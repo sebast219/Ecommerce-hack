@@ -1,42 +1,45 @@
-# 🎓 Guía de Aprendizaje - Backend NestJS
+# 🎓 Guía de Desarrollo - Backend NestJS
 
 ## 📋 Resumen del Proyecto
 
-Has transformado tu backend generado por IA en **ejercicios prácticos de aprendizaje**. Cada archivo ahora contiene esqueletos con guías paso a paso para que escribas código real y aprendas haciendo.
+Este backend está diseñado como **entorno de aprendizaje práctico**. Cada módulo contiene esqueletos con guías detalladas para que implementes la funcionalidad real mientras aprendes NestJS y mejores prácticas.
 
 ## 🏗️ Arquitectura del Ejercicio
 
 ```
 src/modules/
 ├── auth/
-│   ├── auth.service.ts ✅ (Ejercicio completo)
-│   ├── auth.controller.ts ✅ (Ejercicio completo)
+│   ├── auth.service.ts ✅ (Guía completa)
+│   ├── auth.controller.ts ✅ (Endpoints definidos)
 │   └── dto/
-│       ├── login.dto.ts ✅ (Mejorado)
-│       └── register.dto.ts ✅ (Mejorado)
+│       ├── login.dto.ts ✅ (Validación)
+│       └── register.dto.ts ✅ (Validación)
 ├── products/
-│   ├── products.service.ts ✅ (Ejercicio completo)
-│   ├── products.controller.ts ✅ (Ejercicio completo)
+│   ├── products.service.ts ✅ (Business logic guía)
+│   ├── products.controller.ts ✅ (RESTful endpoints)
 │   └── dto/
-│       └── create-product.dto.ts ✅ (Mejorado)
-└── [otros módulos por transformar]
+│       └── create-product.dto.ts ✅ (Validación)
+├── cart/
+│   ├── cart.service.ts ✅ (Patrones avanzados)
+│   └── cart.controller.ts ✅ (Carrito logic)
+└── [otros módulos con estructura similar]
 ```
 
 ## 🎯 Objetivos de Aprendizaje
 
 ### 1. **Services - Lógica de Negocio**
 Aprenderás a:
-- Escribir business logic real
-- Usar Prisma ORM para operaciones CRUD
+- Escribir business logic real con Prisma
 - Implementar validaciones y manejo de errores
 - Usar transacciones para consistencia de datos
+- Aplicar patrones de diseño (Repository, Factory)
 
 ### 2. **Controllers - Endpoints RESTful**
 Aprenderás a:
-- Crear endpoints RESTful siguiendo convenciones
+- Crear endpoints siguiendo convenciones REST
 - Usar decorators de NestJS (@Get, @Post, @Patch, @Delete)
 - Implementar autenticación y autorización
-- Documentar APIs con Swagger
+- Documentar APIs con Swagger/OpenAPI
 
 ### 3. **DTOs - Validación de Datos**
 Aprenderás a:
@@ -53,7 +56,7 @@ Aprenderás a:
 ```typescript
 // Comienza con el método más simple: findOne()
 async findOne(id: string) {
-  // PASO 1: Busca el producto
+  // PASO 1: Busca el producto con relaciones
   const product = await this.prisma.product.findUnique({
     where: { id },
     include: { category: true, inventory: true }
@@ -107,7 +110,7 @@ async validateUser(email: string, password: string) {
 - Aprende sobre paginación
 - Optimiza queries con Prisma
 
-## 🛠️ Herramientas y Conceptos
+## 🛠️ Herramientas y Conceptos Clave
 
 ### **Prisma ORM**
 ```typescript

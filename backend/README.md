@@ -195,14 +195,8 @@ npm run test:cov
 npm run test:e2e
 ```
 
-## 🤝 Contribuir
+# 📚 Documentación
 
-1. Fork el proyecto
-2. Crear una feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit los cambios (`git commit -m 'Add amazing feature'`)
-4. Push a la branch (`git push origin feature/amazing-feature`)
-5. Abrir un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT.
+- **[API Reference](./API_REFERENCE.md)** - Documentación completa de endpoints
+- **[Development Guide](./DEVELOPMENT.md)** - Guía de aprendizaje e implementación
+- **Swagger UI**: http://localhost:3001/api/v1/docs (cuando el servidor está activo)
