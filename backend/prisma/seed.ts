@@ -4,117 +4,142 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
-
   // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 10);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@cybersecurity.com' },
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@ecommerce.com' },
     update: {},
     create: {
-      email: 'admin@cybersecurity.com',
-      password: adminPassword,
+      email: 'admin@ecommerce.com',
+      password: hashedPassword,
+      firstName: 'Admin',
+      lastName: 'User',
       role: 'ADMIN',
     },
   });
 
-  // Create test user
+  // Create regular user
   const userPassword = await bcrypt.hash('user123', 10);
-  const user = await prisma.user.upsert({
-    where: { email: 'user@cybersecurity.com' },
+  
+  const regularUser = await prisma.user.upsert({
+    where: { email: 'user@ecommerce.com' },
     update: {},
     create: {
-      email: 'user@cybersecurity.com',
+      email: 'user@ecommerce.com',
       password: userPassword,
+      firstName: 'Regular',
+      lastName: 'User',
       role: 'USER',
     },
   });
 
-  // Create cybersecurity products
-  const products = [
-    {
-      name: 'USB Rubber Ducky',
-      description: 'Advanced USB attack tool for penetration testing. Programmable keystroke injection device.',
-      price: 59.99,
-      stock: 25,
-      category: 'USB Tools',
-      imageUrl: 'https://example.com/rubber-ducky.jpg',
+  // Create categories
+  const electronicsCategory = await prisma.category.upsert({
+    where: { slug: 'electronics' },
+    update: {},
+    create: {
+      name: 'Electronics',
+      slug: 'electronics',
+      description: 'Electronic devices and accessories',
     },
-    {
-      name: 'WiFi Pineapple',
-      description: 'Professional wireless network auditing platform for security professionals.',
-      price: 299.99,
-      stock: 10,
-      category: 'Network Devices',
-      imageUrl: 'https://example.com/wifi-pineapple.jpg',
-    },
-    {
-      name: 'Bash Bunny',
-      description: 'Multi-function USB attack tool with automated payload execution.',
-      price: 99.99,
-      stock: 15,
-      category: 'USB Tools',
-      imageUrl: 'https://example.com/bash-bunny.jpg',
-    },
-    {
-      name: 'LAN Turtle',
-      description: 'Stealth network access tool for remote network penetration testing.',
-      price: 79.99,
-      stock: 20,
-      category: 'Network Devices',
-      imageUrl: 'https://example.com/lan-turtle.jpg',
-    },
-    {
-      name: 'Packet Squirrel',
-      description: 'Portable network analysis and manipulation tool.',
-      price: 129.99,
-      stock: 12,
-      category: 'Network Devices',
-      imageUrl: 'https://example.com/packet-squirrel.jpg',
-    },
-    {
-      name: 'Key Croc',
-      description: 'Keylogger with advanced keystroke injection capabilities.',
-      price: 49.99,
-      stock: 30,
-      category: 'USB Tools',
-      imageUrl: 'https://example.com/key-croc.jpg',
-    },
-    {
-      name: 'Signal Owl',
-      description: 'Wireless network reconnaissance and analysis tool.',
-      price: 89.99,
-      stock: 18,
-      category: 'Network Devices',
-      imageUrl: 'https://example.com/signal-owl.jpg',
-    },
-    {
-      name: 'Plunder Bug',
-      description: 'Voice and data interception device for security testing.',
-      price: 39.99,
-      stock: 25,
-      category: 'Audio Tools',
-      imageUrl: 'https://example.com/plunder-bug.jpg',
-    },
-  ];
+  });
 
+  const clothingCategory = await prisma.category.upsert({
+    where: { slug: 'clothing' },
+    update: {},
+    create: {
+      name: 'Clothing',
+      slug: 'clothing',
+      description: 'Fashion and apparel',
+    },
+  });
+
+  const booksCategory = await prisma.category.upsert({
+    where: { slug: 'books' },
+    update: {},
+    create: {
+      name: 'Books',
+      slug: 'books',
+      description: 'Books and educational materials',
+    },
+  });
+
+  // Create products
+  await prisma.product.createMany({
+    data: [
+      {
+        name: 'Laptop Pro 15"',
+        slug: 'laptop-pro-15',
+        description: 'High-performance laptop with 15-inch display',
+        price: 1299.99,
+        sku: 'LAPTOP-001',
+        categoryId: electronicsCategory.id,
+        images: ['/images/laptop-1.jpg', '/images/laptop-2.jpg'],
+        tags: ['laptop', 'computer', 'electronics'],
+        isActive: true,
+      },
+      {
+        name: 'Wireless Mouse',
+        slug: 'wireless-mouse',
+        description: 'Ergonomic wireless mouse with long battery life',
+        price: 29.99,
+        sku: 'MOUSE-001',
+        categoryId: electronicsCategory.id,
+        images: ['/images/mouse-1.jpg'],
+        tags: ['mouse', 'wireless', 'accessories'],
+        isActive: true,
+      },
+      {
+        name: 'Cotton T-Shirt',
+        slug: 'cotton-t-shirt',
+        description: 'Comfortable 100% cotton t-shirt',
+        price: 19.99,
+        sku: 'SHIRT-001',
+        categoryId: clothingCategory.id,
+        images: ['/images/shirt-1.jpg', '/images/shirt-2.jpg'],
+        tags: ['clothing', 'cotton', 'casual'],
+        isActive: true,
+      },
+      {
+        name: 'JavaScript Guide',
+        slug: 'javascript-guide',
+        description: 'Complete guide to modern JavaScript development',
+        price: 39.99,
+        sku: 'BOOK-001',
+        categoryId: booksCategory.id,
+        images: ['/images/book-1.jpg'],
+        tags: ['programming', 'javascript', 'education'],
+        isActive: true,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  // Create inventory for products
+  const products = await prisma.product.findMany();
+  
   for (const product of products) {
-    await prisma.product.upsert({
-      where: { name: product.name },
+    await prisma.productInventory.upsert({
+      where: { productId: product.id },
       update: {},
-      create: product,
+      create: {
+        productId: product.id,
+        quantity: Math.floor(Math.random() * 100) + 10,
+        lowStock: 5,
+        track: true,
+      },
     });
   }
 
-  console.log('✅ Database seeded successfully!');
-  console.log(`👤 Admin user: admin@cybersecurity.com / admin123`);
-  console.log(`👤 Test user: user@cybersecurity.com / user123`);
-  console.log(`📦 Created ${products.length} cybersecurity products`);
+  console.log('Database seeded successfully!');
+  console.log('Admin user: admin@ecommerce.com / admin123');
+  console.log('Regular user: user@ecommerce.com / user123');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error seeding database:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
