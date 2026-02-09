@@ -249,8 +249,7 @@ npm run test:e2e
 
 ## 📄 Licencia
 
-Proyecto académico - Universidad IUSH
-
+sebastian yepes padilla
 ---
 
 ## 🎯 Próximos Pasos
