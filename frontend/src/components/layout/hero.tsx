@@ -3,7 +3,7 @@ import { ArrowRight, ShoppingBag } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-20">
+    <section className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white py-20">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
@@ -20,14 +20,14 @@ export function Hero() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/products"
-                className="btn bg-background text-foreground hover:bg-background/90 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium"
+                className="bg-white text-blue-600 hover:bg-gray-100 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium transition-colors"
               >
                 Ver Productos
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
               <Link
                 href="/categories"
-                className="btn btn-outline inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium"
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium transition-colors"
               >
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 Categorías
@@ -37,33 +37,21 @@ export function Hero() {
 
           {/* Image/Illustration */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg" />
-            <img
-              src="/images/hero-image.jpg"
-              alt="Ecommerce Universitario"
-              className="relative rounded-lg shadow-2xl w-full h-auto object-cover"
-              width={600}
-              height={400}
-            />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/10 rounded-lg" />
+            <div className="relative rounded-lg shadow-2xl w-full h-96 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🛍️</div>
+                <div className="text-xl font-semibold text-gray-700">Ecommerce</div>
+                <div className="text-sm text-gray-500">Tu tienda online</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Decorative Elements */}
       <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          className="w-full h-16 text-primary/20"
-          viewBox="0 0 1440 120"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M0,60 C360,60 720,120 1440,60"
-            stroke="currentColor"
-            strokeWidth="2"
-            fill="none"
-          />
-        </svg>
+
       </div>
     </section>
   );
