@@ -1,28 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, Grid, List } from 'lucide-react';
+import { Grid, List, SlidersHorizontal } from 'lucide-react';
+
 import { ProductCard } from '@/components/product/product-card';
 import { ProductFilter } from '@/components/product/product-filter';
 import { useProducts } from '@/hooks/use-products';
 
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showFilters, setShowFilters] = useState(false);
+
   const [filters, setFilters] = useState({
     search: '',
     category: '',
-    minPrice: '',
-    maxPrice: '',
-    sortBy: 'createdAt',
+    minPrice: 0,
+    maxPrice: 10000,
+    sortBy: 'name',
     sortOrder: 'desc' as 'asc' | 'desc',
   });
 
-  const { 
-    products, 
-    isLoading, 
-    error, 
-    pagination, 
-    fetchProducts 
+  const [filterState, setFilterState] = useState({
+    categories: [],
+    priceRange: [0, 2000] as [number, number],
+    rating: 0,
+    inStock: false,
+  });
+
+  const {
+    products,
+    isLoading,
+    error,
+    pagination,
+    fetchProducts,
   } = useProducts();
 
   useEffect(() => {
@@ -30,104 +40,187 @@ export default function ProductsPage() {
   }, [filters]);
 
   const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
-  };
-
-  const handlePageChange = (page: number) => {
-    fetchProducts({ ...filters, page });
+    setFilterState(newFilters);
+    // Convert filter state to products API format
+    const apiFilters = {
+      ...filters,
+      category: newFilters.categories.join(','),
+      minPrice: newFilters.priceRange[0],
+      maxPrice: newFilters.priceRange[1],
+    };
+    setFilters(apiFilters);
   };
 
   return (
-    <div className="container py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Productos</h1>
-        <p className="text-muted-foreground">
-          Descubre nuestra selección de productos de calidad para la comunidad universitaria
-        </p>
-      </div>
+    <section className="min-h-screen bg-background">
 
-      {/* Filters and View Toggle */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4">
-        <ProductFilter filters={filters} onFilterChange={handleFilterChange} />
-        
-        <div className="flex items-center space-x-2 ml-auto">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
-          >
-            <Grid className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
-          >
-            <List className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+      {/* HERO */}
+      <div className="relative overflow-hidden">
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-destructive/15 text-destructive-foreground p-4 rounded-md mb-6">
-          Error: {error}
-        </div>
-      )}
+        <div className="container py-24 text-center max-w-10xl mx-auto px-6 lg:px-12">
 
-      {/* Products Grid/List */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="bg-gray-200 rounded-lg h-64" />
-            </div>
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">
-            No se encontraron productos con los filtros seleccionados.
+          <p className="uppercase tracking-widest text-sm text-muted-foreground mb-4">
+            Premium Store
           </p>
-        </div>
-      ) : (
-        <div className={viewMode === 'grid' 
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-          : 'space-y-4'
-        }>
-          {products.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              viewMode={viewMode}
-            />
-          ))}
-        </div>
-      )}
 
-      {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex justify-center items-center space-x-2 mt-8">
+          <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6 text-center">
+            Tecnología diseñada <br /> para tu rendimiento
+          </h1>
+
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-center">
+            Productos seleccionados para estudiantes, desarrolladores
+            y profesionales exigentes.
+          </p>
+                {/* CONTROLS */}
+      <div className="container py-10">
+
+        <div className="flex flex-wrap items-center gap-4 mb-8">
+
+          {/* Filter Toggle */}
           <button
-            onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={pagination.page === 1}
-            className="px-3 py-2 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 border rounded-full hover:bg-muted transition"
           >
-            Anterior
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtros
           </button>
-          
-          <span className="text-sm text-muted-foreground">
-            Página {pagination.page} de {pagination.pages}
-          </span>
-          
-          <button
-            onClick={() => handlePageChange(pagination.page + 1)}
-            disabled={pagination.page === pagination.pages}
-            className="px-3 py-2 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Siguiente
-          </button>
+
+          {/* View Mode */}
+          <div className="ml-auto flex items-center gap-2 bg-muted rounded-full p-1">
+
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-full transition ${
+                viewMode === 'grid'
+                  ? 'bg-background shadow'
+                  : 'opacity-60 hover:opacity-100'
+              }`}
+            >
+              <Grid className="h-4 w-4" />
+            </button>
+
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-full transition ${
+                viewMode === 'list'
+                  ? 'bg-background shadow'
+                  : 'opacity-60 hover:opacity-100'
+              }`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+
+          </div>
+
         </div>
-      )}
-    </div>
+
+
+        {/* FILTERS PANEL */}
+        {showFilters && (
+          <div className="mb-10 p-6 rounded-2xl border bg-muted/30 backdrop-blur">
+
+            <ProductFilter
+              onFilterChange={handleFilterChange}
+            />
+
+          </div>
+        )}
+
+
+        {/* ERROR */}
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-destructive/10 text-destructive">
+            {error}
+          </div>
+        )}
+
+
+        {/* PRODUCTS */}
+        {isLoading ? (
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[320px] rounded-2xl bg-muted animate-pulse"
+              />
+            ))}
+
+          </div>
+
+        ) : products.length === 0 ? (
+
+          <div className="py-24 text-center">
+
+            <h3 className="text-xl font-semibold mb-2 text-center">
+              Sin resultados
+            </h3>
+
+            <p className="text-muted-foreground text-center">
+              Ajusta los filtros para encontrar lo que buscas.
+            </p>
+
+          </div>
+
+        ) : (
+
+          <div
+            className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'
+                : 'space-y-6'
+            }
+          >
+
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                viewMode={viewMode}
+              />
+            ))}
+
+          </div>
+
+        )}
+
+
+        {/* PAGINATION */}
+        {pagination && pagination.pages > 1 && (
+
+          <div className="flex justify-center mt-16 gap-4">
+
+            <button
+              disabled={pagination.page === 1}
+              onClick={() =>
+                fetchProducts({ ...filters, page: pagination.page - 1 })
+              }
+              className="px-6 py-2 border rounded-full disabled:opacity-40"
+            >
+              Anterior
+            </button>
+
+            <span className="flex items-center text-sm text-muted-foreground">
+              {pagination.page} / {pagination.pages}
+            </span>
+
+            <button
+              disabled={pagination.page === pagination.pages}
+              onClick={() =>
+                fetchProducts({ ...filters, page: pagination.page + 1 })
+              }
+              className="px-6 py-2 border rounded-full disabled:opacity-40"
+            >
+              Siguiente
+            </button>
+
+          </div>
+        )}
+
+      </div>
+        </div>
+      </div>
+    </section>
   );
 }

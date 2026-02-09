@@ -1,166 +1,234 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Smartphone, Laptop, Headphones, Watch, Camera, Gamepad2, Search, Filter } from 'lucide-react';
+import {
+  Wifi,
+  Usb,
+  ShieldAlert,
+  Network,
+  Cpu,
+  Search,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const categories = [
   {
-    id: 'smartphones',
-    name: 'Smartphones',
-    icon: Smartphone,
-    description: 'Últimos modelos y accesorios móviles',
-    productCount: 156,
-    color: 'from-blue-500 to-blue-600'
+    id: 'wireless',
+    name: 'Ataques Inalámbricos',
+    description: 'Auditorías WiFi, MITM y pentesting inalámbrico',
+    icon: Wifi,
+    image: 'https://lab401.com/cdn/shop/products/Wifi-Pineapple-M7-Tactical_520x520.png?v=1617383382',
   },
   {
-    id: 'laptops',
-    name: 'Laptops',
-    icon: Laptop,
-    description: 'Potencia y portabilidad para trabajo y estudio',
-    productCount: 89,
-    color: 'from-purple-500 to-purple-600'
+    id: 'usb',
+    name: 'USB Hacking',
+    description: 'Payloads, BadUSB y ataques físicos',
+    icon: Usb,
+    image: 'https://lab401.com/cdn/shop/files/Bash-Bunny-Mark-II_873x700.png?v=1711536452',
   },
   {
-    id: 'audio',
-    name: 'Audio',
-    icon: Headphones,
-    description: 'Auriculares, parlantes y equipos de sonido',
-    productCount: 234,
-    color: 'from-green-500 to-green-600'
+    id: 'redteam',
+    name: 'Red Team',
+    description: 'Operaciones ofensivas avanzadas',
+    icon: ShieldAlert,
+    image: 'https://lab401.com/cdn/shop/files/WHIDBoard--Complete-Kit-Square_700x700.png?v=1765465610',
   },
   {
-    id: 'wearables',
-    name: 'Wearables',
-    icon: Watch,
-    description: 'Smartwatches y dispositivos fitness',
-    productCount: 67,
-    color: 'from-orange-500 to-orange-600'
+    id: 'network',
+    name: 'Network',
+    description: 'Sniffing, análisis y monitoreo',
+    icon: Network,
+    image: 'https://lab401.com/cdn/shop/files/AWOK-Dual-V3-Front---v2_700x700.png?v=1759511405',
   },
   {
-    id: 'cameras',
-    name: 'Cámaras',
-    icon: Camera,
-    description: 'Fotografía y videografía profesional',
-    productCount: 45,
-    color: 'from-pink-500 to-pink-600'
+    id: 'hardware',
+    name: 'Hardware',
+    description: 'Implantes y dispositivos encubiertos',
+    icon: Cpu,
+    image: 'https://lab401.com/cdn/shop/files/MacoBox---Standalone_700x700.png?v=1746622691',
   },
-  {
-    id: 'gaming',
-    name: 'Gaming',
-    icon: Gamepad2,
-    description: 'Consolas, accesorios y periféricos gaming',
-    productCount: 178,
-    color: 'from-red-500 to-red-600'
-  }
 ];
 
 export default function CategoriesPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [scrollY, setScrollY] = useState(0);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToFirstCategory = () => {
+    const firstSection = sectionRefs.current[0];
+    if (firstSection) {
+      firstSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="container py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Categorías</h1>
-        <p className="text-muted-foreground">
-          Explora nuestras categorías y encuentra los productos perfectos para ti
-        </p>
-      </div>
+    <main className="bg-white text-black">
 
-      {/* Search Bar */}
-      <div className="mb-8">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <input
-            type="text"
-            placeholder="Buscar categorías..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-      </div>
+      {/* Hero */}
+      <section className="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden">
 
-      {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCategories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Card key={category.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardContent className="p-0">
-                {/* Header con gradiente */}
-                <div className={`h-32 bg-gradient-to-r ${category.color} relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="relative z-10 h-full flex items-center justify-center">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
-                    <span className="text-xs font-semibold text-gray-800">
-                      {category.productCount} productos
-                    </span>
-                  </div>
-                </div>
+        <div 
+          className="absolute inset-0 bg-gradient-to-b from-transparent to-white/10"
+          style={{
+            transform: `translateY(${scrollY * 0.5}px)`,
+          }}
+        />
 
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">
-                    {category.description}
-                  </p>
-                  
-                  <Button className="w-full group-hover:bg-blue-600 transition-colors">
-                    Ver Productos
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+        <div className="max-w-4xl space-y-8 relative z-10">
 
-      {/* Empty State */}
-      {filteredCategories.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold mb-2">No se encontraron categorías</h3>
-          <p className="text-gray-600">
-            Intenta con otros términos de búsqueda
+          <span 
+            className="uppercase tracking-[0.4em] text-sm text-black/60 inline-block"
+            style={{
+              transform: `translateY(${scrollY * 0.3}px)`,
+              opacity: 1 - scrollY * 0.001,
+            }}
+          >
+            Hack 6 Platform
+          </span>
+
+          <h1 
+            className="text-6xl md:text-8xl font-semibold tracking-tight leading-[0.95]"
+            style={{
+              transform: `translateY(${scrollY * 0.2}px)`,
+              opacity: 1 - scrollY * 0.0008,
+            }}
+          >
+            Categorías
+            <br />
+            Profesionales
+          </h1>
+
+          <p 
+            className="text-xl text-black/60 max-w-2xl mx-auto"
+            style={{
+              transform: `translateY(${scrollY * 0.15}px)`,
+              opacity: 1 - scrollY * 0.0006,
+            }}
+          >
+            Herramientas utilizadas por equipos
+            de ciberseguridad en todo el mundo.
           </p>
-        </div>
-      )}
 
-      {/* Stats Section */}
-      <div className="mt-16 bg-gray-50 rounded-lg p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">
-              {categories.reduce((sum, cat) => sum + cat.productCount, 0)}+
-            </div>
-            <div className="text-gray-600">Productos Totales</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-purple-600 mb-2">
-              {categories.length}
-            </div>
-            <div className="text-gray-600">Categorías</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-green-600 mb-2">24/7</div>
-            <div className="text-gray-600">Soporte</div>
-          </div>
+          <Button
+            size="lg"
+            className="
+              rounded-full
+              bg-black text-white
+              px-10
+              hover:scale-105
+              transition
+            "
+            style={{
+              transform: `translateY(${scrollY * 0.1}px)`,
+              opacity: 1 - scrollY * 0.0004,
+            }}
+            onClick={scrollToFirstCategory}
+          >
+            Explorar ahora
+          </Button>
+
         </div>
-      </div>
-    </div>
+
+      </section>
+
+      {/* Sections */}
+      {categories.map((cat, index) => {
+        const Icon = cat.icon;
+        const isEven = index % 2 === 0;
+
+        return (
+          <section
+            key={cat.id}
+            ref={el => { sectionRefs.current[index] = el; }}
+            className="min-h-screen flex items-center relative overflow-hidden"
+          >
+
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5"
+              style={{
+                transform: `translateY(${(scrollY - (index + 1) * window.innerHeight) * 0.3}px)`,
+              }}
+            />
+
+            <div
+              className={`
+                container mx-auto px-6 lg:px-12
+                grid lg:grid-cols-2 gap-16 items-center
+                ${isEven ? '' : 'lg:flex-row-reverse'}
+                relative z-10
+              `}
+            >
+
+              {/* Image */}
+              <div className={`relative h-[400px] lg:h-[600px] overflow-hidden rounded-3xl ${isEven ? 'lg:order-first' : 'lg:order-last'}`}>
+
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="
+                    w-full h-full
+                    object-cover
+                    rounded-3xl
+                    shadow-[0_40px_120px_rgba(0,0,0,0.15)]
+                  "
+                />
+
+              </div>
+
+              {/* Content */}
+              <div 
+                className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'}`}
+                style={{
+                  transform: `translateY(${(scrollY - (index + 1) * window.innerHeight) * 0.2}px)`,
+                  opacity: Math.max(0, Math.min(1, 1 - Math.abs(scrollY - (index + 1) * window.innerHeight) * 0.0005)),
+                }}
+              >
+
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Icon className="h-7 w-7" />
+                </div>
+
+                <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
+                  {cat.name}
+                </h2>
+
+                <p className="text-lg text-black/60 leading-relaxed">
+                  {cat.description}
+                </p>
+
+                <Link href={`/categories/${cat.id}`}>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="
+                      rounded-full
+                      border-black/30
+                      hover:bg-black/5
+                    "
+                  >
+                    Ver herramientas →
+                  </Button>
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </section>
+        );
+      })}
+
+    </main>
   );
 }

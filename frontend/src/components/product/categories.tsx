@@ -2,93 +2,171 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Smartphone, Laptop, Headphones, Watch, Camera, Gamepad2 } from 'lucide-react';
+import {
+  Wifi,
+  Usb,
+  ShieldAlert,
+  Network,
+  Cpu,
+  Search
+} from 'lucide-react';
 
+// Categories
 const categories = [
   {
-    id: 'smartphones',
-    name: 'Smartphones',
-    icon: Smartphone,
-    description: 'Últimos modelos y accesorios',
-    productCount: 156
+    id: 'wireless',
+    name: 'Ataques Inalámbricos',
+    icon: Wifi,
+    description: 'Auditorías WiFi y MITM',
+    productCount: 42
   },
   {
-    id: 'laptops',
-    name: 'Laptops',
-    icon: Laptop,
-    description: 'Potencia y portabilidad',
-    productCount: 89
+    id: 'usb-attacks',
+    name: 'USB Hacking',
+    icon: Usb,
+    description: 'Rubber Ducky y BadUSB',
+    productCount: 28
   },
   {
-    id: 'audio',
-    name: 'Audio',
-    icon: Headphones,
-    description: 'Auriculares y parlantes',
-    productCount: 234
+    id: 'red-team',
+    name: 'Red Team',
+    icon: ShieldAlert,
+    description: 'Herramientas ofensivas',
+    productCount: 35
   },
   {
-    id: 'wearables',
-    name: 'Wearables',
-    icon: Watch,
-    description: 'Smartwatches y fitness',
-    productCount: 67
+    id: 'network',
+    name: 'Network Monitoring',
+    icon: Network,
+    description: 'Sniffing y análisis',
+    productCount: 51
   },
   {
-    id: 'cameras',
-    name: 'Cámaras',
-    icon: Camera,
-    description: 'Fotografía profesional',
-    productCount: 45
+    id: 'hardware',
+    name: 'Hardware Implants',
+    icon: Cpu,
+    description: 'Dispositivos encubiertos',
+    productCount: 19
   },
   {
-    id: 'gaming',
-    name: 'Gaming',
-    icon: Gamepad2,
-    description: 'Consolas y accesorios',
-    productCount: 178
+    id: 'forensics',
+    name: 'Forensics',
+    icon: Search,
+    description: 'Análisis digital',
+    productCount: 24
   }
 ];
 
 export function Categories() {
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-4">Explora por Categorías</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Encuentra exactamente lo que buscas en nuestras categorías organizadas
+    <section className="relative py-28 bg-white text-black overflow-hidden">
+
+      <div className="relative container mx-auto px-6 lg:px-12">
+
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-20">
+
+          <span 
+            className="text-sm uppercase tracking-[0.3em] text-black"
+          >
+            Explora
+          </span>
+
+          <h2 
+            className="mt-4 text-4xl md:text-5xl font-semibold tracking-tight"
+          >
+            Categorías de Ciberseguridad
+          </h2>
+
+          <p 
+            className="mt-6 text-lg text-black/60"
+          >
+            Herramientas profesionales para hacking ético
+            y auditoría avanzada.
           </p>
+
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => {
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          {categories.map((category, index) => {
             const Icon = category.icon;
+
             return (
-              <Card key={category.id} className="group hover:shadow-lg transition-all cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                      <Icon className="h-6 w-6 text-primary" />
+              <Card
+                key={category.id}
+                className="
+                  group relative
+                  bg-white
+                  border border-gray-200
+                  rounded-2xl
+                  transition-all duration-500
+                  hover:border-gray-300
+                  hover:-translate-y-2
+                  hover:shadow-[0_30px_80px_rgba(0,0,0,0.12)]
+                "
+              >
+                <CardContent className="p-8">
+
+
+                  <div className="relative flex flex-col h-full">
+
+                    {/* Icon */}
+                    <div
+                      className="
+                        mb-6
+                        w-12 h-12
+                        flex items-center justify-center
+                        rounded-full
+                        bg-gray-100
+                        transition-all duration-500
+                        group-hover:bg-gray-200
+                        group-hover:scale-110
+                      "
+                    >
+                      <Icon className="h-6 w-6 text-black/90" />
                     </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">{category.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{category.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          {category.productCount} productos
-                        </span>
-                        <Button variant="ghost" size="sm" className="p-0 h-auto">
-                          Ver más →
-                        </Button>
-                      </div>
+
+                    {/* Content */}
+                    <h3 className="text-xl font-medium mb-2">
+                      {category.name}
+                    </h3>
+
+                    <p className="text-sm text-black/60 leading-relaxed mb-6">
+                      {category.description}
+                    </p>
+
+                    {/* Bottom */}
+                    <div className="mt-auto flex items-center justify-between">
+
+                      <span className="text-sm text-black/50">
+                        {category.productCount} productos
+                      </span>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="
+                          text-black/80
+                          hover:text-black
+                          hover:bg-transparent
+                          transition-all duration-300
+                        "
+                      >
+                        Explorar →
+                      </Button>
+
                     </div>
+
                   </div>
                 </CardContent>
               </Card>
             );
           })}
+
         </div>
+
       </div>
     </section>
   );
