@@ -1,146 +1,194 @@
-# Ecommerce Backend - NestJS
+# 🚀 Ecommerce Backend - NestJS API
 
-Backend API para el eCommerce Universitario construido con NestJS, Prisma y PostgreSQL.
+Backend API RESTful para el eCommerce Universitario construido con NestJS, Prisma y PostgreSQL.
 
-## 🚀 Características
+## 🏗️ Arquitectura
 
-- **Autenticación JWT** con refresh tokens
-- **Gestión de usuarios** con roles (Admin, User, Vendor)
-- **Catálogo de productos** con inventario
-- **Sistema de categorías** jerárquico
-- **Validación de datos** con class-validator
-- **Documentación API** con Swagger
-- **Rate limiting** para seguridad
-- **TypeScript** para type safety
+### Stack Tecnológico
+- **Framework**: NestJS 10 con TypeScript
+- **Base de Datos**: PostgreSQL 14+ con Prisma ORM
+- **Autenticación**: JWT con refresh tokens y Passport
+- **Validación**: Class-validator + Class-transformer
+- **Documentación**: Swagger/OpenAPI 3.0
+- **Testing**: Jest con Supertest
+- **Arquitectura**: Monolito modular con Clean Architecture
 
-## 📋 Prerrequisitos
-
-- Node.js 18+
-- PostgreSQL 14+
-- npm o yarn
-
-## 🛠️ Instalación
-
-1. Clonar el repositorio
-2. Instalar dependencias:
-```bash
-npm install
-```
-
-3. Configurar variables de entorno:
-```bash
-cp .env.example .env
-```
-
-4. Configurar la base de datos PostgreSQL en `.env`
-
-5. Generar Prisma client:
-```bash
-npm run prisma:generate
-```
-
-6. Ejecutar migraciones:
-```bash
-npm run prisma:migrate
-```
-
-7. Sembrar la base de datos:
-```bash
-npm run prisma:seed
-```
-
-## 🏃‍♂️ Ejecutar la aplicación
-
-### Modo desarrollo
-```bash
-npm run start:dev
-```
-
-### Modo producción
-```bash
-npm run build
-npm run start:prod
-```
-
-## 📚 Documentación API
-
-Una vez iniciada la aplicación, la documentación estará disponible en:
-```
-http://localhost:3001/api/v1/docs
-```
-
-## 🗂️ Estructura del Proyecto
-
+### Estructura del Proyecto
 ```
 src/
 ├── common/          # Elementos compartidos
 │   ├── decorators/  # Decoradores personalizados
 │   ├── guards/      # Guards de autenticación
 │   ├── filters/     # Filtros de excepción
-│   └── pipes/       # Pipes de validación
-├── config/          # Configuración
-├── database/        # Configuración de DB
+│   ├── pipes/       # Pipes de validación
+│   └── interceptors/# Interceptors de logging
+├── config/          # Configuración de la aplicación
+├── database/        # Configuración de Prisma
 ├── modules/         # Módulos funcionales
-│   ├── auth/        # Autenticación
-│   ├── users/       # Usuarios
-│   ├── products/    # Productos
-│   └── categories/  # Categorías
-├── utils/           # Utilidades
+│   ├── auth/        # Autenticación y usuarios
+│   ├── products/    # Gestión de productos
+│   ├── categories/  # Categorías jerárquicas
+│   ├── cart/        # Carrito de compras
+│   ├── orders/      # Gestión de pedidos
+│   └── payments/    # Procesamiento de pagos
+├── utils/           # Utilidades compartidas
 ├── app.module.ts    # Módulo raíz
 └── main.ts          # Punto de entrada
 ```
 
-## 🔐 Autenticación
+## � Inicio Rápido
 
-La API utiliza JWT para autenticación. Los endpoints protegidos requieren un token Bearer en el header:
+### Prerrequisitos
+- Node.js 18+
+- PostgreSQL 14+
+- npm o yarn
 
-```
-Authorization: Bearer <token>
-```
+### Instalación
 
-### Usuarios por defecto
-
-- **Admin**: `admin@ecommerce.com` / `admin123`
-- **User**: `user@ecommerce.com` / `user123`
-
-## 📝 Scripts disponibles
-
-- `npm run start` - Inicia en modo producción
-- `npm run start:dev` - Inicia en modo desarrollo con hot reload
-- `npm run start:debug` - Inicia en modo debug
-- `npm run build` - Compila la aplicación
-- `npm run test` - Ejecuta tests unitarios
-- `npm run test:e2e` - Ejecuta tests e2e
-- `npm run test:cov` - Ejecuta tests con cobertura
-- `npm run lint` - Ejecuta ESLint
-- `npm run format` - Formatea el código con Prettier
-- `npm run prisma:generate` - Genera Prisma client
-- `npm run prisma:migrate` - Ejecuta migraciones
-- `npm run prisma:seed` - Sembrar datos iniciales
-- `npm run prisma:studio` - Abre Prisma Studio
-
-## 🐳 Docker (Opcional)
-
+1. **Clonar e instalar dependencias**
 ```bash
-# Iniciar PostgreSQL con Docker
-docker-compose up -d postgres
+git clone <repository-url>
+cd ecommerce-hack/backend
+npm install
+```
+
+2. **Configurar variables de entorno**
+```bash
+cp .env.example .env
+# Editar .env con tus credenciales de base de datos
+```
+
+3. **Configurar base de datos**
+```bash
+# Generar Prisma client
+npm run prisma:generate
 
 # Ejecutar migraciones
 npm run prisma:migrate
 
-# Sembrar datos
+# Sembrar datos iniciales
 npm run prisma:seed
+```
+
+4. **Iniciar aplicación**
+```bash
+# Modo desarrollo
+npm run start:dev
+
+# Modo producción
+npm run build
+npm run start:prod
+```
+
+5. **Acceder a la documentación**
+- API: http://localhost:3001
+- Documentación Swagger: http://localhost:3001/api/v1/docs
+- Prisma Studio: `npm run prisma:studio`
+
+## 🔐 Autenticación
+
+La API utiliza JWT con refresh tokens para autenticación.
+
+### Headers requeridos
+```
+Authorization: Bearer <access_token>
+```
+
+### Flujo de autenticación
+1. **Login**: Email/contraseña → Access + Refresh tokens
+2. **Access Token**: 15 minutos de duración
+3. **Refresh Token**: 7 días de duración
+4. **Protected Routes**: Verificación automática de tokens
+
+### Usuarios por defecto
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Admin | admin@ecommerce.com | admin123 |
+| Usuario | user@ecommerce.com | user123 |
+
+## � Endpoints Principales
+
+### Autenticación (`/api/v1/auth`)
+- `POST /login` - Iniciar sesión
+- `POST /register` - Registrar usuario
+- `POST /refresh` - Refrescar token
+- `GET /profile` - Obtener perfil del usuario
+- `POST /logout` - Cerrar sesión
+
+### Usuarios (`/api/v1/users`)
+- `GET /` - Listar usuarios (Admin)
+- `GET /:id` - Obtener usuario
+- `PATCH /:id` - Actualizar usuario
+- `DELETE /:id` - Eliminar usuario (Admin)
+
+### Productos (`/api/v1/products`)
+- `GET /` - Listar productos con filtros
+- `POST /` - Crear producto (Admin/Vendor)
+- `GET /:id` - Obtener producto
+- `PATCH /:id` - Actualizar producto (Admin/Vendor)
+- `DELETE /:id` - Eliminar producto (Admin)
+
+### Categorías (`/api/v1/categories`)
+- `GET /` - Listar categorías jerárquicas
+- `POST /` - Crear categoría (Admin)
+- `GET /:id` - Obtener categoría
+- `PATCH /:id` - Actualizar categoría (Admin)
+- `DELETE /:id` - Eliminar categoría (Admin)
+
+### Carrito (`/api/v1/cart`)
+- `GET /` - Obtener carrito del usuario
+- `POST /items` - Agregar item al carrito
+- `PATCH /items/:id` - Actualizar cantidad
+- `DELETE /items/:id` - Eliminar item
+- `DELETE /` - Vaciar carrito
+
+### Pedidos (`/api/v1/orders`)
+- `GET /` - Listar pedidos del usuario
+- `POST /` - Crear orden desde carrito
+- `GET /:id` - Obtener detalles de orden
+- `PATCH /:id/status` - Actualizar estado (Admin)
+
+## 🛠️ Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run start:dev      # Servidor con hot reload
+npm run start:debug    # Modo debug
+npm run start:prod     # Servidor producción
+
+# Build
+npm run build          # Compilar TypeScript
+npm run build:prod     # Build optimizado para producción
+
+# Testing
+npm run test           # Ejecutar tests unitarios
+npm run test:e2e       # Tests end-to-end
+npm run test:cov       # Tests con cobertura
+npm run test:watch     # Tests en modo watch
+
+# Database (Prisma)
+npm run prisma:generate    # Generar Prisma client
+npm run prisma:migrate     # Ejecutar migraciones
+npm run prisma:studio      # Abrir Prisma Studio
+npm run prisma:seed        # Sembrar datos iniciales
+npm run prisma:reset       # Resetear base de datos
+
+# Calidad de código
+npm run lint           # Análisis con ESLint
+npm run format         # Formato con Prettier
 ```
 
 ## 🔧 Variables de Entorno
 
+### .env.example
 ```env
 # Database
 DATABASE_URL="postgresql://username:password@localhost:5432/ecommerce_db"
 
 # JWT
-JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRES_IN="24h"
+JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
 
 # Application
 NODE_ENV="development"
@@ -149,75 +197,207 @@ API_PREFIX="api/v1"
 
 # CORS
 CORS_ORIGIN="http://localhost:3000"
+
+# Rate Limiting
+THROTTLE_TTL=60
+THROTTLE_LIMIT=100
+
+# File Upload
+UPLOAD_DIR="./uploads"
+MAX_FILE_SIZE=5242880  # 5MB
+
+# Email (opcional)
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASS="your-app-password"
 ```
-
-## 📊 Endpoints Principales
-
-### Autenticación
-- `POST /api/v1/auth/login` - Iniciar sesión
-- `POST /api/v1/auth/register` - Registrarse
-- `POST /api/v1/auth/refresh` - Refrescar token
-- `GET /api/v1/auth/profile` - Obtener perfil
-
-### Usuarios
-- `GET /api/v1/users` - Listar usuarios (Admin)
-- `GET /api/v1/users/:id` - Obtener usuario
-- `PATCH /api/v1/users/:id` - Actualizar usuario
-- `DELETE /api/v1/users/:id` - Eliminar usuario (Admin)
-
-### Productos
-- `GET /api/v1/products` - Listar productos
-- `POST /api/v1/products` - Crear producto
-- `GET /api/v1/products/:id` - Obtener producto
-- `PATCH /api/v1/products/:id` - Actualizar producto
-- `DELETE /api/v1/products/:id` - Eliminar producto
-
-### Categorías
-- `GET /api/v1/categories` - Listar categorías
-- `POST /api/v1/categories` - Crear categoría
-- `GET /api/v1/categories/:id` - Obtener categoría
-- `PATCH /api/v1/categories/:id` - Actualizar categoría
-- `DELETE /api/v1/categories/:id` - Eliminar categoría
 
 ## 🧪 Testing
 
+### Estructura de Tests
+```
+test/
+├── unit/              # Tests unitarios
+│   ├── auth/
+│   ├── products/
+│   └── users/
+├── integration/       # Tests de integración
+│   ├── auth.e2e-spec.ts
+│   └── products.e2e-spec.ts
+└── e2e/              # Tests end-to-end
+    └── app.e2e-spec.ts
+```
+
+### Ejecutar Tests
 ```bash
-# Ejecutar todos los tests
+# Todos los tests
 npm run test
 
-# Ejecutar tests en modo watch
-npm run test:watch
+# Tests específicos
+npm run test -- --testPathPattern=auth
 
-# Ejecutar tests con cobertura
+# Coverage
 npm run test:cov
 
-# Ejecutar tests e2e
+# Tests e2e
 npm run test:e2e
 ```
 
-## 🎯 Resumen de Archivos de Configuración
+### Ejemplo de Test Unitario
+```typescript
+// test/unit/auth/auth.service.spec.ts
+describe('AuthService', () => {
+  let service: AuthService;
+  let prisma: PrismaService;
 
-| Archivo | Propósito | ¿Esencial? |
-|---------|-----------|-------------|
-| **.eslintrc.js** | Calidad de código | ✅ Sí |
-| **.prettierrc** | Formato automático | ✅ Sí |
-| **.gitignore** | Control de versiones | ✅ Sí |
-| **nest-cli.json** | CLI NestJS | ✅ Sí |
-| **tsconfig.json** | Compilador TypeScript | ✅ Sí |
-| **package.json** | Dependencias y scripts | ✅ Sí |
-| **package-lock.json** | Versiones exactas | ✅ Sí |
-| **.env.example** | Variables de entorno | ✅ Sí |
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [AuthService, PrismaService],
+    }).compile();
 
-### 🔧 ¿Cómo Funcionan Juntos?
-- **Desarrollo**: `tsconfig.json` + `nest-cli.json` compilan el código
-- **Calidad**: `eslint` + `prettier` mantienen estándares
-- **Dependencias**: `package.json` + `package-lock.json` gestionan librerías
-- **Producción**: `dist/` contiene el código compilado
-- **Configuración**: `.env.example` guía las variables de entorno
-- **Control**: `.gitignore` protege archivos sensibles
+    service = module.get<AuthService>(AuthService);
+    prisma = module.get<PrismaService>(PrismaService);
+  });
 
-## 📚 Documentación
+  it('should validate user credentials', async () => {
+    const result = await service.validateUser(
+      'admin@ecommerce.com', 
+      'admin123'
+    );
+    expect(result).toBeDefined();
+    expect(result.email).toBe('admin@ecommerce.com');
+  });
+});
+```
 
-- **[API Reference](./API_REFERENCE.md)** - Documentación completa de endpoints
-- **[Development Guide](./DEVELOPMENT.md)** - Guía de aprendizaje e implementación
-- **Swagger UI**: http://localhost:3001/api/v1/docs (cuando el servidor está activo)
+## 🐳 Docker (Opcional)
+
+### docker-compose.yml
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ecommerce_db
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+```
+
+### Ejecutar con Docker
+```bash
+# Iniciar servicios
+docker-compose up -d
+
+# Ejecutar migraciones
+docker-compose exec backend npm run prisma:migrate
+
+# Sembrar datos
+docker-compose exec backend npm run prisma:seed
+```
+
+## 📊 Monitorización y Logging
+
+### Logging
+La aplicación utiliza Winston para logging estructurado:
+- **Niveles**: error, warn, info, debug
+- **Formato**: JSON con timestamps
+- **Salida**: Consola y archivos (producción)
+
+### Health Check
+```bash
+# Endpoint de salud
+GET http://localhost:3001/health
+
+# Respuesta esperada
+{
+  "status": "ok",
+  "timestamp": "2024-02-08T12:00:00.000Z",
+  "uptime": 3600,
+  "version": "1.0.0"
+}
+```
+
+## 🚀 Despliegue
+
+### Producción
+1. **Variables de entorno**: Configurar todas las variables requeridas
+2. **Base de datos**: Ejecutar migraciones en producción
+3. **Build**: Compilar para producción
+4. **Process Manager**: Usar PM2 o similar
+
+### Ejemplo PM2
+```bash
+# Instalar PM2
+npm install -g pm2
+
+# Iniciar aplicación
+pm2 start dist/main.js --name ecommerce-api
+
+# Monitorear
+pm2 monit
+
+# Logs
+pm2 logs ecommerce-api
+```
+
+## 🔒 Seguridad
+
+### Implementaciones
+- **Password Hashing**: bcrypt con salt rounds 10
+- **JWT**: Tokens firmados con algoritmo HS256
+- **Rate Limiting**: 100 requests por minuto por IP
+- **CORS**: Configurado para frontend específico
+- **Input Validation**: DTOs con class-validator
+- **SQL Injection Prevention**: Prisma ORM
+
+### Best Practices
+- Usar variables de entorno para datos sensibles
+- Implementar HTTPS en producción
+- Rotar claves JWT periódicamente
+- Monitorear logs de seguridad
+- Actualizar dependencias regularmente
+
+## 🤝 Contribución
+
+### Flujo de Trabajo
+1. Fork del repositorio
+2. Crear feature branch: `git checkout -b feature/nueva-funcionalidad`
+3. Commits descriptivos
+4. Pull request con tests
+5. Code review por el equipo
+
+### Estándares
+- **TypeScript**: Modo estricto
+- **ESLint**: Configuración de NestJS
+- **Prettier**: Formato automático
+- **Commits**: Conventional Commits
+- **Tests**: Cobertura mínima 80%
+
+## 📚 Documentación Adicional
+
+- [Documentación Principal](../README.md)
+- [Guía de Desarrollo](../GUIA_DESARROLLO.md)
+- [Arquitectura del Sistema](../ARQUITECTURA.md)
+- [API Reference](./docs/API.md) - Próximamente
+
+---
+
+**Desarrollado con ❤️ para la Universidad IUSH**
