@@ -13,8 +13,13 @@ export function Footer() {
 
           {/* Brand */}
           <div className="space-y-5">
-
-            <h3 className="text-xl font-medium tracking-tight">
+            
+            <h3 className="text-xl font-medium tracking-tight flex items-center gap-2">
+            <img 
+              src="/favicon.ico" 
+              alt="Hack 6 Logo" 
+              className="h-10 w-10 rounded-full"
+            />
               Hack 6
             </h3>
 

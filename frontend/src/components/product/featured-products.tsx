@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, ShoppingCart } from 'lucide-react';
@@ -169,19 +170,21 @@ export function FeaturedProducts() {
         {/* Footer CTA */}
         <div className="text-center mt-20">
 
-          <Button
-            variant="outline"
-            size="lg"
-            className="
-              rounded-full
-              border-black/30
-              text-black
-              hover:bg-black/10
-              transition-all duration-300
-            "
-          >
-            Ver todo el catálogo
-          </Button>
+          <Link href="/products">
+            <Button
+              variant="outline"
+              size="lg"
+              className="
+                rounded-full
+                border-black/30
+                text-black
+                hover:bg-black/10
+                transition-all duration-300
+              "
+            >
+              Ver todo el catálogo
+            </Button>
+          </Link>
 
         </div>
 

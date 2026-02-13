@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -8,7 +10,9 @@ import {
   ShieldAlert,
   Network,
   Cpu,
-  Search
+  Search,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 
 // Categories
@@ -58,6 +62,8 @@ const categories = [
 ];
 
 export function Categories() {
+  const displayedCategories = categories.slice(0, 3);
+
   return (
     <section className="relative py-28 bg-white text-black overflow-hidden">
 
@@ -88,9 +94,9 @@ export function Categories() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
 
-          {categories.map((category, index) => {
+          {displayedCategories.map((category, index) => {
             const Icon = category.icon;
 
             return (
@@ -167,6 +173,92 @@ export function Categories() {
 
         </div>
 
+      {/* Ver más categorías button */}
+      <div className="flex justify-center mt-8">
+
+        <Button
+          onClick={() => window.location.href = '/categories'}
+          className="
+
+            relative group
+
+            px-10 py-5
+            text-base font-medium
+
+            rounded-full
+
+            bg-black text-white
+
+            overflow-hidden
+
+            transition-all duration-500 ease-out
+
+            hover:scale-[1.03]
+            hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)]
+
+            active:scale-[0.98]
+
+            flex items-center gap-3
+          "
+        >
+
+
+          {/* Glow Layer */}
+          <span
+            className="
+              absolute inset-0
+              bg-gradient-to-r
+              from-purple-600/40
+              via-blue-600/40
+              to-cyan-500/40
+
+              opacity-0
+              group-hover:opacity-100
+
+              blur-xl
+              transition-opacity duration-500
+            "
+          />
+
+
+          {/* Shine Effect */}
+          <span
+            className="
+              absolute -left-full top-0
+              w-1/2 h-full
+
+              bg-gradient-to-r
+              from-transparent
+              via-white/30
+              to-transparent
+
+              skew-x-12
+
+              group-hover:left-full
+              transition-all duration-700
+            "
+          />
+
+
+          {/* Content */}
+          <span className="relative z-10 flex items-center gap-3">
+
+            <Sparkles className="h-5 w-5 text-blue-400 animate-pulse" />
+
+            <span className="tracking-wide">
+              Ver más categorías
+            </span>
+
+            <ArrowRight
+              className="
+                h-5 w-5
+                transition-transform duration-300
+                group-hover:translate-x-1.5
+              "
+            />
+          </span>
+        </Button>
+      </div>
       </div>
     </section>
   );

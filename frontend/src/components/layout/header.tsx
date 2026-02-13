@@ -33,7 +33,11 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 text-black font-medium tracking-tight"
           >
-            <div className="h-7 w-7 rounded-full bg-black" />
+            <img 
+              src="/favicon.ico" 
+              alt="Hack 6 Logo" 
+              className="h-10 w-10 rounded-full"
+            />
             <span className="text-lg">Hack 6</span>
           </Link>
 

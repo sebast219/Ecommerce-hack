@@ -20,11 +20,16 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
         - Usa viewMode para cambiar entre grid y list layout
         - Ejemplo: className={viewMode === 'grid' ? 'w-full' : 'flex gap-4'}
       */}
-      
+
       <div className="text-center">
         <h3 className="font-bold">{product.name}</h3>
         <p className="text-gray-600">${product.price}</p>
         
+        {
+          product.images.length > 0 && (
+            <img src={product.images[0]} alt={product.name} className="w-full h-48 object-cover rounded" />
+          )
+        }
         {/* 
           PASO 2: IMAGEN DEL PRODUCTO
           - Usa la etiqueta <img>
@@ -32,6 +37,12 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
           - Agrega fallback: '/placeholder.jpg'
           - Classes: w-full h-48 object-cover rounded
         */}
+
+        {
+          product.description && (
+            <p className="mt-4 text-gray-600 line-clamp-2">{product.description}</p>
+          )
+        }
         
         {/* 
           PASO 3: INFORMACIÓN DEL PRODUCTO
@@ -39,6 +50,11 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
           - Usa truncamiento para description: line-clamp-2
           - Formatea precio: ${product.price.toFixed(2)}
         */}
+        {
+          product.sku && (
+            <p className="mt-4 text-gray-600">SKU: {product.sku}</p>
+          )
+        }
         
         {/* 
           PASO 4: ESTADO DE INVENTARIO
@@ -56,7 +72,6 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
             const { addItem } = useCartStore();
             const handleAddToCart = () => addItem(product, 1);
         */}
-        
         <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
           Agregar al Carrito
         </button>

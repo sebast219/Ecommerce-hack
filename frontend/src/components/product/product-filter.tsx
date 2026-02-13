@@ -1,12 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { X } from 'lucide-react';
+
+import {
+  X,
+  SlidersHorizontal,
+  Star,
+  PackageCheck,
+} from 'lucide-react';
+
+
+/* ========================
+   TYPES
+======================== */
 
 interface ProductFilterProps {
   onFilterChange: (filters: FilterState) => void;
@@ -19,6 +31,11 @@ interface FilterState {
   inStock: boolean;
 }
 
+
+/* ========================
+   DATA
+======================== */
+
 const categories = [
   { id: 'smartphones', name: 'Smartphones' },
   { id: 'laptops', name: 'Laptops' },
@@ -28,7 +45,13 @@ const categories = [
   { id: 'gaming', name: 'Gaming' },
 ];
 
+
+/* ========================
+   COMPONENT
+======================== */
+
 export function ProductFilter({ onFilterChange }: ProductFilterProps) {
+
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 2000],
@@ -36,123 +59,371 @@ export function ProductFilter({ onFilterChange }: ProductFilterProps) {
     inStock: false,
   });
 
-  const handleCategoryChange = (categoryId: string, checked: boolean) => {
-    const newCategories = checked
-      ? [...filters.categories, categoryId]
-      : filters.categories.filter(id => id !== categoryId);
-    
-    const newFilters = { ...filters, categories: newCategories };
+
+  /* ========================
+     HANDLERS
+  ======================== */
+
+  function updateFilters(newFilters: FilterState) {
     setFilters(newFilters);
     onFilterChange(newFilters);
-  };
+  }
 
-  const handlePriceChange = (value: number[]) => {
-    const newFilters = { ...filters, priceRange: [value[0], value[1]] as [number, number] };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
 
-  const handleRatingChange = (rating: number) => {
-    const newFilters = { ...filters, rating };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+  function handleCategory(id: string, checked: boolean) {
 
-  const handleStockChange = (checked: boolean) => {
-    const newFilters = { ...filters, inStock: checked };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+    const categories = checked
+      ? [...filters.categories, id]
+      : filters.categories.filter(c => c !== id);
 
-  const clearFilters = () => {
-    const newFilters = {
+    updateFilters({
+      ...filters,
+      categories,
+    });
+  }
+
+
+  function handlePrice(value: number[]) {
+
+    updateFilters({
+      ...filters,
+      priceRange: [0, value[0]],
+    });
+  }
+
+
+  function handleRating(value: number) {
+
+    updateFilters({
+      ...filters,
+      rating: value,
+    });
+  }
+
+
+  function handleStock(checked: boolean) {
+
+    updateFilters({
+      ...filters,
+      inStock: checked,
+    });
+  }
+
+
+  function clearFilters() {
+
+    updateFilters({
       categories: [],
-      priceRange: [0, 2000] as [number, number],
+      priceRange: [0, 2000],
       rating: 0,
       inStock: false,
-    };
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+    });
+  }
+
+
+
+  /* ========================
+     ACTIVE FILTERS
+  ======================== */
+
+  const activeCategories = categories.filter(c =>
+    filters.categories.includes(c.id)
+  );
+
+
 
   return (
-    <Card>
-      <CardHeader>
+    <Card
+      className="
+        sticky top-24
+
+        border-slate-200/60
+        bg-white/80
+        backdrop-blur-xl
+
+        shadow-xl
+        rounded-2xl
+      "
+    >
+
+      {/* ================= HEADER ================= */}
+
+      <CardHeader className="pb-3">
+
         <div className="flex items-center justify-between">
-          <CardTitle>Filtros</CardTitle>
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+
+          <div className="flex items-center gap-2">
+
+            <SlidersHorizontal className="h-5 w-5 text-slate-600" />
+
+            <CardTitle className="text-lg">
+              Filtros
+            </CardTitle>
+
+          </div>
+
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="
+              text-slate-500
+              hover:text-red-500
+              hover:bg-red-50
+            "
+          >
             <X className="h-4 w-4 mr-1" />
             Limpiar
           </Button>
+
         </div>
+
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Categorías */}
+
+
+
+      <CardContent className="space-y-7">
+
+
+        {/* ================= ACTIVE CHIPS ================= */}
+
+        {(filters.categories.length > 0 ||
+          filters.rating > 0 ||
+          filters.inStock) && (
+
+          <div className="flex flex-wrap gap-2">
+
+            {activeCategories.map(cat => (
+
+              <FilterChip
+                key={cat.id}
+                label={cat.name}
+                onRemove={() => handleCategory(cat.id, false)}
+              />
+
+            ))}
+
+
+            {filters.rating > 0 && (
+
+              <FilterChip
+                label={`${filters.rating}+ ⭐`}
+                onRemove={() => handleRating(0)}
+              />
+
+            )}
+
+
+            {filters.inStock && (
+
+              <FilterChip
+                label="En stock"
+                onRemove={() => handleStock(false)}
+              />
+
+            )}
+
+          </div>
+
+        )}
+
+
+
+        {/* ================= CATEGORIES ================= */}
+
         <div>
-          <Label className="text-base font-medium mb-3 block">Categorías</Label>
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <div key={category.id} className="flex items-center space-x-2">
+
+          <Label className="text-base font-semibold mb-3 block">
+            Categorías
+          </Label>
+
+          <div className="space-y-3">
+
+            {categories.map(cat => (
+
+              <div
+                key={cat.id}
+                className="
+                  flex items-center gap-3
+                  p-2 rounded-lg
+
+                  hover:bg-slate-50
+                  transition
+                "
+              >
+
                 <Checkbox
-                  id={category.id}
-                  checked={filters.categories.includes(category.id)}
-                  onCheckedChange={(checked) => 
-                    handleCategoryChange(category.id, checked as boolean)
+                  id={cat.id}
+                  checked={filters.categories.includes(cat.id)}
+                  onCheckedChange={(v) =>
+                    handleCategory(cat.id, v as boolean)
                   }
                 />
-                <Label htmlFor={category.id} className="text-sm">
-                  {category.name}
+
+                <Label
+                  htmlFor={cat.id}
+                  className="cursor-pointer text-sm"
+                >
+                  {cat.name}
                 </Label>
+
               </div>
+
             ))}
+
           </div>
+
         </div>
 
-        {/* Rango de Precios */}
+
+
+        {/* ================= PRICE ================= */}
+
         <div>
-          <Label className="text-base font-medium mb-3 block">
-            Rango de Precios: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+
+          <Label className="text-base font-semibold mb-2 block">
+
+            Precio
+
+            <span className="ml-2 text-sm text-slate-500 font-normal">
+              Hasta ${filters.priceRange[1]}
+            </span>
+
           </Label>
+
+
           <Slider
-            value={filters.priceRange}
-            onValueChange={handlePriceChange}
-            max={2000}
+            value={[filters.priceRange[1]]}
+            onValueChange={handlePrice}
             min={0}
+            max={2000}
             step={50}
-            className="w-full"
+            className="mt-3"
           />
+
         </div>
 
-        {/* Calificación */}
+
+
+        {/* ================= RATING ================= */}
+
         <div>
-          <Label className="text-base font-medium mb-3 block">Calificación Mínima</Label>
+
+          <Label className="text-base font-semibold mb-3 block">
+            Calificación
+          </Label>
+
+
           <div className="flex gap-2">
-            {[0, 1, 2, 3, 4].map((rating) => (
+
+            {[1, 2, 3, 4, 5].map(star => (
+
               <Button
-                key={rating}
-                variant={filters.rating > rating ? "default" : "outline"}
+                key={star}
+                variant={
+                  filters.rating >= star
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
-                onClick={() => handleRatingChange(rating + 1)}
-                className="min-w-[40px]"
+                onClick={() => handleRating(star)}
+                className="w-10"
               >
-                {rating + 1}+
+
+                <Star className="h-4 w-4" />
+
               </Button>
+
             ))}
+
           </div>
+
         </div>
 
-        {/* Stock */}
-        <div className="flex items-center space-x-2">
+
+
+        {/* ================= STOCK ================= */}
+
+        <div
+          className="
+            flex items-center gap-3
+
+            p-3 rounded-xl
+
+            border border-slate-200/60
+            bg-slate-50/50
+          "
+        >
+
+          <PackageCheck className="h-4 w-4 text-green-600" />
+
           <Checkbox
-            id="inStock"
+            id="stock"
             checked={filters.inStock}
-            onCheckedChange={handleStockChange}
+            onCheckedChange={(v) =>
+              handleStock(v as boolean)
+            }
           />
-          <Label htmlFor="inStock" className="text-sm">
-            Solo productos disponibles
+
+          <Label
+            htmlFor="stock"
+            className="text-sm cursor-pointer"
+          >
+            Solo disponibles
           </Label>
+
         </div>
+
+
       </CardContent>
+
     </Card>
+  );
+}
+
+
+
+/* ========================
+   CHIP COMPONENT
+======================== */
+
+function FilterChip({
+  label,
+  onRemove,
+}: {
+  label: string;
+  onRemove: () => void;
+}) {
+
+  return (
+
+    <div
+      className="
+        flex items-center gap-2
+
+        px-3 py-1.5
+        rounded-full
+
+        bg-slate-100
+        text-sm
+
+        border border-slate-200
+
+        animate-in fade-in zoom-in-95
+      "
+    >
+
+      {label}
+
+      <button
+        onClick={onRemove}
+        className="hover:text-red-500"
+      >
+        <X className="h-3 w-3" />
+      </button>
+
+    </div>
+
   );
 }

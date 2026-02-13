@@ -8,6 +8,7 @@ interface AuthStore {
   refreshToken: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (userData: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
@@ -33,6 +34,33 @@ export const useAuthStore = create<AuthStore>()(
 
           if (!response.ok) {
             throw new Error('Login failed');
+          }
+
+          const data = await response.json();
+          
+          set({
+            user: data.user,
+            token: data.access_token,
+            refreshToken: data.refresh_token,
+            isAuthenticated: true,
+          });
+        } catch (error) {
+          throw error;
+        }
+      },
+      
+      register: async (userData: { name: string; email: string; password: string }) => {
+        try {
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+          });
+
+          if (!response.ok) {
+            throw new Error('Register failed');
           }
 
           const data = await response.json();

@@ -9,6 +9,7 @@ import {
   EyeOff,
   Mail,
   Lock,
+  User,
   Chrome,
   Home,
 } from 'lucide-react';
@@ -18,30 +19,44 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function LoginPage() {
+export default function RegisterPage() {
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { register } = useAuthStore();
 
 
-  /* Autofocus email */
+  /* Autofocus name */
   useEffect(() => {
-    document.getElementById('email')?.focus();
+    document.getElementById('name')?.focus();
   }, []);
 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       setError('Completa todos los campos');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('La contraseña debe tener mínimo 6 caracteres');
       return;
     }
 
@@ -49,12 +64,16 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
 
-      await login(email, password);
+      await register({
+        name,
+        email,
+        password,
+      });
 
       router.push('/');
 
     } catch {
-      setError('Correo o contraseña incorrectos');
+      setError('Error al crear la cuenta');
     } finally {
       setLoading(false);
     }
@@ -65,22 +84,23 @@ export default function LoginPage() {
     <div className="fixed inset-0 z-50 min-h-screen flex justify-around bg-slate-50 overflow-hidden">
 
 
-      {/* Glow Background */}
+      {/* Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_60%)] z-0" />
 
-      {/* LEFT — HERO */}
-      <div className="hidden lg:flex flex-col justify-center px-16 xl:px-28 relative overflow-hidden">
+
+      {/* LEFT */}
+      <div className="hidden lg:flex flex-col justify-center px-16 xl:px-28 relative">
 
         <div className="relative z-10 max-w-xl">
 
-          <h1 className="text-5xl xl:text-6xl font-bold text-slate-900 leading-tight mb-6">
-            Bienvenido a <br />
+          <h1 className="text-5xl xl:text-6xl font-bold text-slate-900 mb-6">
+            Únete a <br />
             <span className="text-blue-600">Hack 6</span>
           </h1>
 
-          <p className="text-lg text-slate-600 mb-10 leading-relaxed">
-            Plataforma profesional para herramientas de
-            ciberseguridad y tecnología avanzada.
+          <p className="text-lg text-slate-600 mb-10">
+            Crea tu cuenta y accede a herramientas
+            profesionales de ciberseguridad.
           </p>
           
           <Link
@@ -117,6 +137,7 @@ export default function LoginPage() {
               ['Rápido', 'bg-blue-500'],
               ['Profesional', 'bg-purple-500'],
             ].map(([label, color]) => (
+
               <div
                 key={label}
                 className="flex items-center gap-2 text-slate-600"
@@ -124,6 +145,7 @@ export default function LoginPage() {
                 <span className={`w-2 h-2 rounded-full ${color}`} />
                 {label}
               </div>
+
             ))}
 
           </div>
@@ -134,7 +156,7 @@ export default function LoginPage() {
 
 
 
-      {/* RIGHT — FORM */}
+      {/* RIGHT */}
       <div className="lg:max-w-md xl:max-w-lg flex items-center justify-center px-6 py-12 relative z-10">
 
         <div className="w-full max-w-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -145,9 +167,9 @@ export default function LoginPage() {
 
             <div className="inline-flex items-center gap-2 mb-6">
 
-              <div className="h-9 w-9 rounded-full bg-black shadow-sm" />
+              <div className="h-9 w-9 rounded-full bg-black" />
 
-              <span className="text-xl font-bold tracking-wide">
+              <span className="text-xl font-bold">
                 Hack 6
               </span>
 
@@ -161,11 +183,11 @@ export default function LoginPage() {
           <div className="text-center space-y-2">
 
             <h2 className="text-3xl font-bold text-slate-900">
-              Iniciar Sesión
+              Crear Cuenta
             </h2>
 
             <p className="text-sm text-slate-600">
-              Accede a tu panel profesional
+              Regístrate gratis
             </p>
 
           </div>
@@ -178,19 +200,15 @@ export default function LoginPage() {
             variant="outline"
             className="
               w-full h-12 rounded-full gap-2
-
               border-slate-200
               bg-white
-
               hover:bg-slate-50
               hover:shadow-md
-              hover:scale-[1.01]
-
-              transition-all
+              transition
             "
           >
             <Chrome className="h-4 w-4" />
-            Continuar con Google
+            Registrarse con Google
           </Button>
 
 
@@ -212,13 +230,10 @@ export default function LoginPage() {
           <div
             className="
               rounded-2xl p-6
-
               border border-slate-200/60
-
               bg-white/70
               backdrop-blur-xl
-
-              shadow-[0_10px_30px_rgba(0,0,0,0.06)]
+              shadow-lg
             "
           >
 
@@ -233,21 +248,40 @@ export default function LoginPage() {
               {error && (
                 <div
                   className="
-                    flex items-center gap-2
-
                     bg-red-50 text-red-700
                     px-4 py-3 rounded-xl
-                    text-sm border border-red-100
-
-                    animate-in
-                    fade-in
-                    slide-in-from-top-2
-                    duration-300
+                    text-sm border
                   "
                 >
                   ⚠️ {error}
                 </div>
               )}
+
+
+
+              {/* Name */}
+              <div className="space-y-1">
+
+                <label className="text-sm font-medium text-slate-700">
+                  Nombre
+                </label>
+
+                <div className="relative group">
+
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Tu nombre"
+                    className="pl-10 h-12 rounded-xl"
+                    required
+                  />
+
+                </div>
+
+              </div>
 
 
 
@@ -260,26 +294,14 @@ export default function LoginPage() {
 
                 <div className="relative group">
 
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
 
                   <Input
-                    id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@ejemplo.com"
-                    className="
-                      pl-10 h-12 rounded-xl
-
-                      border-slate-200
-                      bg-white/90
-
-                      focus:border-blue-500
-                      focus:ring-4
-                      focus:ring-blue-500/10
-
-                      transition-all
-                    "
+                    placeholder="tu@correo.com"
+                    className="pl-10 h-12 rounded-xl"
                     required
                   />
 
@@ -296,53 +318,48 @@ export default function LoginPage() {
                   Contraseña
                 </label>
 
-                <div className="relative group">
+                <div className="relative">
 
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
 
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="
-                      pl-10 pr-10 h-12 rounded-xl
-
-                      border-slate-200
-                      bg-white/90
-
-                      focus:border-blue-500
-                      focus:ring-4
-                      focus:ring-blue-500/10
-
-                      transition-all
-                    "
+                    className="pl-10 pr-10 h-12 rounded-xl"
                     required
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
                   >
                     {showPassword ? <EyeOff size={16}/> : <Eye size={16}/> }
                   </button>
 
                 </div>
- 
+
               </div>
 
 
 
-              {/* Forgot */}
-              <div className="text-right">
+              {/* Confirm */}
+              <div className="space-y-1">
 
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
+                <label className="text-sm font-medium text-slate-700">
+                  Confirmar Contraseña
+                </label>
+
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-12 rounded-xl"
+                  required
+                />
 
               </div>
 
@@ -353,54 +370,15 @@ export default function LoginPage() {
                 type="submit"
                 disabled={loading}
                 className="
-                  group
-                  relative
-                  overflow-hidden
-
-                  w-full h-12
-                  rounded-full
-
+                  w-full h-12 rounded-full
                   bg-black text-white
-
                   font-semibold
-
-                  transition-all duration-300
-
                   hover:scale-[1.02]
-                  hover:shadow-[0_15px_40px_rgba(0,0,0,0.25)]
-
-                  disabled:opacity-70
-                  disabled:hover:scale-100
+                  transition
                 "
               >
 
-                {/* Shine */}
-                <span
-                  className="
-                    absolute inset-0
-
-                    bg-gradient-to-r
-                    from-transparent
-                    via-white/30
-                    to-transparent
-
-                    -translate-x-full
-                    group-hover:translate-x-full
-
-                    transition-transform duration-700
-                  "
-                />
-
-                {loading ? (
-                  <div className="flex items-center gap-2 relative z-10">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Verificando...
-                  </div>
-                ) : (
-                  <span className="relative z-10">
-                    Entrar
-                  </span>
-                )}
+                {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
 
               </Button>
 
@@ -410,16 +388,16 @@ export default function LoginPage() {
 
 
 
-          {/* Register */}
+          {/* Login */}
           <div className="text-center text-sm text-slate-600">
 
-            ¿No tienes cuenta?{' '}
+            ¿Ya tienes cuenta?{' '}
 
             <a
-              href="/auth/register"
+              href="/auth/login"
               className="text-blue-600 font-medium hover:underline"
             >
-              Regístrate gratis
+              Inicia sesión
             </a>
 
           </div>
