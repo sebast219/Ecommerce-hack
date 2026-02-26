@@ -4,13 +4,12 @@ import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Providers } from './providers';
-
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Ecommerce Universitario',
-  description: 'Tienda online para la comunidad universitaria',
-  keywords: ['ecommerce', 'universidad', 'tienda online'],
+  title: 'Ecommerce Hak 6',
+  description: 'Plataforma especializada en herramientas de ciberseguridad',
+  keywords: ['ecommerce', 'ciberseguridad', 'herramientas', 'pentesting', 'seguridad informática'],
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },

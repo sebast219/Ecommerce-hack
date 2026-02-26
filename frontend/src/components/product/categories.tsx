@@ -1,264 +1,108 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { Wifi, Usb, ShieldAlert, Network, Cpu, Search, ArrowRight } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Wifi,
-  Usb,
-  ShieldAlert,
-  Network,
-  Cpu,
-  Search,
-  ArrowRight,
-  Sparkles
-} from 'lucide-react';
-
-// Categories
 const categories = [
-  {
-    id: 'wireless',
-    name: 'Ataques Inalámbricos',
-    icon: Wifi,
-    description: 'Auditorías WiFi y MITM',
-    productCount: 42
-  },
-  {
-    id: 'usb-attacks',
-    name: 'USB Hacking',
-    icon: Usb,
-    description: 'Rubber Ducky y BadUSB',
-    productCount: 28
-  },
-  {
-    id: 'red-team',
-    name: 'Red Team',
-    icon: ShieldAlert,
-    description: 'Herramientas ofensivas',
-    productCount: 35
-  },
-  {
-    id: 'network',
-    name: 'Network Monitoring',
-    icon: Network,
-    description: 'Sniffing y análisis',
-    productCount: 51
-  },
-  {
-    id: 'hardware',
-    name: 'Hardware Implants',
-    icon: Cpu,
-    description: 'Dispositivos encubiertos',
-    productCount: 19
-  },
-  {
-    id: 'forensics',
-    name: 'Forensics',
-    icon: Search,
-    description: 'Análisis digital',
-    productCount: 24
-  }
+  { id: 'wireless',   name: 'Ataques Inalámbricos', icon: Wifi,        description: 'Auditorías WiFi y MITM',       productCount: 42 },
+  { id: 'usb-attacks',name: 'USB Hacking',           icon: Usb,         description: 'Rubber Ducky y BadUSB',        productCount: 28 },
+  { id: 'red-team',   name: 'Red Team',              icon: ShieldAlert, description: 'Herramientas ofensivas',       productCount: 35 },
+  { id: 'network',    name: 'Network Monitoring',    icon: Network,     description: 'Sniffing y análisis',          productCount: 51 },
+  { id: 'hardware',   name: 'Hardware Implants',     icon: Cpu,         description: 'Dispositivos encubiertos',     productCount: 19 },
+  { id: 'forensics',  name: 'Forensics',             icon: Search,      description: 'Análisis digital',            productCount: 24 },
 ];
 
 export function Categories() {
-  const displayedCategories = categories.slice(0, 3);
+  const displayed = categories.slice(0, 3);
 
   return (
-    <section className="relative py-28 bg-white text-black overflow-hidden">
-
-      <div className="relative container mx-auto px-6 lg:px-12">
+    <section className="py-32 bg-white text-black transition-all duration-500 ease-in-out">
+      <div className="container mx-auto px-6 lg:px-12">
 
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-20">
-
-          <span 
-            className="text-sm uppercase tracking-[0.3em] text-black"
-          >
-            Explora
-          </span>
-
-          <h2 
-            className="mt-4 text-4xl md:text-5xl font-semibold tracking-tight"
-          >
-            Categorías de Ciberseguridad
-          </h2>
-
-          <p 
-            className="mt-6 text-lg text-black/60"
-          >
-            Herramientas profesionales para hacking ético
-            y auditoría avanzada.
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 fade-in">
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-[0.35em] text-black/35 font-medium block">
+              Explora
+            </span>
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-semibold tracking-[-0.02em] leading-tight">
+              Categorías de
+              <br />
+              <span className="text-black/25">Ciberseguridad</span>
+            </h2>
+          </div>
+          <p className="text-sm text-black/45 max-w-xs leading-relaxed md:text-right">
+            Herramientas profesionales para hacking ético y auditoría avanzada.
           </p>
-
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-
-          {displayedCategories.map((category, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-black/8 border border-black/8 rounded-2xl overflow-hidden slide-up">
+          {displayed.map((category, index) => {
             const Icon = category.icon;
-
             return (
-              <Card
+              <Link
                 key={category.id}
+                href={`/categories/${category.id}`}
                 className="
-                  group relative
-                  bg-white
-                  border border-gray-200
-                  rounded-2xl
+                  group bg-white p-8
+                  flex flex-col gap-6
+                  hover:bg-black hover:text-white
                   transition-all duration-500
-                  hover:border-gray-300
-                  hover:-translate-y-2
-                  hover:shadow-[0_30px_80px_rgba(0,0,0,0.12)]
+                  hover:scale-[1.02]
                 "
+                style={{
+                  animationDelay: `${index * 60}ms`
+                }}
               >
-                <CardContent className="p-8">
+                {/* Top row */}
+                <div className="flex items-start justify-between">
+                  <span className="text-xs font-mono text-black/25 group-hover:text-white/25 transition-colors">
+                    0{index + 1}
+                  </span>
+                  <Icon className="h-5 w-5 text-black/30 group-hover:text-white/60 transition-colors" />
+                </div>
 
+                {/* Content */}
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-lg font-semibold tracking-tight leading-snug">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-black/50 group-hover:text-white/55 transition-colors leading-relaxed">
+                    {category.description}
+                  </p>
+                </div>
 
-                  <div className="relative flex flex-col h-full">
-
-                    {/* Icon */}
-                    <div
-                      className="
-                        mb-6
-                        w-12 h-12
-                        flex items-center justify-center
-                        rounded-full
-                        bg-gray-100
-                        transition-all duration-500
-                        group-hover:bg-gray-200
-                        group-hover:scale-110
-                      "
-                    >
-                      <Icon className="h-6 w-6 text-black/90" />
-                    </div>
-
-                    {/* Content */}
-                    <h3 className="text-xl font-medium mb-2">
-                      {category.name}
-                    </h3>
-
-                    <p className="text-sm text-black/60 leading-relaxed mb-6">
-                      {category.description}
-                    </p>
-
-                    {/* Bottom */}
-                    <div className="mt-auto flex items-center justify-between">
-
-                      <span className="text-sm text-black/50">
-                        {category.productCount} productos
-                      </span>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="
-                          text-black/80
-                          hover:text-black
-                          hover:bg-transparent
-                          transition-all duration-300
-                        "
-                      >
-                        Explorar →
-                      </Button>
-
-                    </div>
-
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Bottom */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-black/30 group-hover:text-white/30 transition-colors">
+                    {category.productCount} productos
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-black/25 group-hover:text-white/60 transition-all duration-300 group-hover:translate-x-1" />
+                </div>
+              </Link>
             );
           })}
-
         </div>
 
-      {/* Ver más categorías button */}
-      <div className="flex justify-center mt-8">
-
-        <Button
-          onClick={() => window.location.href = '/categories'}
-          className="
-
-            relative group
-
-            px-10 py-5
-            text-base font-medium
-
-            rounded-full
-
-            bg-black text-white
-
-            overflow-hidden
-
-            transition-all duration-500 ease-out
-
-            hover:scale-[1.03]
-            hover:shadow-[0_25px_60px_rgba(0,0,0,0.35)]
-
-            active:scale-[0.98]
-
-            flex items-center gap-3
-          "
-        >
-
-
-          {/* Glow Layer */}
-          <span
+        {/* CTA */}
+        <div className="flex justify-center mt-12">
+          <Link
+            href="/categories"
             className="
-              absolute inset-0
-              bg-gradient-to-r
-              from-purple-600/40
-              via-blue-600/40
-              to-cyan-500/40
-
-              opacity-0
-              group-hover:opacity-100
-
-              blur-xl
-              transition-opacity duration-500
+              group inline-flex items-center gap-2
+              border border-black/20
+              rounded-full px-8 py-3.5
+              text-sm font-medium text-black/70
+              hover:border-black/50 hover:text-black hover:bg-black/[0.02]
+              transition-all duration-300
             "
-          />
+          >
+            Ver todas las categorías
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
 
-
-          {/* Shine Effect */}
-          <span
-            className="
-              absolute -left-full top-0
-              w-1/2 h-full
-
-              bg-gradient-to-r
-              from-transparent
-              via-white/30
-              to-transparent
-
-              skew-x-12
-
-              group-hover:left-full
-              transition-all duration-700
-            "
-          />
-
-
-          {/* Content */}
-          <span className="relative z-10 flex items-center gap-3">
-
-            <Sparkles className="h-5 w-5 text-blue-400 animate-pulse" />
-
-            <span className="tracking-wide">
-              Ver más categorías
-            </span>
-
-            <ArrowRight
-              className="
-                h-5 w-5
-                transition-transform duration-300
-                group-hover:translate-x-1.5
-              "
-            />
-          </span>
-        </Button>
-      </div>
       </div>
     </section>
   );

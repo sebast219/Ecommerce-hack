@@ -1,6 +1,6 @@
-# 🎨 Ecommerce Frontend - Next.js 14
+# 🎨 Ecommerce Hak 6 Frontend - Next.js 14
 
-Frontend moderno para el eCommerce Universitario construido con Next.js 14, TypeScript y Tailwind CSS.
+Frontend especializado en herramientas de ciberseguridad construido con Next.js 14, TypeScript y Tailwind CSS.
 
 ## 🏗️ Arquitectura
 
@@ -18,15 +18,16 @@ Frontend moderno para el eCommerce Universitario construido con Next.js 14, Type
 ```
 src/
 ├── app/               # App Router (Next.js 14)
-│   ├── (auth)/        # Rutas de autenticación agrupadas
+│   ├── auth/          # Rutas de autenticación
 │   │   ├── login/
 │   │   └── register/
-│   ├── (dashboard)/   # Panel administrativo
-│   ├── products/      # Catálogo de productos
 │   ├── cart/          # Carrito de compras
-│   ├── checkout/      # Proceso de pago
-│   ├── profile/       # Perfil de usuario
-│   └── api/           # API Routes de Next.js
+│   ├── categories/    # Categorías de ciberseguridad
+│   ├── products/      # Catálogo de herramientas
+│   ├── nosotros/      # Acerca de Hak 6
+│   ├── page.tsx       # Homepage
+│   ├── layout.tsx     # Layout principal
+│   └── not-found.tsx  # Página 404
 ├── components/        # Componentes React
 │   ├── ui/           # Componentes base reutilizables
 │   ├── layout/       # Layout components (Header, Footer)
@@ -90,9 +91,9 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # Configuración adicional
-NEXT_PUBLIC_APP_NAME="Ecommerce Universitario"
+NEXT_PUBLIC_APP_NAME="Ecommerce Hak 6"
 NEXT_PUBLIC_APP_VERSION="1.0.0"
-NEXT_PUBLIC_JWT_SECRET="your-jwt-secret"
+NEXT_PUBLIC_APP_SPECIALIZATION="Ciberseguridad"
 ```
 
 ## 🎨 Sistema de Diseño
@@ -133,11 +134,11 @@ NEXT_PUBLIC_JWT_SECRET="your-jwt-secret"
 - **Type Safety**: TypeScript estricto en todo el proyecto
 
 ### 🔄 En Desarrollo
-- **Catálogo de Productos**: Listado con filtros y búsqueda
+- **Catálogo Especializado**: Herramientas de pentesting, forense, redes
 - **Carrito de Compras**: Gestión completa del carrito
-- **Proceso de Checkout**: Multi-step checkout
+- **Proceso de Checkout**: Multi-step checkout con Stripe
 - **Panel Administrativo**: Dashboard básico
-- **Optimización**: Performance y SEO
+- **Filtros Técnicos**: Por categoría, nivel de habilidad, compatibilidad
 
 ## 🛠️ Scripts Disponibles
 
@@ -463,4 +464,4 @@ test: add unit tests for auth store
 
 ---
 
-**Desarrollado con ❤️ y TypeScript para la Universidad IUSH**
+**Desarrollado con ❤️ y TypeScript para Ecommerce Hak 6**

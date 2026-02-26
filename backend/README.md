@@ -1,6 +1,6 @@
-# 🚀 Ecommerce Backend - NestJS API
+# 🚀 Ecommerce Hak 6 Backend - NestJS API
 
-Backend API RESTful para el eCommerce Universitario construido con NestJS, Prisma y PostgreSQL.
+Backend API RESTful especializado en herramientas de ciberseguridad con Clean Architecture, NestJS, Prisma y PostgreSQL.
 
 ## 🏗️ Arquitectura
 
@@ -11,29 +11,30 @@ Backend API RESTful para el eCommerce Universitario construido con NestJS, Prism
 - **Validación**: Class-validator + Class-transformer
 - **Documentación**: Swagger/OpenAPI 3.0
 - **Testing**: Jest con Supertest
-- **Arquitectura**: Monolito modular con Clean Architecture
+- **Arquitectura**: Clean Architecture (Domain, Application, Infrastructure, Presentation)
 
 ### Estructura del Proyecto
 ```
 src/
-├── common/          # Elementos compartidos
-│   ├── decorators/  # Decoradores personalizados
-│   ├── guards/      # Guards de autenticación
-│   ├── filters/     # Filtros de excepción
-│   ├── pipes/       # Pipes de validación
-│   └── interceptors/# Interceptors de logging
-├── config/          # Configuración de la aplicación
-├── database/        # Configuración de Prisma
-├── modules/         # Módulos funcionales
-│   ├── auth/        # Autenticación y usuarios
-│   ├── products/    # Gestión de productos
-│   ├── categories/  # Categorías jerárquicas
-│   ├── cart/        # Carrito de compras
-│   ├── orders/      # Gestión de pedidos
-│   └── payments/    # Procesamiento de pagos
-├── utils/           # Utilidades compartidas
-├── app.module.ts    # Módulo raíz
-└── main.ts          # Punto de entrada
+├── domain/           # Capa de Dominio (Clean Architecture)
+│   ├── entities/      # Entidades puras del negocio
+│   ├── repositories/  # Interfaces de repositorios
+│   └── services/      # Servicios de dominio
+├── application/       # Capa de Aplicación
+│   ├── use-cases/     # Casos de uso del negocio
+│   └── dto/          # Data Transfer Objects
+├── infrastructure/    # Capa de Infraestructura
+│   ├── database/      # Implementación de repositorios
+│   └── external/      # Servicios externos (Stripe, Email)
+├── presentation/      # Capa de Presentación
+│   ├── controllers/   # Endpoints API
+│   ├── guards/        # Guards de autenticación
+│   ├── pipes/         # Pipes de validación
+│   └── filters/       # Filtros de excepción
+├── shared/           # Utilidades compartidas
+├── config/           # Configuración de la aplicación
+├── app.module.ts     # Módulo raíz
+└── main.ts           # Punto de entrada
 ```
 
 ## � Inicio Rápido
@@ -400,4 +401,4 @@ pm2 logs ecommerce-api
 
 ---
 
-**Desarrollado con ❤️ para la Universidad IUSH**
+**Desarrollado con ❤️ para Ecommerce Hak 6**

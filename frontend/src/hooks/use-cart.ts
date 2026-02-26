@@ -15,13 +15,12 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { CartItem, CartSummary } from '@/types/cart';
+import { CartItem } from '@/types/cart';
 import { useCartStore } from '@/store/cart-store';
 import { useAuth } from './use-auth';
 
 interface UseCartReturn {
   items: CartItem[];
-  summary: CartSummary | null;
   isLoading: boolean;
   error: string | null;
   addItem: (productId: string, quantity?: number) => Promise<void>;
@@ -39,7 +38,6 @@ export function useCart(): UseCartReturn {
   // TODO: Definir estados locales
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState<CartSummary | null>(null);
 
   // TODO: Implementar función para agregar item
   const addItem = useCallback(async (productId: string, quantity = 1) => {
@@ -227,7 +225,6 @@ export function useCart(): UseCartReturn {
       // if (!response.ok) throw new Error('Failed to clear cart');
       
       storeClearCart();
-      setSummary(null);
       
     } catch (err: any) {
       setError(err.message || 'Error al vaciar el carrito');
@@ -316,23 +313,13 @@ export function useCart(): UseCartReturn {
     // PASO 4: Actualizar estado
     // - setSummary() con cálculos
     
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
     const taxes = subtotal * 0.16; // 16% IVA
     const total = subtotal + taxes;
-    
-    setSummary({
-      id: 'current-cart',
-      items,
-      subtotal,
-      taxes,
-      total,
-      itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-    });
   }, [items]);
 
   return {
     items,
-    summary,
     isLoading,
     error,
     addItem,

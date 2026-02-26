@@ -52,6 +52,7 @@ const categories = [
 
 export default function CategoriesPage() {
   const [scrollY, setScrollY] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
@@ -63,6 +64,12 @@ export default function CategoriesPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Animación de entrada optimizada
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 80);
+    return () => clearTimeout(timer);
+  }, []);
+
   const scrollToFirstCategory = () => {
     const firstSection = sectionRefs.current[0];
     if (firstSection) {
@@ -71,10 +78,12 @@ export default function CategoriesPage() {
   };
 
   return (
-    <main className="bg-white text-black">
+    <main className={`bg-white text-black transition-all duration-700 ease-out ${
+      isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+    }`}>
 
       {/* Hero */}
-      <section className="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden">
+      <section className="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden fade-in">
 
         <div 
           className="absolute inset-0 bg-gradient-to-b from-transparent to-white/10"
@@ -92,7 +101,7 @@ export default function CategoriesPage() {
               opacity: 1 - scrollY * 0.001,
             }}
           >
-            Hack 6 Platform
+            • Seguridad • Tecnología • Futuro •
           </span>
 
           <h1 
@@ -186,10 +195,11 @@ export default function CategoriesPage() {
 
               {/* Content */}
               <div 
-                className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'}`}
+                className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'} slide-up`}
                 style={{
                   transform: `translateY(${(scrollY - (index + 1) * window.innerHeight) * 0.2}px)`,
                   opacity: Math.max(0, Math.min(1, 1 - Math.abs(scrollY - (index + 1) * window.innerHeight) * 0.0005)),
+                  animationDelay: `${index * 80}ms`
                 }}
               >
 

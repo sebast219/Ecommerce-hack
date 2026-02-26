@@ -1,15 +1,16 @@
-# 🛍️ eCommerce Universitario - Plataforma FullStack
+# �️ Ecommerce Hak 6 - Plataforma de Ciberseguridad
 
-Plataforma de comercio electrónico completa construida con tecnologías modernas para el proyecto académico de la Universidad IUSH.
+Plataforma de comercio electrónico especializada en herramientas de ciberseguridad con arquitectura Clean Architecture basada en principios de diseño moderno.
 
 ## 🏗️ Arquitectura del Proyecto
 
 ### Stack Tecnológico
 - **Frontend**: Next.js 14 + TypeScript + Tailwind CSS + Zustand
 - **Backend**: NestJS + TypeScript + Prisma ORM + PostgreSQL
+- **Arquitectura**: Clean Architecture (Domain, Application, Infrastructure, Presentation)
 - **Autenticación**: JWT con refresh tokens
 - **Pagos**: Integración con Stripe (modo prueba)
-- **Arquitectura**: Monolito modular con Clean Architecture
+- **Especialización**: Herramientas de ciberseguridad (pentesting, forense, redes)
 
 ### Flujo de Datos
 ```
@@ -56,37 +57,40 @@ npm run dev
 - Backend API: http://localhost:3001
 - Documentación API: http://localhost:3001/api/v1/docs
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ecommerce-hack/
 ├── frontend/          # Next.js App Router
 │   ├── src/
-│   │   ├── app/       # Rutas y layouts
+│   │   ├── app/       # Rutas: auth/, cart/, categories/, products/
 │   │   ├── components/ # Componentes React
 │   │   ├── hooks/     # Custom hooks
 │   │   ├── store/     # Estado global (Zustand)
 │   │   ├── lib/       # Utilidades y API client
 │   │   └── types/     # Tipos TypeScript
 │   └── README.md      # Guía específica del frontend
-├── backend/           # NestJS API
+├── backend/           # NestJS con Clean Architecture
 │   ├── src/
-│   │   ├── modules/   # Módulos funcionales
-│   │   ├── common/    # Elementos compartidos
-│   │   ├── config/    # Configuración
-│   │   └── database/  # Configuración de DB
+│   │   ├── domain/       # Entidades y reglas de negocio
+│   │   ├── application/   # Casos de uso y DTOs
+│   │   ├── infrastructure/ # Implementaciones concretas
+│   │   ├── presentation/  # Controllers y API
+│   │   └── shared/        # Utilidades compartidas
 │   ├── prisma/        # Schema y migraciones
 │   └── README.md      # Guía específica del backend
 ├── docs/              # Documentación adicional
 └── README.md          # Este archivo
 ```
 
+## Características Principales
 ## 🔥 Características Principales
 
-### Backend (NestJS)
+### Backend (NestJS + Clean Architecture)
+- ✅ **Clean Architecture** con 4 capas bien definidas
 - ✅ **Autenticación JWT** completa con refresh tokens
 - ✅ **Gestión de usuarios** con roles (Admin, User, Vendor)
-- ✅ **Catálogo de productos** con inventario
+- ✅ **Catálogo especializado** en herramientas de ciberseguridad
 - ✅ **Sistema de categorías** jerárquico
 - ✅ **Carrito de compras** persistente
 - ✅ **Gestión de pedidos** y pagos
@@ -94,11 +98,12 @@ ecommerce-hack/
 - ✅ **Testing** unitario y de integración
 
 ### Frontend (Next.js)
+- ✅ **Especializado** en herramientas de ciberseguridad
 - ✅ **Diseño responsive** con Tailwind CSS
 - ✅ **Estado global** con Zustand
 - ✅ **Formularios** con React Hook Form + Zod
 - ✅ **Autenticación** de usuarios
-- ✅ **Catálogo de productos** con filtros
+- ✅ **Catálogo técnico** con filtros especializados
 - ✅ **Carrito de compras** funcional
 - ✅ **Proceso de checkout** multi-paso
 - ✅ **Panel administrativo** básico
@@ -161,20 +166,22 @@ npm run type-check   # Verificación de tipos
 
 ## 🎯 Estado Actual del Proyecto
 
-### Backend (80% completado)
-- ✅ Autenticación y autorización
-- ✅ CRUD de usuarios y productos
-- ✅ Gestión de carrito y pedidos
-- ✅ Schema de base de datos completo
-- ✅ API documentada con Swagger
-- ✅ Testing básico implementado
+### Backend (15% completado - Clean Architecture)
+- ✅ Estructura Clean Architecture definida
+- ✅ Entidades de dominio básicas
+- ✅ Configuración de Prisma y PostgreSQL
+- ✅ Un caso de uso implementado (CreateUser)
+- 🔄 Repositories interfaces pendientes
+- 🔄 Use cases principales pendientes
+- 🔄 Controllers API pendientes
 
-### Frontend (40% completado)
+### Frontend (20% completado)
 - ✅ Estructura base configurada
+- ✅ Metadata actualizada a "Ecommerce Hak 6"
 - ✅ Sistema de diseño con Tailwind
 - ✅ Estado global con Zustand
-- ✅ Componentes UI básicos
-- 🔄 Páginas principales en desarrollo
+- ✅ Rutas básicas: auth, cart, categories, products
+- 🔄 Componentes de ciberseguridad pendientes
 - 🔄 Integración con backend en progreso
 
 ## 🚀 Despliegue

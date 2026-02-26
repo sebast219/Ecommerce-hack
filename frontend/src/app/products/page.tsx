@@ -10,6 +10,7 @@ import { useProducts } from '@/hooks/use-products';
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -29,6 +30,12 @@ export default function ProductsPage() {
 
   const { products, isLoading, error, pagination, fetchProducts } = useProducts();
 
+  // Animación de entrada optimizada
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Refetch cuando cambian los filtros
   useEffect(() => {
     fetchProducts(filters);
@@ -47,10 +54,12 @@ export default function ProductsPage() {
   };
 
   return (
-    <section className="min-h-screen bg-background">
+    <section className={`min-h-screen bg-background transition-all duration-700 ease-out ${
+      isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+    }`}>
 
       {/* HERO */}
-      <div className="relative overflow-hidden py-24 text-center max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="relative overflow-hidden py-24 text-center max-w-7xl mx-auto px-6 lg:px-12 fade-in">
         <p className="uppercase tracking-widest text-sm text-muted-foreground mb-4">
           Premium Store
         </p>
@@ -99,7 +108,7 @@ export default function ProductsPage() {
 
         {/* PANEL DE FILTROS */}
         {showFilters && (
-          <div className="mb-10 p-6 rounded-2xl border bg-muted/30 backdrop-blur">
+          <div className="mb-10 p-6 rounded-2xl border bg-muted/30 backdrop-blur slide-up">
             <ProductFilter onFilterChange={handleFilterChange} />
           </div>
         )}
@@ -119,7 +128,7 @@ export default function ProductsPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="py-24 text-center">
+          <div className="py-24 text-center fade-in">
             <h3 className="text-xl font-semibold mb-2 text-center">
               Sin resultados
             </h3>
@@ -128,9 +137,14 @@ export default function ProductsPage() {
             </p>
           </div>
         ) : (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8' : 'space-y-6'}>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} viewMode={viewMode} />
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 slide-up' : 'space-y-6 slide-up'}>
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                style={{ animationDelay: `${index * 40}ms` }}
+              >
+                <ProductCard product={product} viewMode={viewMode} />
+              </div>
             ))}
           </div>
         )}
