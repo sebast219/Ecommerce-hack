@@ -162,47 +162,6 @@ export function Footer() {
 
             </form>
           </div>
-
-          {/* Payment Methods Row */}
-          <div className="md:col-span-4 mt-8 pt-8 ">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-6 flex-wrap">
-               {[
-                { name: 'Visa', src: '/payments/visa_payment_method_card_icon_142729.svg' },
-                { name: 'Mastercard', src: '/payments/mastercard_payment_method_icon_142750.svg' },
-                { name: 'PayPal', src: '/payments/paypal_icon-icons.com_62739.svg' },
-                { name: 'Google Pay', src: '/payments/4202002appsgooglegoogleplaylogoplaysocialsocialmedia-115686_115615.svg' },
-              ].map((item) => (
-                <div
-                  key={item.name}
-                  className="
-                    flex items-center justify-center
-                    w-16 h-10
-                    md:w-18 md:h-12
-                    rounded-md
-                    transition-transform duration-300
-                    hover:scale-110
-                  "
-                >
-                  <img
-                    src={item.src}
-                    alt={item.name}
-                    loading="lazy"
-                    className="
-                      max-h-6
-                      md:max-h-7
-                      max-w-full
-                      object-contain
-                      transition-all duration-300
-                      hover:grayscale-0
-                    "
-                  />
-                </div>
-              ))}
-              </div>
-            </div>
-          </div>
-
         </div>
 
         {/* Bottom */}

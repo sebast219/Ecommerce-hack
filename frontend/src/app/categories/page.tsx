@@ -164,7 +164,7 @@ export default function CategoriesPage() {
             <div
               className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5"
               style={{
-                transform: `translateY(${(scrollY - (index + 1) * window.innerHeight) * 0.3}px)`,
+                transform: `translateY(${(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.3}px)`,
               }}
             />
 
@@ -197,8 +197,8 @@ export default function CategoriesPage() {
               <div 
                 className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'} slide-up`}
                 style={{
-                  transform: `translateY(${(scrollY - (index + 1) * window.innerHeight) * 0.2}px)`,
-                  opacity: Math.max(0, Math.min(1, 1 - Math.abs(scrollY - (index + 1) * window.innerHeight) * 0.0005)),
+                  transform: `translateY(${(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.2}px)`,
+                  opacity: Math.max(0, Math.min(1, 1 - Math.abs(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.0005)),
                   animationDelay: `${index * 80}ms`
                 }}
               >

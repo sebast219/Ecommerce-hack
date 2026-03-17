@@ -95,8 +95,12 @@ export default function LoginPage() {
             href="/"
             className="
               inline-flex items-center gap-2
-              text-xs text-white/40 uppercase tracking-[0.3em]
-              hover:text-white transition-colors duration-300
+              px-4 py-2 rounded-full
+              border border-white/100
+              bg-transparent
+              text-xs text-white uppercase tracking-[0.3em]
+              hover:border-white/100
+              transition-all duration-300
             "
           >
             <ArrowLeft className="h-3 w-3" />

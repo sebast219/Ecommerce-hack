@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,10 +32,11 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col scroll-container">
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <ScrollToTop />
           </div>
         </Providers>
       </body>

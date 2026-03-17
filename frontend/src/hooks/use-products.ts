@@ -69,9 +69,7 @@ export function useProducts() {
       setIsLoading(true);
       setError(null);
       
-      // Simulación de API call - REEMPLAZAR CON API REAL
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Carga instantánea sin delay
       setProducts([]);
       setPagination({
         page: 1,

@@ -15,6 +15,32 @@ const nextConfig = {
       },
     ];
   },
+  // Optimizations for faster development
+  swcMinify: true,
+  compiler: {
+    removeConsole: false,
+  },
+  // Faster module resolution
+  transpilePackages: [],
+  // Reduce build time
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;

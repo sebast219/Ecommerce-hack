@@ -27,10 +27,9 @@ export function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push('/auth/login');
-    }, 2000);
+    // Carga instantánea sin delay
+    setIsLoading(false);
+    router.push('/auth/login');
   };
 
   const inputClass = `

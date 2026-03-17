@@ -75,9 +75,7 @@ export function useAuth(): UseAuthReturn {
     setError(null);
     
     try {
-      // Simulación de API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Carga instantánea sin delay
       // TODO: Reemplazar con llamada real a API
       // const response = await fetch('/api/auth/login', {
       //   method: 'POST',
@@ -120,9 +118,7 @@ export function useAuth(): UseAuthReturn {
     setError(null);
     
     try {
-      // Simulación de API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Carga instantánea sin delay
       // TODO: Implementar llamada real
       // const response = await fetch('/api/auth/register', {
       //   method: 'POST',
