@@ -2,12 +2,16 @@
 // PROPÓSITO: Implementar interfaces de dominio usando tecnologías específicas (Prisma)
 
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma.service';
-import { User, Product, Order, UserRole, OrderStatus } from '../../../domain/entities/user.entity';
-import { 
-  IUserRepository, 
-  IProductRepository, 
-  IOrderRepository 
+import { PrismaService } from '../../../infrastructure/database/prisma.service';
+import {
+  User,
+  UserRole,
+  Product,
+  Money,
+} from '../../../domain/entities/user.entity';
+import {
+  IUserRepository,
+  IProductRepository,
 } from '../../../domain/repositories/user.repository.interface';
 
 // EJEMPLO: Implementación de repositorio de usuarios con Prisma
@@ -43,7 +47,9 @@ export class UserRepositoryImpl implements IUserRepository {
     return prismaUser ? this.mapPrismaUserToUser(prismaUser) : null;
   }
 
-  async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+  async create(
+    userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<User> {
     // EJEMPLO: Creación con Prisma
     const prismaUser = await this.prisma.user.create({
       data: {
@@ -79,7 +85,7 @@ export class UserRepositoryImpl implements IUserRepository {
       where: { role: role as any },
     });
 
-    return prismaUsers.map(user => this.mapPrismaUserToUser(user));
+    return prismaUsers.map((user) => this.mapPrismaUserToUser(user));
   }
 
   async existsByEmail(email: string): Promise<boolean> {
@@ -146,7 +152,9 @@ export class ProductRepositoryImpl implements IProductRepository {
     return prismaProduct ? this.mapPrismaProductToProduct(prismaProduct) : null;
   }
 
-  async create(productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+  async create(
+    productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Product> {
     const prismaProduct = await this.prisma.product.create({
       data: {
         name: productData.name,
@@ -170,7 +178,10 @@ export class ProductRepositoryImpl implements IProductRepository {
     // EJEMPLO: Lógica de actualización
     const prismaProduct = await this.prisma.product.update({
       where: { id },
-      data: productData,
+      data: {
+        ...productData,
+        price: productData.price?.amount, // Convertir Money a decimal
+      },
       include: {
         category: true,
         inventory: true,
@@ -196,7 +207,9 @@ export class ProductRepositoryImpl implements IProductRepository {
       },
     });
 
-    return prismaProducts.map(product => this.mapPrismaProductToProduct(product));
+    return prismaProducts.map((product) =>
+      this.mapPrismaProductToProduct(product),
+    );
   }
 
   async findByCategory(categoryId: string): Promise<Product[]> {
@@ -208,7 +221,9 @@ export class ProductRepositoryImpl implements IProductRepository {
       },
     });
 
-    return prismaProducts.map(product => this.mapPrismaProductToProduct(product));
+    return prismaProducts.map((product) =>
+      this.mapPrismaProductToProduct(product),
+    );
   }
 
   async search(query: string): Promise<Product[]> {
@@ -226,7 +241,9 @@ export class ProductRepositoryImpl implements IProductRepository {
       },
     });
 
-    return prismaProducts.map(product => this.mapPrismaProductToProduct(product));
+    return prismaProducts.map((product) =>
+      this.mapPrismaProductToProduct(product),
+    );
   }
 
   async existsBySku(sku: string): Promise<boolean> {
@@ -244,10 +261,7 @@ export class ProductRepositoryImpl implements IProductRepository {
       id: prismaProduct.id,
       name: prismaProduct.name,
       slug: prismaProduct.slug,
-      price: {
-        amount: prismaProduct.price,
-        currency: 'USD', // EJEMPLO: Valor por defecto
-      },
+      price: new Money(Number(prismaProduct.price), 'USD'),
       sku: prismaProduct.sku,
       isActive: prismaProduct.isActive,
       createdAt: prismaProduct.createdAt,

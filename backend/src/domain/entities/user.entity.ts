@@ -53,7 +53,7 @@ export enum OrderStatus {
 export class Money {
   constructor(
     public readonly amount: number,
-    public readonly currency: string = 'USD'
+    public readonly currency: string = 'USD',
   ) {
     this.validateAmount();
   }

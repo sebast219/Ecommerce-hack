@@ -4,20 +4,27 @@
 import { Module } from '@nestjs/common';
 
 // EJEMPLO: Exportar entidades del dominio
-export { User, Product, Order, UserRole, OrderStatus, Money } from './entities/user.entity';
+export {
+  User,
+  Product,
+  Order,
+  UserRole,
+  OrderStatus,
+  Money,
+} from './entities/user.entity';
 
 // EJEMPLO: Exportar interfaces de repositorios
-export { 
-  IUserRepository, 
-  IProductRepository, 
-  IOrderRepository 
+export {
+  IUserRepository,
+  IProductRepository,
+  IOrderRepository,
 } from './repositories/user.repository.interface';
 
 // EJEMPLO: Exportar servicios de dominio
-export { 
-  UserDomainService, 
-  ProductDomainService, 
-  OrderDomainService 
+export {
+  UserDomainService,
+  ProductDomainService,
+  OrderDomainService,
 } from './services/user.domain.service';
 
 @Module({

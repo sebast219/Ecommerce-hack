@@ -25,7 +25,7 @@ export interface CreateUserResponse {
 export class CreateUserUseCase {
   constructor(
     private userRepository: IUserRepository,
-    private userDomainService: UserDomainService
+    private userDomainService: UserDomainService,
   ) {}
 
   // EJEMPLO: Método principal del caso de uso
@@ -41,12 +41,14 @@ export class CreateUserUseCase {
 
     return {
       user: createdUser,
-      message: 'User created successfully'
+      message: 'User created successfully',
     };
   }
 
   // EJEMPLO: Validaciones específicas del caso de uso
-  private async validateBusinessRules(request: CreateUserRequest): Promise<void> {
+  private async validateBusinessRules(
+    request: CreateUserRequest,
+  ): Promise<void> {
     // EJEMPLO: Verificar si email ya existe
     const existingUser = await this.userRepository.findByEmail(request.email);
     if (existingUser) {
@@ -66,7 +68,9 @@ export class CreateUserUseCase {
   }
 
   // EJEMPLO: Creación de entidad de dominio
-  private createUserEntity(request: CreateUserRequest): Omit<User, 'id' | 'createdAt' | 'updatedAt'> {
+  private createUserEntity(
+    request: CreateUserRequest,
+  ): Omit<User, 'id' | 'createdAt' | 'updatedAt'> {
     return {
       email: request.email,
       firstName: request.firstName,

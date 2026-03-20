@@ -11,7 +11,7 @@ export interface IUserRepository {
   create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   update(id: string, userData: Partial<User>): Promise<User>;
   delete(id: string): Promise<void>;
-  
+
   // Métodos específicos del dominio
   findByRole(role: string): Promise<User[]>;
   existsByEmail(email: string): Promise<boolean>;
@@ -22,10 +22,12 @@ export interface IProductRepository {
   findById(id: string): Promise<Product | null>;
   findBySlug(slug: string): Promise<Product | null>;
   findBySku(sku: string): Promise<Product | null>;
-  create(productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product>;
+  create(
+    productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Product>;
   update(id: string, productData: Partial<Product>): Promise<Product>;
   delete(id: string): Promise<void>;
-  
+
   // Métodos de consulta específicos
   findActive(): Promise<Product[]>;
   findByCategory(categoryId: string): Promise<Product[]>;
@@ -37,9 +39,11 @@ export interface IProductRepository {
 export interface IOrderRepository {
   findById(id: string): Promise<Order | null>;
   findByUserId(userId: string): Promise<Order[]>;
-  create(orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order>;
+  create(
+    orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Order>;
   updateStatus(id: string, status: OrderStatus): Promise<Order>;
-  
+
   // Métodos específicos del dominio
   findByStatus(status: OrderStatus): Promise<Order[]>;
   findByDateRange(startDate: Date, endDate: Date): Promise<Order[]>;

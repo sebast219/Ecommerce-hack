@@ -4,19 +4,18 @@
 import { Module } from '@nestjs/common';
 
 // EJEMPLO: Exportar casos de uso
-export { 
-  CreateUserUseCase, 
+export {
+  CreateUserUseCase,
   LoginUseCase,
   CreateUserRequest,
   CreateUserResponse,
   LoginRequest,
-  LoginResponse
+  LoginResponse,
 } from './use-cases/auth/create-user.use-case';
 
 // EJEMPLO: Exportar DTOs de aplicación
-export { 
-  // DTOs de otros casos de uso se agregarían aquí
-} from './dto';
+export {} from // DTOs de otros casos de uso se agregarían aquí
+'./dto';
 
 @Module({
   providers: [

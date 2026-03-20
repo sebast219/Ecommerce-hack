@@ -40,12 +40,12 @@ export class JwtAuthGuard implements CanActivate {
 
   // EJEMPLO: Método para extraer token del header
   private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [type, _token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? _token : undefined;
   }
 
   // EJEMPLO: Método para validar token
-  private validateToken(token: string): any {
+  private validateToken(_token: string): any {
     // EJEMPLO: Aquí se usaría jwtService.verifyAsync(token)
     // Por ahora es un ejemplo de estructura
     return { userId: 'user_id', email: 'user@example.com', role: 'USER' };
@@ -89,10 +89,7 @@ export class PermissionsGuard implements CanActivate {
     // EJEMPLO: Obtener permisos requeridos
     const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
       'permissions',
-      [
-        context.getHandler(),
-        context.getClass(),
-      ],
+      [context.getHandler(), context.getClass()],
     );
 
     if (!requiredPermissions) {
@@ -116,7 +113,10 @@ export class PermissionsGuard implements CanActivate {
 // EJEMPLO: Guard de throttling (rate limiting)
 @Injectable()
 export class ThrottlingGuard implements CanActivate {
-  private readonly requests = new Map<string, { count: number; resetTime: number }>();
+  private readonly requests = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -130,7 +130,7 @@ export class ThrottlingGuard implements CanActivate {
 
     // EJEMPLO: Obtener o crear registro del cliente
     let clientRecord = this.requests.get(clientIp);
-    
+
     if (!clientRecord || now > clientRecord.resetTime) {
       clientRecord = {
         count: 1,

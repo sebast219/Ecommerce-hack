@@ -39,8 +39,9 @@ export class CustomValidationPipe implements PipeTransform {
 export class ParseUuidPipe implements PipeTransform<string, string> {
   transform(value: string): string {
     // EJEMPLO: Validar formato UUID
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
     if (!uuidRegex.test(value)) {
       throw new BadRequestException(`Invalid UUID format: ${value}`);
     }
@@ -55,7 +56,7 @@ export class ParseDatePipe implements PipeTransform<string, Date> {
   transform(value: string): Date {
     // EJEMPLO: Validar y parsear fecha
     const date = new Date(value);
-    
+
     if (isNaN(date.getTime())) {
       throw new BadRequestException(`Invalid date format: ${value}`);
     }
@@ -70,7 +71,7 @@ export class ParseEmailPipe implements PipeTransform<string, string> {
   transform(value: string): string {
     // EJEMPLO: Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(value)) {
       throw new BadRequestException(`Invalid email format: ${value}`);
     }
@@ -85,23 +86,33 @@ export class ValidatePasswordPipe implements PipeTransform<string, string> {
   transform(value: string): string {
     // EJEMPLO: Validar requisitos de password
     if (value.length < 8) {
-      throw new BadRequestException('Password must be at least 8 characters long');
+      throw new BadRequestException(
+        'Password must be at least 8 characters long',
+      );
     }
 
     if (!/[A-Z]/.test(value)) {
-      throw new BadRequestException('Password must contain at least one uppercase letter');
+      throw new BadRequestException(
+        'Password must contain at least one uppercase letter',
+      );
     }
 
     if (!/[a-z]/.test(value)) {
-      throw new BadRequestException('Password must contain at least one lowercase letter');
+      throw new BadRequestException(
+        'Password must contain at least one lowercase letter',
+      );
     }
 
     if (!/\d/.test(value)) {
-      throw new BadRequestException('Password must contain at least one number');
+      throw new BadRequestException(
+        'Password must contain at least one number',
+      );
     }
 
     if (!/[!@#$%^&*]/.test(value)) {
-      throw new BadRequestException('Password must contain at least one special character');
+      throw new BadRequestException(
+        'Password must contain at least one special character',
+      );
     }
 
     return value;
@@ -112,7 +123,11 @@ export class ValidatePasswordPipe implements PipeTransform<string, string> {
 @Injectable()
 export class ValidateFilePipe implements PipeTransform {
   constructor(
-    private readonly allowedTypes: string[] = ['image/jpeg', 'image/png', 'image/webp'],
+    private readonly allowedTypes: string[] = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+    ],
     private readonly maxSize: number = 5 * 1024 * 1024, // 5MB
   ) {}
 
@@ -171,14 +186,17 @@ export class ParseArrayPipe implements PipeTransform<string, string[]> {
     // EJEMPLO: Parsear string a array y limpiar elementos
     return value
       .split(this.separator)
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   }
 }
 
 // EJEMPLO: Pipe para validación de booleanos
 @Injectable()
-export class ParseBooleanPipe implements PipeTransform<string | boolean, boolean> {
+export class ParseBooleanPipe implements PipeTransform<
+  string | boolean,
+  boolean
+> {
   transform(value: string | boolean): boolean {
     if (typeof value === 'boolean') {
       return value;
@@ -186,11 +204,11 @@ export class ParseBooleanPipe implements PipeTransform<string | boolean, boolean
 
     if (typeof value === 'string') {
       const lowerValue = value.toLowerCase().trim();
-      
+
       if (['true', '1', 'yes', 'on'].includes(lowerValue)) {
         return true;
       }
-      
+
       if (['false', '0', 'no', 'off'].includes(lowerValue)) {
         return false;
       }

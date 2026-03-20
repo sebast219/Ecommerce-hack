@@ -1,21 +1,32 @@
 // 🏗️ PRESENTATION CONTROLLERS - Capa de presentación HTTP
 // PROPÓSITO: Manejar requests HTTP, validar inputs y coordinar con casos de uso
 
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  Get, 
-  Param, 
-  Patch, 
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
   Delete,
   UseGuards,
   HttpCode,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateUserUseCase, LoginUseCase } from '../../../application/use-cases/auth/create-user.use-case';
-import { CreateUserRequest, LoginRequest } from '../../../application/use-cases/auth/create-user.use-case';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
+  CreateUserUseCase,
+  LoginUseCase,
+} from '../../../application/use-cases/auth/create-user.use-case';
+import {
+  CreateUserRequest,
+  LoginRequest,
+} from '../../../application/use-cases/auth/create-user.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -40,7 +51,7 @@ export class LoginDto implements LoginRequest {
 export class AuthController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
-    private readonly loginUseCase: LoginUseCase
+    private readonly loginUseCase: LoginUseCase,
   ) {}
 
   // EJEMPLO: Endpoint de registro
@@ -53,17 +64,17 @@ export class AuthController {
     // EJEMPLO: El controller solo coordina, no contiene lógica de negocio
     try {
       const result = await this.createUserUseCase.execute(createUserDto);
-      
+
       return {
         success: true,
         data: result.user,
-        message: result.message
+        message: result.message,
       };
     } catch (error) {
       // EJEMPLO: Manejo de errores específico del controller
       return {
         success: false,
-        message: error.message
+        message: error.message,
       };
     }
   }
@@ -77,20 +88,20 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     try {
       const result = await this.loginUseCase.execute(loginDto);
-      
+
       return {
         success: true,
         data: {
           user: result.user,
           accessToken: result.accessToken,
-          refreshToken: result.refreshToken
+          refreshToken: result.refreshToken,
         },
-        message: 'Login successful'
+        message: 'Login successful',
       };
     } catch (error) {
       return {
         success: false,
-        message: error.message
+        message: error.message,
       };
     }
   }
@@ -106,7 +117,7 @@ export class AuthController {
     // EJEMPLO: Aquí se inyectaría el caso de uso GetProfileUseCase
     return {
       success: true,
-      message: 'Profile endpoint - Implement GetProfileUseCase'
+      message: 'Profile endpoint - Implement GetProfileUseCase',
     };
   }
 }
@@ -116,13 +127,13 @@ export class AuthController {
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
-  constructor(
+  constructor() {
     // EJEMPLO: Inyectar casos de uso específicos
     // private readonly createProductUseCase: CreateProductUseCase,
     // private readonly getProductsUseCase: GetProductsUseCase,
     // private readonly updateProductUseCase: UpdateProductUseCase,
     // private readonly deleteProductUseCase: DeleteProductUseCase
-  ) {}
+  }
 
   @Post()
   @Roles('ADMIN', 'VENDOR')
@@ -133,7 +144,7 @@ export class ProductsController {
     // EJEMPLO: Coordinar con caso de uso
     return {
       success: true,
-      message: 'Product creation - Implement CreateProductUseCase'
+      message: 'Product creation - Implement CreateProductUseCase',
     };
   }
 
@@ -144,7 +155,7 @@ export class ProductsController {
     // EJEMPLO: Coordinar con caso de uso
     return {
       success: true,
-      message: 'Products listing - Implement GetProductsUseCase'
+      message: 'Products listing - Implement GetProductsUseCase',
     };
   }
 
@@ -157,7 +168,7 @@ export class ProductsController {
     return {
       success: true,
       data: { id },
-      message: 'Product details - Implement GetProductByIdUseCase'
+      message: 'Product details - Implement GetProductByIdUseCase',
     };
   }
 
@@ -171,7 +182,7 @@ export class ProductsController {
     return {
       success: true,
       data: { id },
-      message: 'Product update - Implement UpdateProductUseCase'
+      message: 'Product update - Implement UpdateProductUseCase',
     };
   }
 
@@ -185,7 +196,7 @@ export class ProductsController {
     return {
       success: true,
       data: { id },
-      message: 'Product deletion - Implement DeleteProductUseCase'
+      message: 'Product deletion - Implement DeleteProductUseCase',
     };
   }
 }
@@ -196,11 +207,11 @@ export class ProductsController {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class AdminController {
-  constructor(
+  constructor() {
     // EJEMPLO: Inyectar casos de uso de administración
     // private readonly getDashboardStatsUseCase: GetDashboardStatsUseCase,
     // private readonly getAnalyticsUseCase: GetAnalyticsUseCase
-  ) {}
+  }
 
   @Get('stats')
   @ApiBearerAuth()
@@ -210,7 +221,7 @@ export class AdminController {
     // EJEMPLO: Coordinar con caso de uso
     return {
       success: true,
-      message: 'Dashboard stats - Implement GetDashboardStatsUseCase'
+      message: 'Dashboard stats - Implement GetDashboardStatsUseCase',
     };
   }
 
@@ -222,7 +233,7 @@ export class AdminController {
     // EJEMPLO: Coordinar con caso de uso
     return {
       success: true,
-      message: 'Analytics data - Implement GetAnalyticsUseCase'
+      message: 'Analytics data - Implement GetAnalyticsUseCase',
     };
   }
 }

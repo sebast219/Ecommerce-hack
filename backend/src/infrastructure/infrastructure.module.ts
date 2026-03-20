@@ -4,24 +4,22 @@
 import { Module } from '@nestjs/common';
 
 // EJEMPLO: Exportar implementaciones de repositorios
-export { 
-  UserRepositoryImpl, 
-  ProductRepositoryImpl 
+export {
+  UserRepositoryImpl,
+  ProductRepositoryImpl,
 } from './database/repositories/user.repository.impl';
 
 // EJEMPLO: Exportar servicios externos
-export { 
-  // StripeService,
-  // EmailService,
-  // CacheService,
-} from './external';
+export {} from // StripeService,
+// EmailService,
+// CacheService,
+'./external';
 
 @Module({
   providers: [
     // EJEMPLO: Implementaciones de repositorios
     // UserRepositoryImpl,
     // ProductRepositoryImpl,
-    
     // EJEMPLO: Servicios externos
     // StripeService,
     // EmailService,
@@ -31,7 +29,6 @@ export {
     // EJEMPLO: Exportar implementaciones para Application layer
     // UserRepositoryImpl,
     // ProductRepositoryImpl,
-    
     // EJEMPLO: Exportar servicios externos
     // StripeService,
     // EmailService,

@@ -19,6 +19,16 @@ model User {
   phone     String?
   role      UserRole @default(USER)
   avatar    String?
+  
+  // Cybersecurity specific fields
+  bio       String?     // professional bio
+  company   String?     // company name
+  experienceLevel ExperienceLevel @default(BEGINNER)
+  certifications String[] // security certifications
+  linkedinProfile String?
+  githubProfile  String?
+  isVerified     Boolean @default(false)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -26,6 +36,8 @@ model User {
   orders    Order[]
   cartItems CartItem[]
   refreshTokens RefreshToken[]
+  reviews   ProductReview[]
+  wishlist  WishlistItem[]
 
   @@map("users")
 }
@@ -37,6 +49,7 @@ model Category {
   description String?
   image       String?
   isActive    Boolean  @default(true)
+  parentId    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -66,6 +79,16 @@ model Product {
   dimensions  Json?
   seoTitle    String?
   seoDescription String?
+  
+  // Cybersecurity specific fields
+  difficulty  ProductDifficulty @default(BEGINNER)
+  licenseType String?     // open-source, commercial, educational
+  compatibility String[]   // windows, linux, mac, android, ios
+  requirements Json?      // system requirements
+  tutorials   String[]    // tutorial URLs or references
+  isPhysical  Boolean     @default(true)
+  downloadUrl String?     // for digital products
+  
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -76,6 +99,8 @@ model Product {
   inventory  ProductInventory?
   cartItems  CartItem[]
   orderItems OrderItem[]
+  reviews    ProductReview[]
+  wishlistItems WishlistItem[]
 
   @@map("products")
 }
@@ -202,11 +227,63 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+model ProductReview {
+  id        String   @id @default(cuid())
+  rating    Int      @default(5)
+  comment   String?
+  pros      String?
+  cons      String?
+  isVerified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@map("product_reviews")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@map("wishlist_items")
+}
+
 // Enums
 enum UserRole {
   USER
   ADMIN
   VENDOR
+  MODERATOR
+  INSTRUCTOR
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ProductDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
 }
 
 enum OrderStatus {
@@ -217,6 +294,7 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
   REFUNDED
+  DIGITAL_DELIVERY
 }
 
 enum PaymentStatus {

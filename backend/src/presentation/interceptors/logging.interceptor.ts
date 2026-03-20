@@ -26,22 +26,25 @@ export class LoggingInterceptor implements NestInterceptor {
 
     console.log(`[${requestId}] ${request.method} ${request.url} - Started`);
 
-    return next
-      .handle()
-      .pipe(
-        tap({
-          next: (data) => {
-            const duration = Date.now() - startTime;
-            console.log(`[${requestId}] ${request.method} ${request.url} - Success (${duration}ms)`);
-            this.requests.delete(requestId);
-          },
-          error: (error) => {
-            const duration = Date.now() - startTime;
-            console.log(`[${requestId}] ${request.method} ${request.url} - Error (${duration}ms):`, error.message);
-            this.requests.delete(requestId);
-          },
-        }),
-      );
+    return next.handle().pipe(
+      tap({
+        next: (_data) => {
+          const duration = Date.now() - startTime;
+          console.log(
+            `[${requestId}] ${request.method} ${request.url} - Success (${duration}ms)`,
+          );
+          this.requests.delete(requestId);
+        },
+        error: (error) => {
+          const duration = Date.now() - startTime;
+          console.log(
+            `[${requestId}] ${request.method} ${request.url} - Error (${duration}ms):`,
+            error.message,
+          );
+          this.requests.delete(requestId);
+        },
+      }),
+    );
   }
 
   // EJEMPLO: Generar ID único para cada request
@@ -125,8 +128,7 @@ export class CacheInterceptor implements NestInterceptor {
   }
 
   // EJEMPLO: Obtener TTL de metadatos del endpoint
-  private getCacheTTL(context: ExecutionContext): number {
-    const reflector = context.getHandler();
+  private getCacheTTL(_context: ExecutionContext): number {
     // Aquí se leería el decorador @Cache(ttl)
     return 300; // Default 5 minutos
   }
@@ -145,19 +147,23 @@ export class PerformanceInterceptor implements NestInterceptor {
         const duration = Number(endTime - startTime) / 1000000; // Convertir a milisegundos
 
         // EJEMPLO: Log de performance
-        console.log(`Performance: ${request.method} ${request.url} took ${duration.toFixed(2)}ms`);
+        console.log(
+          `Performance: ${request.method} ${request.url} took ${duration.toFixed(2)}ms`,
+        );
 
         // EJEMPLO: Alerta si es muy lento
         const threshold = this.getPerformanceThreshold(context);
         if (duration > threshold) {
-          console.warn(`Slow request detected: ${request.method} ${request.url} took ${duration.toFixed(2)}ms (threshold: ${threshold}ms)`);
+          console.warn(
+            `Slow request detected: ${request.method} ${request.url} took ${duration.toFixed(2)}ms (threshold: ${threshold}ms)`,
+          );
         }
       }),
     );
   }
 
   // EJEMPLO: Obtener umbral de performance de metadatos
-  private getPerformanceThreshold(context: ExecutionContext): number {
+  private getPerformanceThreshold(_context: ExecutionContext): number {
     // Aquí se leería el decorador @TrackPerformance(threshold)
     return 1000; // Default 1 segundo
   }

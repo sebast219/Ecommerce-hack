@@ -4,25 +4,25 @@
 import { Module } from '@nestjs/common';
 
 // EJEMPLO: Exportar controllers
-export { 
-  AuthController, 
-  ProductsController, 
-  AdminController 
+export {
+  AuthController,
+  ProductsController,
+  AdminController,
 } from './controllers/auth.controller';
 
 // EJEMPLO: Exportar guards
-export { 
-  JwtAuthGuard, 
-  RolesGuard, 
-  PermissionsGuard, 
-  ThrottlingGuard 
+export {
+  JwtAuthGuard,
+  RolesGuard,
+  PermissionsGuard,
+  ThrottlingGuard,
 } from './guards/jwt-auth.guard';
 
 // EJEMPLO: Exportar decoradores
-export { 
-  Public, 
-  Roles, 
-  Permissions, 
+export {
+  Public,
+  Roles,
+  Permissions,
   Throttle,
   Cache,
   Audit,
@@ -52,7 +52,7 @@ export {
   Timeout,
   Compress,
   Cors,
-  Security
+  Security,
 } from './decorators/roles.decorator';
 
 @Module({

@@ -59,7 +59,10 @@ async function bootstrap() {
     .addTag('Orders', 'Order management')
     .addTag('Payments', 'Payment processing')
     .addTag('Admin', 'Administrative functions')
-    .addServer(`http://localhost:${configService.get('app.port')}/${apiPrefix}`, 'Development')
+    .addServer(
+      `http://localhost:${configService.get('app.port')}/${apiPrefix}`,
+      'Development',
+    )
     .addServer('https://api.yourdomain.com/v1', 'Production')
     .build();
 
@@ -78,8 +81,12 @@ async function bootstrap() {
   app.getHttpServer().on('listening', () => {
     console.log('🚀 Application is running');
     console.log(`📍 Environment: ${configService.get('NODE_ENV')}`);
-    console.log(`🌐 API: http://localhost:${configService.get('app.port')}/${apiPrefix}`);
-    console.log(`📚 Docs: http://localhost:${configService.get('app.port')}/${apiPrefix}/docs`);
+    console.log(
+      `🌐 API: http://localhost:${configService.get('app.port')}/${apiPrefix}`,
+    );
+    console.log(
+      `📚 Docs: http://localhost:${configService.get('app.port')}/${apiPrefix}/docs`,
+    );
   });
 
   // EJEMPLO: Graceful shutdown

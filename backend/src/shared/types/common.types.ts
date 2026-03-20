@@ -64,7 +64,13 @@ export interface IncludeOptions {
 }
 
 // EJEMPLO: Tipos para query complejas
-export interface QueryOptions extends PaginationOptions, SortOptions, FilterOptions, SearchOptions, IncludeOptions {
+export interface QueryOptions
+  extends
+    PaginationOptions,
+    SortOptions,
+    FilterOptions,
+    SearchOptions,
+    IncludeOptions {
   // Combinación de todas las opciones
 }
 

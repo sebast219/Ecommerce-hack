@@ -39,7 +39,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
@@ -62,9 +62,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     // EJEMPLO: Agregar detalles para errores de validación
-    if (status === HttpStatus.BAD_REQUEST && exception instanceof HttpException) {
+    if (
+      status === HttpStatus.BAD_REQUEST &&
+      exception instanceof HttpException
+    ) {
       const exceptionResponse = exception.getResponse();
-      if (typeof exceptionResponse === 'object' && (exceptionResponse as any).message) {
+      if (
+        typeof exceptionResponse === 'object' &&
+        (exceptionResponse as any).message
+      ) {
         errorResponse.details = (exceptionResponse as any).message;
       }
     }

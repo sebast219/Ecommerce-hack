@@ -1,8 +1,12 @@
 // 🏗️ DOMAIN SERVICES - Lógica de negocio pura
 // PROPÓSITO: Contener reglas de negocio complejas que no pertenecen a una sola entidad
 
-import { User, Product, Order, OrderStatus, Money } from '../entities/user.entity';
-import { IUserRepository, IProductRepository, IOrderRepository } from '../repositories/user.repository.interface';
+import { Money, OrderStatus } from '../entities/user.entity';
+import {
+  IUserRepository,
+  IProductRepository,
+  IOrderRepository,
+} from '../repositories/user.repository.interface';
 
 // EJEMPLO: Servicio de dominio para gestión de usuarios
 export class UserDomainService {
@@ -60,7 +64,7 @@ export class ProductDomainService {
   // EJEMPLO: Regla de negocio - Validar SKU único
   async validateUniqueSku(sku: string, excludeId?: string): Promise<void> {
     const existingProduct = await this.productRepository.findBySku(sku);
-    
+
     if (existingProduct && existingProduct.id !== excludeId) {
       throw new Error(`Product with SKU ${sku} already exists`);
     }
@@ -71,7 +75,7 @@ export class ProductDomainService {
 export class OrderDomainService {
   constructor(
     private orderRepository: IOrderRepository,
-    private productRepository: IProductRepository
+    private productRepository: IProductRepository,
   ) {}
 
   // EJEMPLO: Regla de negocio - Validar cambio de estado
