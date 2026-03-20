@@ -173,11 +173,7 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0576/8238/9078/products/flipper-zero-black_1200x1200.jpg'
         ],
         tags: ['rf', 'rfid', 'nfc', 'sub-ghz', 'infrared', 'gpio'],
-                licenseType: 'commercial',
-        compatibility: ['standalone'],
-        requirements: { battery: 'Li-ion 1600mAh', connectivity: 'USB-C, Bluetooth' },
-        tutorials: ['https://docs.flipperzero.one'],
-                isActive: true,
+        isActive: true,
       },
       {
         name: 'LAN Turtle',
@@ -191,11 +187,7 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/LAN-Turtle_1200x1200.jpg'
         ],
         tags: ['network', 'ethernet', 'remote-access', 'pentesting', 'hak5'],
-                licenseType: 'commercial',
-        compatibility: ['network'],
-        requirements: { ethernet: 'RJ45', power: 'PoE or USB' },
-        tutorials: ['https://docs.hak5.org/lan-turtle'],
-                isActive: true,
+        isActive: true,
       },
       {
         name: 'Packet Squirrel',
@@ -209,11 +201,7 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/Packet-Squirrel_1200x1200.jpg'
         ],
         tags: ['network', 'mitm', 'packet-capture', 'pentesting', 'hak5'],
-                licenseType: 'commercial',
-        compatibility: ['network'],
-        requirements: { ethernet: 'RJ45', power: 'USB or PoE' },
-        tutorials: ['https://docs.hak5.org/packet-squirrel'],
-                isActive: true,
+        isActive: true,
       },
       {
         name: 'Signal Owl',
@@ -227,12 +215,7 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/Signal-Owl_1200x1200.jpg'
         ],
         tags: ['wifi', 'bluetooth', 'rf', 'wireless-audit', 'hak5'],
-        difficulty: 'ADVANCED',
-        licenseType: 'commercial',
-        compatibility: ['standalone'],
-        requirements: { power: '5V 1A', connectivity: 'WiFi, Bluetooth' },
-        tutorials: ['https://docs.hak5.org/signal-owl'],
-                isActive: true,
+        isActive: true,
       },
       {
         name: 'Key Croc',
@@ -246,11 +229,7 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/Key-Croc_1200x1200.jpg'
         ],
         tags: ['keylogger', 'keystroke-injection', 'usb', 'hak5'],
-                licenseType: 'commercial',
-        compatibility: ['windows', 'linux', 'mac'],
-        requirements: { usb: '2.0+', connection: 'Keyboard passthrough' },
-        tutorials: ['https://docs.hak5.org/key-croc'],
-                isActive: true,
+        isActive: true,
       },
     ],
     skipDuplicates: true,
