@@ -4,16 +4,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { configuration } from './config/configuration';
+import configuration from './config/configuration';
 
 // EJEMPLO: Módulos de Domain (inyectados en Application)
 import { DomainModule } from './domain/domain.module';
 
-// EJEMPLO: Módulos de Application (casos de uso)
-import { ApplicationModule } from './application/application.module';
-
 // EJEMPLO: Módulos de Infrastructure (implementaciones concretas)
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
+
+// EJEMPLO: Módulos de Application (casos de uso)
+import { ApplicationModule } from './application/application.module';
 
 // EJEMPLO: Módulos de Presentation (controllers, guards, etc.)
 import { PresentationModule } from './presentation/presentation.module';
@@ -35,11 +35,11 @@ import { PresentationModule } from './presentation/presentation.module';
       },
     ]),
 
-    // EJEMPLO: Módulos organizados por capas
-    DomainModule,
-    ApplicationModule,
+    // EJEMPLO: Módulos organizados por capas - ORDEN CORRECTO
     InfrastructureModule,
+    ApplicationModule,
     PresentationModule,
+    DomainModule,
   ],
   controllers: [],
   providers: [],

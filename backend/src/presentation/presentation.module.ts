@@ -2,13 +2,16 @@
 // PROPÓSITO: Exportar todos los controllers, guards y decoradores
 
 import { Module } from '@nestjs/common';
+import { ApplicationModule } from '../application/application.module';
+import { AuthController } from './controllers/auth.controller';
+import { ProductsController } from './controllers/products.controller';
+import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
 
-// EJEMPLO: Exportar controllers
-export {
-  AuthController,
-  ProductsController,
-  AdminController,
-} from './controllers/auth.controller';
+// Cart controller - verificar si existe
+// import { CartController } from './controllers/cart.controller';
+
+// Categories controller - verificar si está en products.controller
+// import { CategoriesController } from './controllers/categories.controller';
 
 // EJEMPLO: Exportar guards
 export {
@@ -56,21 +59,22 @@ export {
 } from './decorators/roles.decorator';
 
 @Module({
+  imports: [
+    ApplicationModule,
+  ],
   controllers: [
-    // EJEMPLO: Controllers HTTP
-    // AuthController,
-    // ProductsController,
-    // AdminController,
+    AuthController,
+    ProductsController,
+    // CategoriesController,
+    // CartController,
   ],
   providers: [
-    // EJEMPLO: Guards y middleware
     // JwtAuthGuard,
     // RolesGuard,
     // PermissionsGuard,
     // ThrottlingGuard,
   ],
   exports: [
-    // EJEMPLO: Exportar guards para otros módulos
     // JwtAuthGuard,
     // RolesGuard,
     // PermissionsGuard,

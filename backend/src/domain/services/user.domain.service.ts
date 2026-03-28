@@ -1,6 +1,7 @@
 // 🏗️ DOMAIN SERVICES - Lógica de negocio pura
 // PROPÓSITO: Contener reglas de negocio complejas que no pertenecen a una sola entidad
 
+import { Injectable } from '@nestjs/common';
 import { Money, OrderStatus } from '../entities/user.entity';
 import {
   IUserRepository,
@@ -9,39 +10,40 @@ import {
 } from '../repositories/user.repository.interface';
 
 // EJEMPLO: Servicio de dominio para gestión de usuarios
+@Injectable()
 export class UserDomainService {
-  constructor(private userRepository: IUserRepository) {}
+  constructor() {}
 
   // EJEMPLO: Regla de negocio - Validar cambio de rol
-  async canChangeRole(userId: string, newRole: string): Promise<boolean> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+  // async canChangeRole(userId: string, newRole: string): Promise<boolean> {
+  //   const user = await this.userRepository.findById(userId);
+  //   if (!user) {
+  //     throw new Error('User not found');
+  //   }
 
-    // EJEMPLO: Lógica de negocio específica
-    if (user.role === 'ADMIN' && newRole !== 'ADMIN') {
-      // Regla: No se puede degradar a un admin si es el único admin
-      const adminCount = await this.userRepository.findByRole('ADMIN');
-      if (adminCount.length <= 1) {
-        return false;
-      }
-    }
+  //   // EJEMPLO: Lógica de negocio específica
+  //   if (user.role === 'ADMIN' && newRole !== 'ADMIN') {
+  //     // Regla: No se puede degradar a un admin si es el único admin
+  //     const adminCount = await this.userRepository.findByRole('ADMIN');
+  //     if (adminCount.length <= 1) {
+  //       return false;
+  //     }
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   // EJEMPLO: Regla de negocio - Validar eliminación de usuario
-  async canDeleteUser(userId: string): Promise<boolean> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+  // async canDeleteUser(userId: string): Promise<boolean> {
+  //   const user = await this.userRepository.findById(userId);
+  //   if (!user) {
+  //     throw new Error('User not found');
+  //   }
 
-    // EJEMPLO: Lógica de negocio - No eliminar usuarios con órdenes activas
-    // Aquí se inyectarían otros repositories si es necesario
-    return true;
-  }
+  //   // EJEMPLO: Lógica de negocio - No eliminar usuarios con órdenes activas
+  //   // Aquí se inyectarían otros repositories si es necesario
+  //   return true;
+  // }
 }
 
 // EJEMPLO: Servicio de dominio para gestión de productos

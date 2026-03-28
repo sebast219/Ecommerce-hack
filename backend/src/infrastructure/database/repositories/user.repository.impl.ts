@@ -12,6 +12,7 @@ import {
 import {
   IUserRepository,
   IProductRepository,
+  UserWithPassword,
 } from '../../../domain/repositories/user.repository.interface';
 
 // EJEMPLO: Implementación de repositorio de usuarios con Prisma
@@ -95,6 +96,28 @@ export class UserRepositoryImpl implements IUserRepository {
     });
 
     return !!user;
+  }
+
+  // Método de autenticación - incluye contraseña
+  async findByEmailForAuth(email: string): Promise<UserWithPassword | null> {
+    const prismaUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!prismaUser) {
+      return null;
+    }
+
+    return {
+      id: prismaUser.id,
+      email: prismaUser.email,
+      firstName: prismaUser.firstName,
+      lastName: prismaUser.lastName,
+      role: prismaUser.role as UserRole,
+      createdAt: prismaUser.createdAt,
+      updatedAt: prismaUser.updatedAt,
+      password: prismaUser.password,
+    };
   }
 
   // EJEMPLO: Método privado de mapeo
@@ -253,6 +276,28 @@ export class ProductRepositoryImpl implements IProductRepository {
     });
 
     return !!product;
+  }
+
+  // Método de autenticación - incluye contraseña
+  async findByEmailForAuth(email: string): Promise<UserWithPassword | null> {
+    const prismaUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!prismaUser) {
+      return null;
+    }
+
+    return {
+      id: prismaUser.id,
+      email: prismaUser.email,
+      firstName: prismaUser.firstName,
+      lastName: prismaUser.lastName,
+      role: prismaUser.role as UserRole,
+      createdAt: prismaUser.createdAt,
+      updatedAt: prismaUser.updatedAt,
+      password: prismaUser.password,
+    };
   }
 
   // EJEMPLO: Método privado de mapeo

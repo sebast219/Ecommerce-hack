@@ -2,9 +2,9 @@
 // PROPÓSITO: Coordinar flujos de negocio entre entidades y servicios
 
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../../domain/entities/user.entity';
-import { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { UserDomainService } from '../../domain/services/user.domain.service';
+import { User } from '../../../domain/entities/user.entity';
+import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
+import { UserDomainService } from '../../../domain/services/user.domain.service';
 import { ConfigService } from '@nestjs/config';
 
 // EJEMPLO: Caso de uso - Crear usuario

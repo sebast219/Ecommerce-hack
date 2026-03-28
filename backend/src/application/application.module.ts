@@ -2,31 +2,28 @@
 // PROPÓSITO: Exportar todos los casos de uso y DTOs de la aplicación
 
 import { Module } from '@nestjs/common';
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
+import { CreateUserUseCase, LoginUseCase } from './use-cases/auth/create-user.use-case';
+import { GetProductsUseCase, GetProductUseCase } from './use-cases/products/get-products.use-case';
 
-// EJEMPLO: Exportar casos de uso
-export {
-  CreateUserUseCase,
-  LoginUseCase,
-  CreateUserRequest,
-  CreateUserResponse,
-  LoginRequest,
-  LoginResponse,
-} from './use-cases/auth/create-user.use-case';
-
-// EJEMPLO: Exportar DTOs de aplicación
-export {} from // DTOs de otros casos de uso se agregarían aquí
-'./dto';
+// Cart use cases - verificar si existen
+// import { GetCartUseCase, AddToCartUseCase, UpdateCartItemUseCase, RemoveFromCartUseCase } from './use-cases/cart/cart.use-case';
 
 @Module({
+  imports: [
+    InfrastructureModule,
+  ],
   providers: [
-    // EJEMPLO: Casos de uso (inyectables en Presentation layer)
-    // CreateUserUseCase,
-    // LoginUseCase,
+    GetProductsUseCase,
+    GetProductUseCase,
+    CreateUserUseCase,
+    LoginUseCase,
   ],
   exports: [
-    // EJEMPLO: Exportar casos de uso para Presentation layer
-    // CreateUserUseCase,
-    // LoginUseCase,
+    GetProductsUseCase,
+    GetProductUseCase,
+    CreateUserUseCase,
+    LoginUseCase,
   ],
 })
 export class ApplicationModule {}

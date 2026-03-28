@@ -12,21 +12,23 @@ import {
 @Injectable()
 export class CustomValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
-    // EJEMPLO: Validar tipo de dato específico
-    if (metadata.type === 'string' && typeof value !== 'string') {
+    // EJEMPLO: Validar tipo de dato basado en el tipo de parámetro
+    const metatype = metadata.metatype;
+    
+    if (metatype === String && typeof value !== 'string') {
       throw new BadRequestException(`Expected string, got ${typeof value}`);
     }
 
-    if (metadata.type === 'number' && isNaN(Number(value))) {
+    if (metatype === Number && isNaN(Number(value))) {
       throw new BadRequestException(`Expected number, got ${value}`);
     }
 
     // EJEMPLO: Transformación de datos
-    if (metadata.type === 'string') {
+    if (metatype === String) {
       return value?.trim();
     }
 
-    if (metadata.type === 'number') {
+    if (metatype === Number) {
       return Number(value);
     }
 

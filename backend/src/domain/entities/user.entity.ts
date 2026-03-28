@@ -1,6 +1,20 @@
 // 🏗️ DOMAIN ENTITIES - Entidades puras del negocio
 // PROPÓSITO: Definir las reglas de negocio y datos centrales sin dependencias externas
 
+export class OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  
+  // Relations
+  orderId: string;
+  productId: string;
+  
+  constructor(data: Partial<OrderItem>) {
+    Object.assign(this, data);
+  }
+}
+
 export interface User {
   id: string;
   email: string;

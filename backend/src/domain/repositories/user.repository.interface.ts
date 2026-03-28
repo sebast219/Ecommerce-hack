@@ -1,7 +1,12 @@
 // 🏗️ DOMAIN REPOSITORIES INTERFACES - Contratos puros de acceso a datos
 // PROPÓSITO: Definir cómo la capa de dominio interactúa con datos sin conocer implementación
 
-import { User, Product, Order } from '../entities/user.entity';
+import { User, Product, Order, OrderStatus } from '../entities/user.entity';
+
+// Interfaz para usuario con datos sensibles (solo para autenticación)
+export interface UserWithPassword extends User {
+  password: string;
+}
 
 // EJEMPLO: Interfaz de repositorio de usuarios
 export interface IUserRepository {
@@ -15,6 +20,9 @@ export interface IUserRepository {
   // Métodos específicos del dominio
   findByRole(role: string): Promise<User[]>;
   existsByEmail(email: string): Promise<boolean>;
+  
+  // Métodos de autenticación
+  findByEmailForAuth(email: string): Promise<UserWithPassword | null>;
 }
 
 // EJEMPLO: Interfaz de repositorio de productos

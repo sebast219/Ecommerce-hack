@@ -22,11 +22,11 @@ import {
 import {
   CreateUserUseCase,
   LoginUseCase,
-} from '../../../application/use-cases/auth/create-user.use-case';
-import {
   CreateUserRequest,
   LoginRequest,
-} from '../../../application/use-cases/auth/create-user.use-case';
+} from '../../application/use-cases/auth/create-user.use-case';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -118,122 +118,6 @@ export class AuthController {
     return {
       success: true,
       message: 'Profile endpoint - Implement GetProfileUseCase',
-    };
-  }
-}
-
-// EJEMPLO: Controller de productos
-@ApiTags('Products')
-@Controller('products')
-@UseGuards(JwtAuthGuard, RolesGuard)
-export class ProductsController {
-  constructor() {
-    // EJEMPLO: Inyectar casos de uso específicos
-    // private readonly createProductUseCase: CreateProductUseCase,
-    // private readonly getProductsUseCase: GetProductsUseCase,
-    // private readonly updateProductUseCase: UpdateProductUseCase,
-    // private readonly deleteProductUseCase: DeleteProductUseCase
-  }
-
-  @Post()
-  @Roles('ADMIN', 'VENDOR')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new product' })
-  @ApiResponse({ status: 201, description: 'Product created successfully' })
-  async createProduct() {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      message: 'Product creation - Implement CreateProductUseCase',
-    };
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'Get all products' })
-  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
-  async getProducts() {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      message: 'Products listing - Implement GetProductsUseCase',
-    };
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get product by ID' })
-  @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Product not found' })
-  async getProductById(@Param('id') id: string) {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      data: { id },
-      message: 'Product details - Implement GetProductByIdUseCase',
-    };
-  }
-
-  @Patch(':id')
-  @Roles('ADMIN', 'VENDOR')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update product' })
-  @ApiResponse({ status: 200, description: 'Product updated successfully' })
-  async updateProduct(@Param('id') id: string) {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      data: { id },
-      message: 'Product update - Implement UpdateProductUseCase',
-    };
-  }
-
-  @Delete(':id')
-  @Roles('ADMIN')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete product' })
-  @ApiResponse({ status: 200, description: 'Product deleted successfully' })
-  async deleteProduct(@Param('id') id: string) {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      data: { id },
-      message: 'Product deletion - Implement DeleteProductUseCase',
-    };
-  }
-}
-
-// EJEMPLO: Controller de administración
-@ApiTags('Admin')
-@Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN')
-export class AdminController {
-  constructor() {
-    // EJEMPLO: Inyectar casos de uso de administración
-    // private readonly getDashboardStatsUseCase: GetDashboardStatsUseCase,
-    // private readonly getAnalyticsUseCase: GetAnalyticsUseCase
-  }
-
-  @Get('stats')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get dashboard statistics' })
-  @ApiResponse({ status: 200, description: 'Stats retrieved successfully' })
-  async getDashboardStats() {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      message: 'Dashboard stats - Implement GetDashboardStatsUseCase',
-    };
-  }
-
-  @Get('analytics')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get analytics data' })
-  @ApiResponse({ status: 200, description: 'Analytics retrieved successfully' })
-  async getAnalytics() {
-    // EJEMPLO: Coordinar con caso de uso
-    return {
-      success: true,
-      message: 'Analytics data - Implement GetAnalyticsUseCase',
     };
   }
 }
