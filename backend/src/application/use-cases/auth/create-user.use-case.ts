@@ -116,9 +116,23 @@ export class LoginUseCase {
     //   throw new Error('Invalid credentials');
     // }
 
-    // EJEMPLO: Generar tokens (aquí se inyectaría servicio JWT)
-    const accessToken = 'generated_access_token'; // EJEMPLO
-    const refreshToken = 'generated_refresh_token'; // EJEMPLO
+    // EJEMPLO: Generar tokens JWT reales
+    const payload = { 
+      sub: user.id, 
+      email: user.email, 
+      role: user.role 
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '24h',
+      secret: this.configService.get('JWT_SECRET'),
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d', 
+      secret: this.configService.get('JWT_REFRESH_SECRET') 
+        || this.configService.get('JWT_SECRET'),
+    });
 
     return {
       user,
