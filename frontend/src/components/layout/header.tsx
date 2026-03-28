@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
@@ -10,11 +10,17 @@ import { CartDrawer } from '@/components/cart/cart-drawer';
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const { items } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+  };
 
   const navLinks = [
     { name: 'Productos',   href: '/products'   },
@@ -124,11 +130,44 @@ export function Header() {
 
             {/* User */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:block text-sm text-black/70">
-                  Hola, {user.firstName}
-                </span>
-                <div className="h-8 w-8 rounded-full bg-black/90" />
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 hover:bg-gray-100 rounded-full px-2 py-1 transition-colors"
+                >
+                  <span className="hidden sm:block text-sm text-black/70">
+                    Hola, {user.firstName} {user.lastName?.charAt(0).toUpperCase()}
+                  </span>
+                  <div className="h-8 w-8 rounded-full bg-black/90" />
+                </button>
+                
+                {/* User Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-black/70 hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Mi perfil
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="block px-4 py-2 text-sm text-black/70 hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Mis pedidos
+                    </Link>
+                    <div className="h-px bg-gray-200 my-2" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
