@@ -1,5 +1,5 @@
-// 🚂 RAILWAY-SERVER.JS - Servidor Express para despliegue en Railway
-// PROPÓSITO: Servidor ligero que consume Use Cases de NestJS
+// 🚂 RAILWAY-SERVER.JS - Servidor Express sincronizado con NestJS
+// PROPÓSITO: Servidor ligero con misma lógica que NestJS
 
 const express = require('express');
 const cors = require('cors');
@@ -20,12 +20,26 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware de autenticación unificado (misma lógica que NestJS)
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ 
+    success: false, message: 'Token required' 
+  });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(403).json({ success: false, message: 'Invalid token' });
+  }
+};
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// 🔐 AUTENTICACIÓN
+// 🔐 AUTENTICACIÓN - Login con misma lógica que NestJS LoginUseCase
 app.post('/api/v1/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,48 +52,72 @@ app.post('/api/v1/auth/login', async (req, res) => {
       });
     }
 
+    // Validar formato de email (misma lógica que NestJS)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid email format' 
+      });
+    }
+
+    // Buscar usuario con contraseña (misma lógica que findByEmailForAuth)
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!user) {
       return res.status(401).json({ 
         success: false, 
         message: 'Invalid credentials' 
       });
     }
 
-    // Generar tokens
-    const accessToken = jwt.sign(
-      { sub: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    // Validar contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid credentials' 
+      });
+    }
 
+    // Generar tokens (misma lógica que NestJS)
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
     const refreshToken = jwt.sign(
-      { sub: user.id, type: 'refresh' },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: '7d' }
+      { sub: user.id, type: 'refresh' }, 
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
     );
 
-    // Guardar refresh token
+    // Limpiar tokens anteriores del usuario
+    await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
+
+    // Guardar nuevo refresh token
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
       }
     });
 
+    // Retornar respuesta sin contraseña (mismo formato que NestJS)
     const { password: _, ...userWithoutPassword } = user;
     
     res.json({
       success: true,
-      data: { user: userWithoutPassword, accessToken, refreshToken },
+      data: { 
+        user: userWithoutPassword, 
+        accessToken, 
+        refreshToken 
+      },
       message: 'Login successful'
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Internal server error' 
+      message: error.message || 'Internal server error' 
     });
   }
 });
@@ -212,7 +250,8 @@ app.get('/api/v1/products', async (req, res) => {
           total,
           totalPages: Math.ceil(total / parseInt(limit))
         }
-      }
+      },
+      message: 'OK'
     });
   } catch (error) {
     console.error('Products error:', error);
@@ -257,7 +296,8 @@ app.get('/api/v1/products/:identifier', async (req, res) => {
 
     res.json({
       success: true,
-      data: { product }
+      data: { product },
+      message: 'OK'
     });
   } catch (error) {
     console.error('Product error:', error);
@@ -282,7 +322,8 @@ app.get('/api/v1/categories', async (req, res) => {
 
     res.json({
       success: true,
-      data: { categories }
+      data: { categories },
+      message: 'OK'
     });
   } catch (error) {
     console.error('Categories error:', error);
@@ -293,48 +334,30 @@ app.get('/api/v1/categories', async (req, res) => {
   }
 });
 
-// 🛒 CARRITO (Simplificado - debería usar Use Cases de NestJS)
-app.get('/api/v1/cart', async (req, res) => {
+// 🛒 CARRITO - Con autenticación obligatoria
+app.get('/api/v1/cart', authenticateToken, async (req, res) => {
   try {
-    const { sessionId } = req.query;
-    
-    if (!sessionId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Session ID is required' 
-      });
-    }
-
-    let cart = await prisma.cart.findUnique({
-      where: { sessionId },
-      include: {
-        items: {
-          include: { product: true }
-        }
-      }
+    const cart = await prisma.cartItem.findMany({
+      where: { userId: req.user.sub },
+      include: { product: true },
     });
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { sessionId },
-        include: {
-          items: {
-            include: { product: true }
-          }
-        }
-      });
-    }
-
-    res.json({
-      success: true,
-      data: { cart }
-    });
+    res.json({ success: true, data: { items: cart }, message: 'OK' });
   } catch (error) {
-    console.error('Cart error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Internal server error' 
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /api/v1/cart/items → requiere auth
+app.post('/api/v1/cart/items', authenticateToken, async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+    const item = await prisma.cartItem.create({
+      data: { productId, quantity, userId: req.user.sub },
+      include: { product: true },
     });
+    res.status(201).json({ success: true, data: item, message: 'OK' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -385,14 +408,14 @@ app.use((error, req, res, next) => {
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found'
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
   console.log(`🚂 Railway Server running on port ${PORT}`);
