@@ -9,6 +9,7 @@ import { ProductRepositoryImpl } from './database/repositories/product.repositor
 import { PrismaService } from './database/prisma.service';
 import { UserDomainService } from '../domain/services/user.domain.service';
 import { PRODUCT_REPOSITORY, CATEGORY_REPOSITORY } from '../domain/repositories/product.repository.interface';
+import { USER_REPOSITORY } from '../domain/repositories/user.repository.interface';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PRODUCT_REPOSITORY, CATEGORY_REPOSITORY } from '../domain/repositories/
   providers: [
     PrismaService,
     UserRepositoryImpl,
+    { provide: USER_REPOSITORY, useClass: UserRepositoryImpl },
     { provide: PRODUCT_REPOSITORY, useClass: ProductRepositoryImpl },
     { provide: CATEGORY_REPOSITORY, useClass: ProductRepositoryImpl },
     UserDomainService,
@@ -32,6 +34,7 @@ import { PRODUCT_REPOSITORY, CATEGORY_REPOSITORY } from '../domain/repositories/
   exports: [
     PrismaService,
     UserRepositoryImpl,
+    { provide: USER_REPOSITORY, useClass: UserRepositoryImpl },
     { provide: PRODUCT_REPOSITORY, useClass: ProductRepositoryImpl },
     { provide: CATEGORY_REPOSITORY, useClass: ProductRepositoryImpl },
     UserDomainService,

@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 import {
   CreateUserUseCase,
   LoginUseCase,
@@ -33,15 +34,32 @@ import { Roles } from '../decorators/roles.decorator';
 
 // EJEMPLO: DTOs para validación de entrada
 export class CreateUserDto implements CreateUserRequest {
+  @IsEmail()
   email: string;
+  
+  @IsString()
+  @MinLength(2)
   firstName: string;
+  
+  @IsString()
+  @MinLength(2)
   lastName: string;
+  
+  @IsString()
+  @MinLength(6)
   password: string;
+  
+  @IsOptional()
+  @IsString()
   role?: string;
 }
 
 export class LoginDto implements LoginRequest {
+  @IsEmail()
   email: string;
+  
+  @IsString()
+  @MinLength(6)
   password: string;
 }
 

@@ -1,9 +1,10 @@
 // 🏗️ APPLICATION USE CASES - Casos de uso y orquestación
 // PROPÓSITO: Coordinar flujos de negocio entre entidades y servicios
 
+import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../../domain/entities/user.entity';
-import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
+import { IUserRepository, USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -24,6 +25,7 @@ export interface CreateUserResponse {
 // EJEMPLO: Use Case para creación de usuarios
 export class CreateUserUseCase {
   constructor(
+    @Inject(USER_REPOSITORY)
     private userRepository: IUserRepository,
     private userDomainService: UserDomainService,
   ) {}
@@ -94,6 +96,7 @@ export interface LoginResponse {
 
 export class LoginUseCase {
   constructor(
+    @Inject(USER_REPOSITORY)
     private userRepository: IUserRepository,
     private userDomainService: UserDomainService,
     private jwtService: JwtService,

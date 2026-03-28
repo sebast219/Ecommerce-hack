@@ -3,6 +3,9 @@
 
 import { User, Product, Order, OrderStatus } from '../entities/user.entity';
 
+export const USER_REPOSITORY = 'USER_REPOSITORY';
+export const REFRESH_TOKEN_REPOSITORY = 'REFRESH_TOKEN_REPOSITORY';
+
 // Interfaz para usuario con datos sensibles (solo para autenticación)
 export interface UserWithPassword extends User {
   password: string;
