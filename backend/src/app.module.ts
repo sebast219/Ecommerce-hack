@@ -4,6 +4,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PassportModule } from '@nestjs/passport';
 import configuration from './config/configuration';
 
 // EJEMPLO: Módulos de Domain (inyectados en Application)
@@ -34,6 +35,9 @@ import { PresentationModule } from './presentation/presentation.module';
         limit: 10,
       },
     ]),
+
+    // EJEMPLO: Passport para autenticación
+    PassportModule.register({ defaultStrategy: 'jwt' }),
 
     // EJEMPLO: Módulos organizados por capas - ORDEN CORRECTO
     InfrastructureModule,

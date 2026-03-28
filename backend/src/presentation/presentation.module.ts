@@ -5,10 +5,8 @@ import { Module } from '@nestjs/common';
 import { ApplicationModule } from '../application/application.module';
 import { AuthController } from './controllers/auth.controller';
 import { ProductsController } from './controllers/products.controller';
+import { CartController, WishlistController } from './controllers/cart.controller';
 import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
-
-// Cart controller - verificar si existe
-// import { CartController } from './controllers/cart.controller';
 
 // Categories controller - verificar si está en products.controller
 // import { CategoriesController } from './controllers/categories.controller';
@@ -65,8 +63,9 @@ export {
   controllers: [
     AuthController,
     ProductsController,
+    CartController,
+    WishlistController,
     // CategoriesController,
-    // CartController,
   ],
   providers: [
     // JwtAuthGuard,

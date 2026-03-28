@@ -6,6 +6,14 @@ import { Product } from '../../../domain/entities/product.entity';
 import { ICartRepository } from '../../../domain/repositories/cart.repository.interface';
 import { ICartItemRepository } from '../../../domain/repositories/cart.repository.interface';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
+import { Inject } from '@nestjs/common';
+import { 
+  CART_REPOSITORY,
+  CART_ITEM_REPOSITORY 
+} from '../../../domain/repositories/cart.repository.interface';
+import { 
+  PRODUCT_REPOSITORY 
+} from '../../../domain/repositories/product.repository.interface';
 
 export interface AddToCartRequest {
   productId: string;
@@ -21,9 +29,12 @@ export interface AddToCartResponse {
 
 export class AddToCartUseCase {
   constructor(
-    private cartRepository: ICartRepository,
-    private cartItemRepository: ICartItemRepository,
-    private productRepository: IProductRepository,
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
+    @Inject(CART_ITEM_REPOSITORY)
+    private readonly cartItemRepository: ICartItemRepository,
+    @Inject(PRODUCT_REPOSITORY)
+    private readonly productRepository: IProductRepository,
   ) {}
 
   async execute(request: AddToCartRequest): Promise<AddToCartResponse> {
@@ -105,9 +116,12 @@ export interface UpdateCartItemResponse {
 
 export class UpdateCartItemUseCase {
   constructor(
-    private cartItemRepository: ICartItemRepository,
-    private cartRepository: ICartRepository,
-    private productRepository: IProductRepository,
+    @Inject(CART_ITEM_REPOSITORY)
+    private readonly cartItemRepository: ICartItemRepository,
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
+    @Inject(PRODUCT_REPOSITORY)
+    private readonly productRepository: IProductRepository,
   ) {}
 
   async execute(request: UpdateCartItemRequest): Promise<UpdateCartItemResponse> {
@@ -160,8 +174,10 @@ export interface RemoveFromCartResponse {
 
 export class RemoveFromCartUseCase {
   constructor(
-    private cartItemRepository: ICartItemRepository,
-    private cartRepository: ICartRepository,
+    @Inject(CART_ITEM_REPOSITORY)
+    private readonly cartItemRepository: ICartItemRepository,
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
   ) {}
 
   async execute(request: RemoveFromCartRequest): Promise<RemoveFromCartResponse> {
@@ -199,7 +215,8 @@ export interface GetCartResponse {
 
 export class GetCartUseCase {
   constructor(
-    private cartRepository: ICartRepository,
+    @Inject(CART_REPOSITORY)
+    private readonly cartRepository: ICartRepository,
   ) {}
 
   async execute(request: GetCartRequest): Promise<GetCartResponse> {
@@ -208,9 +225,8 @@ export class GetCartUseCase {
     let cart: Cart | null = null;
 
     if (userId) {
-      // Buscar carrito por usuario (implementar lógica específica)
-      // Por ahora, buscar por sesión
-      cart = await this.cartRepository.findBySessionId(sessionId || '');
+      // Buscar carrito por usuario
+      cart = await this.cartRepository.findByUserId(userId);
     } else if (sessionId) {
       cart = await this.cartRepository.findBySessionId(sessionId);
     }

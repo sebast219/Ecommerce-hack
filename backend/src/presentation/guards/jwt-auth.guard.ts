@@ -3,54 +3,11 @@
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 // EJEMPLO: Guard de autenticación JWT
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    // EJEMPLO: Verificar si la ruta es pública
-    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (isPublic) {
-      return true;
-    }
-
-    // EJEMPLO: Extraer token del request
-    const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
-
-    if (!token) {
-      return false;
-    }
-
-    // EJEMPLO: Validar token (aquí se inyectaría servicio JWT)
-    try {
-      const payload = this.validateToken(token);
-      request.user = payload;
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  // EJEMPLO: Método para extraer token del header
-  private extractTokenFromHeader(request: any): string | undefined {
-    const [type, _token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? _token : undefined;
-  }
-
-  // EJEMPLO: Método para validar token
-  private validateToken(_token: string): any {
-    // EJEMPLO: Aquí se usaría jwtService.verifyAsync(token)
-    // Por ahora es un ejemplo de estructura
-    return { userId: 'user_id', email: 'user@example.com', role: 'USER' };
-  }
-}
+export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 // EJEMPLO: Guard de roles
 @Injectable()

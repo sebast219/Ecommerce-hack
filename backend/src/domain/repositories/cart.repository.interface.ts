@@ -13,6 +13,7 @@ export interface ICartRepository {
   // Métodos CRUD básicos
   findById(id: string): Promise<Cart | null>;
   findBySessionId(sessionId: string): Promise<Cart | null>;
+  findByUserId(userId: string): Promise<Cart | null>;
   create(cartData: Omit<Cart, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cart>;
   update(id: string, cartData: Partial<Cart>): Promise<Cart>;
   delete(id: string): Promise<void>;
@@ -92,3 +93,6 @@ export interface IRefreshTokenRepository {
   isValidToken(token: string): Promise<boolean>;
   isTokenExpired(token: string): Promise<boolean>;
 }
+
+export const CART_REPOSITORY = 'CART_REPOSITORY';
+export const CART_ITEM_REPOSITORY = 'CART_ITEM_REPOSITORY';

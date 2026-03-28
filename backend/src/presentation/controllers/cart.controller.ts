@@ -20,6 +20,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 import {
   AddToCartUseCase,
   UpdateCartItemUseCase,
@@ -33,11 +34,21 @@ import {
   GetCartRequest,
 } from '../../application/use-cases/cart/manage-cart.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 export class AddToCartDto implements AddToCartRequest {
+  @IsString()
   productId: string;
+  
+  @IsNumber()
   quantity: number;
+  
+  @IsOptional()
+  @IsString()
   sessionId?: string;
+  
+  @IsOptional()
+  @IsString()
   userId?: string;
 }
 
@@ -67,9 +78,9 @@ export class CartController {
   @ApiOperation({ summary: 'Get user cart' })
   @ApiResponse({ status: 200, description: 'Cart retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Cart not found' })
-  async getCart(@Query() query: GetCartDto) {
+  async getCart(@CurrentUser() user: any) {
     try {
-      const result = await this.getCartUseCase.execute(query);
+      const result = await this.getCartUseCase.execute({ userId: user.id });
 
       return {
         success: true,
@@ -90,9 +101,13 @@ export class CartController {
   @ApiResponse({ status: 201, description: 'Item added to cart successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async addToCart(@Body() addToCartDto: AddToCartDto) {
+  async addToCart(@CurrentUser() user: any, @Body() addToCartDto: AddToCartDto) {
     try {
-      const result = await this.addToCartUseCase.execute(addToCartDto);
+      const result = await this.addToCartUseCase.execute({
+        userId: user.id,
+        productId: addToCartDto.productId,
+        quantity: addToCartDto.quantity,
+      });
 
       return {
         success: true,

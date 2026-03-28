@@ -1,16 +1,17 @@
 // 🏗️ PRESENTATION STRATEGY - Estrategia JWT con Passport
 // PROPÓSITO: Implementar estrategia de autenticación JWT con Passport
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { IUserRepository } from '../../domain/repositories/user.repository.interface';
+import { IUserRepository, USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
+    @Inject(USER_REPOSITORY)
     private userRepository: IUserRepository,
   ) {
     super({
@@ -35,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Retornar información del usuario para ser inyectada en el request
     return {
-      userId: user.id,
+      id: user.id,
       email: user.email,
       role: user.role,
       firstName: user.firstName,

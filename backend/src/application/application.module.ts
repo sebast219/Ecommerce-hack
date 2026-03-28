@@ -5,9 +5,12 @@ import { Module } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { CreateUserUseCase, LoginUseCase } from './use-cases/auth/create-user.use-case';
 import { GetProductsUseCase, GetProductUseCase } from './use-cases/products/get-products.use-case';
-
-// Cart use cases - verificar si existen
-// import { GetCartUseCase, AddToCartUseCase, UpdateCartItemUseCase, RemoveFromCartUseCase } from './use-cases/cart/cart.use-case';
+import {
+  GetCartUseCase,
+  AddToCartUseCase,
+  UpdateCartItemUseCase,
+  RemoveFromCartUseCase,
+} from './use-cases/cart/manage-cart.use-case';
 
 @Module({
   imports: [
@@ -18,12 +21,20 @@ import { GetProductsUseCase, GetProductUseCase } from './use-cases/products/get-
     GetProductUseCase,
     CreateUserUseCase,
     LoginUseCase,
+    GetCartUseCase,
+    AddToCartUseCase,
+    UpdateCartItemUseCase,
+    RemoveFromCartUseCase,
   ],
   exports: [
     GetProductsUseCase,
     GetProductUseCase,
     CreateUserUseCase,
     LoginUseCase,
+    GetCartUseCase,
+    AddToCartUseCase,
+    UpdateCartItemUseCase,
+    RemoveFromCartUseCase,
   ],
 })
 export class ApplicationModule {}

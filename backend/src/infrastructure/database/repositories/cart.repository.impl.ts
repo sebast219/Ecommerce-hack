@@ -44,6 +44,32 @@ export class CartRepositoryImpl implements ICartRepository {
     return prismaCart ? this.mapPrismaCartToCart(prismaCart) : null;
   }
 
+  async findByUserId(userId: string): Promise<Cart | null> {
+    // Buscar cart items de este usuario para obtener el cartId
+    const cartItem = await this.prisma.cartItem.findFirst({
+      where: { userId },
+      select: { cartId: true },
+    });
+
+    if (!cartItem) {
+      return null;
+    }
+
+    // Obtener el carrito completo con todos sus items
+    const prismaCart = await this.prisma.cart.findUnique({
+      where: { id: cartItem.cartId },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    return prismaCart ? this.mapPrismaCartToCart(prismaCart) : null;
+  }
+
   async create(cartData: { sessionId?: string }): Promise<Cart> {
     const prismaCart = await this.prisma.cart.create({
       data: {
