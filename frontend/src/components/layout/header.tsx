@@ -3,17 +3,24 @@
 import Link from 'next/link';
 import { ShoppingCart, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
 import { CartDrawer } from '@/components/cart/cart-drawer';
 
 export function Header() {
+  const pathname = usePathname();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const { items } = useCartStore();
   const { user, logout } = useAuthStore();
+
+  // Ocultar header en páginas de admin y perfil
+  if (pathname?.startsWith('/admin') || pathname === '/profile') {
+    return null;
+  }
 
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
 

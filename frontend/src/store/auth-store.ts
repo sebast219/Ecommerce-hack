@@ -7,25 +7,16 @@ import { User } from '@/types/auth';
 
 
 interface AuthStore {
-
   user: User | null;
-
   token: string | null;
-
   refreshToken: string | null;
-
   isAuthenticated: boolean;
-
+  isHydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
-
   register: (userData: { firstName: string; lastName: string; email: string; password: string }) => Promise<void>;
-
   logout: () => void;
-
   setUser: (user: User) => void;
-
   setTokens: (accessToken: string, refreshToken: string) => void;
-
 }
 
 
@@ -35,17 +26,11 @@ export const useAuthStore = create<AuthStore>()(
   persist(
 
     (set, get) => ({
-
       user: null,
-
       token: null,
-
       refreshToken: null,
-
       isAuthenticated: false,
-
-      
-
+      isHydrated: false,
       login: async (email: string, password: string) => {
 
         try {
@@ -199,6 +184,11 @@ export const useAuthStore = create<AuthStore>()(
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isHydrated = true;
+        }
+      },
     }
 
   )

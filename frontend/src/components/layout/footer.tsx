@@ -1,8 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Footer() {
+  const pathname = usePathname();
+  
+  // Ocultar footer en la página de perfil
+  if (pathname === '/profile') {
+    return null;
+  }
+
   return (
     <footer className="bg-white text-black border-t border-black/10">
 

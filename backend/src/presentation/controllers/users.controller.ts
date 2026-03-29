@@ -130,6 +130,10 @@ export class UpdateProfileDto {
   @IsString()
   @IsNotEmpty()
   email: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }
 
 export class ChangePasswordDto {
@@ -182,13 +186,20 @@ export class UsersController {
   @ApiOperation({ summary: 'Update user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   async updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
+    const updateData: any = {
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      email: dto.email,
+    };
+
+    // Solo actualizar avatar si se proporciona explícitamente
+    if (dto.avatar !== undefined) {
+      updateData.avatar = dto.avatar;
+    }
+
     const user = await this.prisma.user.update({
       where: { id: req.user.userId },
-      data: {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        email: dto.email,
-      },
+      data: updateData,
       select: {
         id: true,
         email: true,
@@ -196,6 +207,7 @@ export class UsersController {
         lastName: true,
         phone: true,
         role: true,
+        avatar: true,
       },
     });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -23,6 +23,8 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  Camera,
+  FileImage,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
@@ -38,10 +40,16 @@ interface Order {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, logout, isAuthenticated, token, setUser } = useAuthStore();
+  const { user, logout, isAuthenticated, token, setUser, isHydrated } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'settings'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Avatar states
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar || null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Payment modal states
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -179,10 +187,10 @@ export default function ProfilePage() {
   ];
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isHydrated && !isAuthenticated) {
       router.push('/auth/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isHydrated, router]);
 
   const handleLogout = () => {
     logout();
@@ -677,6 +685,102 @@ export default function ProfilePage() {
     }
   };
 
+  // Handle avatar file selection
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      // Convertir a base64 para preview y envío
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        setAvatarUrl(base64String);
+
+        // Enviar al servidor
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            email: user?.email,
+            avatar: base64String,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al subir la imagen');
+        }
+
+        const data = await response.json();
+        setUser(data.data || data);
+        setShowAvatarMenu(false);
+        alert('Foto de perfil actualizada exitosamente');
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      alert(error.message || 'Error al subir la imagen');
+      // Restaurar avatar anterior
+      setAvatarUrl(user?.avatar || null);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  // Handle remove avatar
+  const handleRemoveAvatar = async () => {
+    if (!confirm('¿Estás seguro de que deseas eliminar tu foto de perfil?')) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          email: user?.email,
+          avatar: null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar la imagen');
+      }
+
+      const data = await response.json();
+      setUser(data.data || data);
+      setAvatarUrl(null);
+      setShowAvatarMenu(false);
+      alert('Foto de perfil eliminada exitosamente');
+    } catch (error: any) {
+      alert(error.message || 'Error al eliminar la imagen');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -706,17 +810,22 @@ export default function ProfilePage() {
     }
   };
 
-  if (!isAuthenticated || !user) {
-    return null;
+  // Show loading state while hydrating or if not authenticated
+  if (!isHydrated || !isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4 text-black/50">
+          <div className="h-8 w-8 border-4 border-black/10 border-t-black rounded-full animate-spin" />
+          <span className="text-sm font-medium">Cargando...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex overflow-hidden">
+    <div className="h-screen w-full bg-white flex overflow-hidden">
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────── */}
-      <div className="hidden lg:flex flex-col w-[320px] bg-black text-white px-8 py-12 relative overflow-hidden">
-        {/* Ambient blur */}
-        <div className="absolute bottom-[-150px] left-[-150px] w-[500px] h-[500px] rounded-full bg-white/5 blur-[100px]" />
-
+      <div className="hidden lg:flex flex-col h-full w-[320px] bg-black text-white px-8 py-12 relative overflow-hidden">
         {/* Logo */}
         <div className="relative z-10 mb-16">
           <Link href="/" className="inline-flex items-center gap-2 group">
@@ -780,7 +889,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between px-6 py-4 border-b border-black/10">
           <Link href="/" className="flex items-center gap-2">
@@ -813,8 +922,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 lg:px-12 py-8 lg:py-12">
+        <div className="flex-1 overflow-y-auto h-full">
+          <div className="max-w-4xl mx-auto px-6 lg:px-12 py-8 lg:py-12 bg-white min-h-full">
             {/* ─── OVERVIEW TAB ───────────────────────────────────── */}
             {activeTab === 'overview' && (
               <div className="space-y-10">
@@ -842,8 +951,89 @@ export default function ProfilePage() {
                   {/* Avatar & Basic Info */}
                   <div className="p-8 lg:p-10 border-b border-black/10">
                     <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-black text-white flex items-center justify-center text-2xl lg:text-3xl font-semibold">
-                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      {/* Avatar with floating menu */}
+                      <div className="relative">
+                        <div
+                          className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-black text-white flex items-center justify-center text-2xl lg:text-3xl font-semibold overflow-hidden cursor-pointer transition-all hover:ring-4 hover:ring-black/10"
+                          onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+                        >
+                          {isUploadingAvatar ? (
+                            <div className="h-6 w-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={`${user.firstName} ${user.lastName}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <>{user.firstName?.[0]}{user.lastName?.[0]}</>
+                          )}
+                        </div>
+
+                        {/* Floating Menu Card */}
+                        {showAvatarMenu && (
+                          <>
+                            {/* Backdrop */}
+                            <div
+                              className="fixed inset-0 z-40"
+                              onClick={() => setShowAvatarMenu(false)}
+                            />
+                            {/* Menu */}
+                            <div className="absolute top-full left-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-black/10 p-2 min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
+                              <button
+                                onClick={() => {
+                                  fileInputRef.current?.click();
+                                }}
+                                disabled={isUploadingAvatar}
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 transition-colors text-left text-sm font-medium disabled:opacity-50"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-black/5 flex items-center justify-center">
+                                  <Camera className="h-4 w-4" />
+                                </div>
+                                <span>Cambiar foto</span>
+                              </button>
+
+                              {avatarUrl && (
+                                <button
+                                  onClick={handleRemoveAvatar}
+                                  disabled={isUploadingAvatar}
+                                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-left text-sm font-medium text-red-600 disabled:opacity-50"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                    <Trash2 className="h-4 w-4" />
+                                  </div>
+                                  <span>Eliminar foto</span>
+                                </button>
+                              )}
+
+                              <div className="mt-2 pt-2 border-t border-black/10 px-4 py-2">
+                                <p className="text-xs text-black/40">
+                                  Formatos: JPG, PNG, WebP
+                                  <br />
+                                  Máximo: 5MB
+                                </p>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Hidden file input */}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarChange}
+                        />
+
+                        {/* Camera icon overlay on hover */}
+                        <button
+                          onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+                          className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow-lg border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all"
+                          title="Cambiar foto de perfil"
+                        >
+                          <Camera className="h-4 w-4" />
+                        </button>
                       </div>
                       <div>
                         <h2 className="text-xl lg:text-2xl font-semibold tracking-tight">

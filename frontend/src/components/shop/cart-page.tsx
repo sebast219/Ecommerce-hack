@@ -138,9 +138,17 @@ export function CartPage() {
             Tu carrito
           </h1>
         </div>
-        <span className="text-sm text-black/35 mb-1">
-          {items.length} {items.length === 1 ? 'producto' : 'productos'}
-        </span>
+        <div className="flex items-center gap-4 mb-1">
+          <Link
+            href="/cart"
+            className="text-xs uppercase tracking-[0.2em] text-black/40 hover:text-black transition-colors border-b border-black/20 hover:border-black pb-0.5"
+          >
+            expandir carrito
+          </Link>
+          <span className="text-sm text-black/35">
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </span>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 lg:px-12 py-12">

@@ -146,8 +146,6 @@ export class CreateOrderUseCase {
           }
         : undefined,
       items: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     // Crear los items de la orden

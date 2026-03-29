@@ -22,6 +22,7 @@ import {
   Mail,
   Package,
   Lock,
+  ShoppingCart,
 } from 'lucide-react';
 
 interface AddressForm {
@@ -155,7 +156,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-full bg-white flex flex-col">
       {/* Header */}
       <header className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -412,6 +413,15 @@ export default function CheckoutPage() {
                   {items.length} items
                 </span>
               </div>
+
+              {/* Expandir carrito */}
+              <Link
+                href="/cart"
+                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>Expandir carrito</span>
+              </Link>
 
               {/* Items */}
               <div className="space-y-4 mb-6">

@@ -35,9 +35,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <WebVitals />
         <Providers>
-          <div className="min-h-screen flex flex-col scroll-container">
+          <div className="min-h-screen flex flex-col">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 h-full">{children}</main>
             <Footer />
             <ScrollToTop />
             <SpeedInsights />
