@@ -8,7 +8,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { Input } from '@/components/ui/input';
 
 export default function RegisterPage() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,12 +21,12 @@ export default function RegisterPage() {
   const { register } = useAuthStore();
 
   useEffect(() => {
-    document.getElementById('name')?.focus();
+    document.getElementById('firstName')?.focus();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
       setError('Completa todos los campos');
       return;
     }
@@ -40,7 +41,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       setError('');
-      await register({ name, email, password });
+      await register({ firstName, lastName, email, password });
       router.push('/');
     } catch {
       setError('Error al crear la cuenta');
@@ -157,16 +158,37 @@ export default function RegisterPage() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
 
-              {/* Name */}
+              {/* First Name */}
               <div className="space-y-1.5">
                 <label className="text-xs uppercase tracking-[0.25em] text-black/40 font-medium">
                   Nombre
                 </label>
                 <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Tu nombre completo"
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Tu nombre"
+                  className="
+                    h-12 rounded-xl
+                    border-black/15 bg-transparent
+                    placeholder:text-black/25
+                    focus:border-black focus:ring-0
+                    text-sm
+                  "
+                  required
+                />
+              </div>
+
+              {/* Last Name */}
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase tracking-[0.25em] text-black/40 font-medium">
+                  Apellido
+                </label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Tu apellido"
                   className="
                     h-12 rounded-xl
                     border-black/15 bg-transparent

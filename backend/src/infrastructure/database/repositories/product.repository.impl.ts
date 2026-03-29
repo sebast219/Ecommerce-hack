@@ -336,6 +336,14 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
   }
 
   // Additional CategoryRepository methods
+  async findAllCategories(): Promise<Category[]> {
+    const prismaCategories = await this.prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    });
+    return prismaCategories.map(this.mapPrismaCategoryToCategory);
+  }
+
   async findRootCategories(): Promise<Category[]> {
     const prismaCategories = await this.prisma.category.findMany({
       where: { parentId: null },

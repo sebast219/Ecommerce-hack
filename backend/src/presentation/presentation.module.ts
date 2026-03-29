@@ -4,7 +4,7 @@
 import { Module } from '@nestjs/common';
 import { ApplicationModule } from '../application/application.module';
 import { AuthController } from './controllers/auth.controller';
-import { ProductsController } from './controllers/products.controller';
+import { ProductsController, CategoriesController } from './controllers/products.controller';
 import { CartController, WishlistController } from './controllers/cart.controller';
 import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
 
@@ -63,9 +63,9 @@ export {
   controllers: [
     AuthController,
     ProductsController,
+    CategoriesController,
     CartController,
     WishlistController,
-    // CategoriesController,
   ],
   providers: [
     // JwtAuthGuard,

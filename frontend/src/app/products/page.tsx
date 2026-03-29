@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Grid, List, SlidersHorizontal } from 'lucide-react';
 
 import { ProductCard } from '@/components/product/product-card';
@@ -36,9 +36,15 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Refetch cuando cambian los filtros
+  // Refetch cuando cambian los filtros manualmente (no en carga inicial)
+  const prevFiltersRef = useRef(filters);
   useEffect(() => {
-    fetchProducts(filters);
+    // Solo hacer fetch si los filtros realmente cambiaron
+    if (JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)) {
+      fetchProducts(filters);
+      prevFiltersRef.current = filters;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // Convierte estado de filtros a API

@@ -7,12 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useCategories } from '@/hooks/use-categories';
 
 import {
   X,
   SlidersHorizontal,
   Star,
   PackageCheck,
+  Loader2,
 } from 'lucide-react';
 
 
@@ -33,17 +35,10 @@ interface FilterState {
 
 
 /* ========================
-   DATA
+   DATA - REMOVED: Now using API categories
 ======================== */
 
-const categories = [
-  { id: 'smartphones', name: 'Smartphones' },
-  { id: 'laptops', name: 'Laptops' },
-  { id: 'audio', name: 'Audio' },
-  { id: 'wearables', name: 'Wearables' },
-  { id: 'cameras', name: 'Cámaras' },
-  { id: 'gaming', name: 'Gaming' },
-];
+// Categories now come from useCategories hook
 
 
 /* ========================
@@ -51,6 +46,8 @@ const categories = [
 ======================== */
 
 export function ProductFilter({ onFilterChange }: ProductFilterProps) {
+
+  const { categories, isLoading: categoriesLoading } = useCategories();
 
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -126,7 +123,7 @@ export function ProductFilter({ onFilterChange }: ProductFilterProps) {
      ACTIVE FILTERS
   ======================== */
 
-  const activeCategories = categories.filter(c =>
+  const activeCategories = categories.filter((c: { id: string }) =>
     filters.categories.includes(c.id)
   );
 
@@ -194,7 +191,7 @@ export function ProductFilter({ onFilterChange }: ProductFilterProps) {
 
           <div className="flex flex-wrap gap-2">
 
-            {activeCategories.map(cat => (
+            {activeCategories.map((cat: { id: string; name: string }) => (
 
               <FilterChip
                 key={cat.id}
@@ -238,39 +235,42 @@ export function ProductFilter({ onFilterChange }: ProductFilterProps) {
             Categorías
           </Label>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
 
-            {categories.map(cat => (
-
-              <div
-                key={cat.id}
-                className="
-                  flex items-center gap-3
-                  p-2 rounded-lg
-
-                  hover:bg-slate-50
-                  transition
-                "
-              >
-
-                <Checkbox
-                  id={cat.id}
-                  checked={filters.categories.includes(cat.id)}
-                  onCheckedChange={(v) =>
-                    handleCategory(cat.id, v as boolean)
-                  }
-                />
-
-                <Label
-                  htmlFor={cat.id}
-                  className="cursor-pointer text-sm"
-                >
-                  {cat.name}
-                </Label>
-
+            {categoriesLoading ? (
+              <div className="flex items-center gap-2 text-slate-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Cargando categorías...</span>
               </div>
-
-            ))}
+            ) : categories.length === 0 ? (
+              <p className="text-sm text-slate-500">No hay categorías disponibles</p>
+            ) : (
+              categories.map((cat: { id: string; name: string }) => (
+                <div
+                  key={cat.id}
+                  className="
+                    flex items-center gap-3
+                    p-2 rounded-lg
+                    hover:bg-slate-50
+                    transition
+                  "
+                >
+                  <Checkbox
+                    id={cat.id}
+                    checked={filters.categories.includes(cat.id)}
+                    onCheckedChange={(v) =>
+                      handleCategory(cat.id, v as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={cat.id}
+                    className="cursor-pointer text-sm"
+                  >
+                    {cat.name}
+                  </Label>
+                </div>
+              ))
+            )}
 
           </div>
 

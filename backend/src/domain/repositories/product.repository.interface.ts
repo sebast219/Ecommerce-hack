@@ -39,6 +39,7 @@ export interface ICategoryRepository {
   // Métodos CRUD básicos
   findById(id: string): Promise<Category | null>;
   findBySlug(slug: string): Promise<Category | null>;
+  findAllCategories(): Promise<Category[]>;
   create(
     categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Category>;

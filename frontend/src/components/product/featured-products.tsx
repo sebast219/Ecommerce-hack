@@ -95,7 +95,7 @@ export function FeaturedProducts() {
                       ${product.price}
                     </span>
                     <span className="ml-2 text-xs text-black/30 line-through tabular-nums">
-                      ${(product.price * 1.25).toFixed(2)}
+                      ${(Number(product.price) * 1.25).toFixed(2)}
                     </span>
                   </div>
 

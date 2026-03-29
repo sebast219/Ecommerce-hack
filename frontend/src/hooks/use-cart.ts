@@ -61,8 +61,6 @@ export function useCart(): UseCartReturn {
     // - Si API falla, revertir cambios
     // - Mostrar error al usuario
     
-    console.log('Implementar addItem - Product:', productId, 'Quantity:', quantity);
-    
     if (!isAuthenticated) {
       setError('Debes iniciar sesión para agregar productos al carrito');
       return;
@@ -115,8 +113,6 @@ export function useCart(): UseCartReturn {
     // - Revertir si falla
     // - Mostrar mensaje específico
     
-    console.log('Implementar updateItem - Item:', itemId, 'Quantity:', quantity);
-    
     if (quantity <= 0) {
       setError('La cantidad debe ser mayor a 0');
       return;
@@ -165,8 +161,6 @@ export function useCart(): UseCartReturn {
     // - Revertir si falla
     // - Notificar al usuario
     
-    console.log('Implementar removeItem - Item:', itemId);
-    
     setIsLoading(true);
     setError(null);
     
@@ -203,8 +197,6 @@ export function useCart(): UseCartReturn {
     // PASO 3: Limpiar store
     // - storeClearCart()
     // - Limpiar estado local
-    
-    console.log('Implementar clearCart');
     
     if (!confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
       return;
@@ -245,8 +237,6 @@ export function useCart(): UseCartReturn {
     
     // PASO 3: Recalcular resumen
     // - Totales, impuestos, etc.
-    
-    console.log('Implementar refreshCart');
     
     if (!isAuthenticated) {
       return;
@@ -313,7 +303,7 @@ export function useCart(): UseCartReturn {
     // PASO 4: Actualizar estado
     // - setSummary() con cálculos
     
-    const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
     const taxes = subtotal * 0.16; // 16% IVA
     const total = subtotal + taxes;
   }, [items]);

@@ -1,6 +1,3 @@
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,28 +5,14 @@ import {
   Users,
   Target,
   Award,
-  Zap,
-  Star,
   ArrowRight,
 } from 'lucide-react';
 
+// Configuración para página estática - máxima performance
+export const dynamic = 'force-static';
+export const revalidate = 86400;
+
 export default function NosotrosPage() {
-  const [scrollY, setScrollY] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const valuesRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Animación de entrada optimizada
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 60);
-    return () => clearTimeout(timer);
-  }, []);
-
   const stats = [
     { value: '10K+', label: 'Profesionales Formados' },
     { value: '500+', label: 'Herramientas Disponibles' },
@@ -75,17 +58,14 @@ export default function NosotrosPage() {
   ];
 
   return (
-    <main className={`bg-white text-black overflow-hidden transition-all duration-700 ease-out ${
-      isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-    }`}>
+    <main className="bg-white text-black overflow-hidden">
 
       {/* ─── HERO ─────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-between px-6 lg:px-12 overflow-hidden fade-in">
 
         {/* Ambient blur */}
         <div
-          className="pointer-events-none absolute right-[-200px] top-[-200px] w-[700px] h-[700px] rounded-full bg-gray-100 blur-[160px] opacity-60"
-          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+          className="pointer-events-none absolute right-[-200px] top-[-200px] w-[700px] h-[700px] rounded-full bg-gray-100 blur-[160px] opacity-60 animate-float"
         />
 
         {/* Top label row */}
@@ -99,13 +79,7 @@ export default function NosotrosPage() {
         </div>
 
         {/* Main headline */}
-        <div
-          className="relative z-10 pb-0"
-          style={{
-            transform: `translateY(${scrollY * 0.18}px)`,
-            opacity: 1 - scrollY * 0.0009,
-          }}
-        >
+        <div className="relative z-10 pb-0">
           <h1
             className="
               text-[clamp(4rem,11vw,9.5rem)]
@@ -117,28 +91,22 @@ export default function NosotrosPage() {
           >
             Seguridad
             <br />
-            <span className="text-black/25">al más alto</span>
+            <span className="text-black">al más alto</span>
             <br />
             nivel.
           </h1>
         </div>
 
         {/* Bottom row */}
-        <div
-          className="relative z-10 pb-20 flex flex-col sm:flex-row items-end justify-between gap-10"
-          style={{
-            transform: `translateY(${scrollY * 0.08}px)`,
-            opacity: 1 - scrollY * 0.0006,
-          }}
-        >
+        <div className="relative z-10 pb-20 flex flex-col sm:flex-row items-end justify-between gap-10">
           <p className="text-base text-black/50 max-w-sm leading-relaxed">
             Formamos expertos y desarrollamos herramientas diseñadas
             para el mundo real.
           </p>
 
           <div className="flex gap-4">
-            <button
-              onClick={() => valuesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            <a
+              href="#valores"
               className="
                 group inline-flex items-center gap-2
                 bg-black text-white
@@ -151,7 +119,7 @@ export default function NosotrosPage() {
             >
               Descubrir más
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
+            </a>
 
             <Link
               href="/products"
@@ -257,7 +225,7 @@ export default function NosotrosPage() {
 
 
       {/* ─── VALUES ───────────────────────────────────────────────── */}
-      <section ref={valuesRef} className="py-28 border-t border-black/10">
+      <section id="valores" className="py-28 border-t border-black/10">
         <div className="max-w-6xl mx-auto px-6 lg:px-12">
 
           <div className="flex items-end justify-between mb-20">

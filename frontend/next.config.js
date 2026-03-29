@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   images: {
     domains: ['localhost'],
@@ -22,7 +26,10 @@ const nextConfig = {
   },
   // Faster module resolution
   transpilePackages: [],
-  // Reduce build time
+  // Experimental features for performance analysis
+  experimental: {
+    webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'INP', 'TTFB'],
+  },
   webpack: (config, { dev, isServer }) => {
     if (dev) {
       config.optimization = {
@@ -43,4 +50,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

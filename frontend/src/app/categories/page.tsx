@@ -8,9 +8,8 @@ import {
   ShieldAlert,
   Network,
   Cpu,
-  Search,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 const categories = [
   {
@@ -51,24 +50,7 @@ const categories = [
 ];
 
 export default function CategoriesPage() {
-  const [scrollY, setScrollY] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Animación de entrada optimizada
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 80);
-    return () => clearTimeout(timer);
-  }, []);
 
   const scrollToFirstCategory = () => {
     const firstSection = sectionRefs.current[0];
@@ -78,51 +60,26 @@ export default function CategoriesPage() {
   };
 
   return (
-    <main className={`bg-white text-black transition-all duration-700 ease-out ${
-      isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-    }`}>
+    <main className="bg-white text-black">
 
       {/* Hero */}
-      <section className="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden fade-in">
+      <section className="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden">
 
-        <div 
-          className="absolute inset-0 bg-gradient-to-b from-transparent to-white/10"
-          style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/10 animate-float" />
 
         <div className="max-w-4xl space-y-8 relative z-10">
 
-          <span 
-            className="uppercase tracking-[0.4em] text-sm text-black/60 inline-block"
-            style={{
-              transform: `translateY(${scrollY * 0.3}px)`,
-              opacity: 1 - scrollY * 0.001,
-            }}
-          >
+          <span className="uppercase tracking-[0.4em] text-sm text-black/60 inline-block">
             • Seguridad • Tecnología • Futuro •
           </span>
 
-          <h1 
-            className="text-6xl md:text-8xl font-semibold tracking-tight leading-[0.95]"
-            style={{
-              transform: `translateY(${scrollY * 0.2}px)`,
-              opacity: 1 - scrollY * 0.0008,
-            }}
-          >
+          <h1 className="text-6xl md:text-8xl font-semibold tracking-tight leading-[0.95]">
             Categorías
             <br />
             Profesionales
           </h1>
 
-          <p 
-            className="text-xl text-black/60 max-w-2xl mx-auto"
-            style={{
-              transform: `translateY(${scrollY * 0.15}px)`,
-              opacity: 1 - scrollY * 0.0006,
-            }}
-          >
+          <p className="text-xl text-black/60 max-w-2xl mx-auto">
             Herramientas utilizadas por equipos
             de ciberseguridad en todo el mundo.
           </p>
@@ -136,10 +93,6 @@ export default function CategoriesPage() {
               hover:scale-105
               transition
             "
-            style={{
-              transform: `translateY(${scrollY * 0.1}px)`,
-              opacity: 1 - scrollY * 0.0004,
-            }}
             onClick={scrollToFirstCategory}
           >
             Explorar ahora
@@ -161,12 +114,7 @@ export default function CategoriesPage() {
             className="min-h-screen flex items-center relative overflow-hidden"
           >
 
-            <div
-              className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5"
-              style={{
-                transform: `translateY(${(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.3}px)`,
-              }}
-            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5 animate-float-delayed" />
 
             <div
               className={`
@@ -194,14 +142,7 @@ export default function CategoriesPage() {
               </div>
 
               {/* Content */}
-              <div 
-                className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'} slide-up`}
-                style={{
-                  transform: `translateY(${(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.2}px)`,
-                  opacity: Math.max(0, Math.min(1, 1 - Math.abs(scrollY - (index + 1) * (typeof window !== 'undefined' ? window.innerHeight : 1000)) * 0.0005)),
-                  animationDelay: `${index * 80}ms`
-                }}
-              >
+              <div className={`space-y-8 max-w-xl ${isEven ? 'lg:order-last' : 'lg:order-first'}`}>
 
                 <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
                   <Icon className="h-7 w-7" />

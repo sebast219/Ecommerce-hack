@@ -177,11 +177,11 @@ export function CartPage() {
                     {/* Price */}
                     <div className="text-right">
                       <p className="font-semibold tabular-nums">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        ${(Number(item.product.price) * item.quantity).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-xs text-black/35 tabular-nums">
-                          ${item.product.price.toFixed(2)} c/u
+                          ${Number(item.product.price).toFixed(2)} c/u
                         </p>
                       )}
                     </div>

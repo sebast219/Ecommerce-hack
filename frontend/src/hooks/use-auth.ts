@@ -68,8 +68,6 @@ export function useAuth(): UseAuthReturn {
     // PASO 5: Finalizar carga
     // - setIsLoading(false)
     
-    console.log('Implementar login - Email:', email);
-    
     // Código temporal para que funcione
     setIsLoading(true);
     setError(null);
@@ -112,8 +110,6 @@ export function useAuth(): UseAuthReturn {
     // PASO 4: Manejar errores
     // - Email ya existe, validación fallida, etc.
     
-    console.log('Implementar register - User:', userData.email);
-    
     setIsLoading(true);
     setError(null);
     
@@ -152,7 +148,6 @@ export function useAuth(): UseAuthReturn {
     // - window.location.href = '/login'
     // - O usar router de Next.js
     
-    console.log('Implementar logout');
     storeLogout();
     
     // TODO: Limpiar localStorage
@@ -179,8 +174,6 @@ export function useAuth(): UseAuthReturn {
     // PASO 4: Manejar errores
     // - Si refresh falla, hacer logout
     // - Token expirado permanentemente
-    
-    console.log('Implementar refreshToken');
     
     try {
       // TODO: Implementar llamada real
@@ -216,8 +209,6 @@ export function useAuth(): UseAuthReturn {
     // PASO 3: Manejar sesión inválida
     // - Si tokens inválidos, limpiar
     // - Redirigir a login
-    
-    console.log('Verificar sesión existente');
     
     // TODO: Implementar verificación real
     // const savedToken = localStorage.getItem('access_token');

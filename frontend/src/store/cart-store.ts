@@ -33,8 +33,6 @@ export const useCartStore = create<CartStore>()(
         
         // PASO 3: Actualizar el estado con set()
         // - Ejemplo: set((state) => ({ items: [...] }))
-        
-        console.log('Implementar addItem - Product:', product.name, 'Quantity:', quantity);
       },
       
       // TODO: Implementa removeItem
@@ -42,8 +40,6 @@ export const useCartStore = create<CartStore>()(
         // PASO 1: Filtrar el array para remover el item
         // - Usa filter() para excluir el item con el id especificado
         // - Ejemplo: items.filter(item => item.id !== id)
-        
-        console.log('Implementar removeItem - ID:', id);
       },
       
       // TODO: Implementa updateQuantity
@@ -51,16 +47,12 @@ export const useCartStore = create<CartStore>()(
         // PASO 1: Encontrar y actualizar el item
         // - Usa map() para encontrar el item y actualizar su cantidad
         // - Validar que quantity > 0
-        
-        console.log('Implementar updateQuantity - ID:', id, 'Quantity:', quantity);
       },
       
       // TODO: Implementa clearCart
       clearCart: () => {
         // PASO 1: Limpiar el array de items
         // - Ejemplo: set({ items: [] })
-        
-        console.log('Implementar clearCart');
       },
       
       // TODO: Implementa getTotal
@@ -68,8 +60,6 @@ export const useCartStore = create<CartStore>()(
         // PASO 1: Calcular el total del carrito
         // - Usa reduce() para sumar (price * quantity) de cada item
         // - Ejemplo: get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0)
-        
-        console.log('Implementar getTotal');
         return 0; // Temporal
       },
       
@@ -78,8 +68,6 @@ export const useCartStore = create<CartStore>()(
         // PASO 1: Contar el total de items en el carrito
         // - Usa reduce() para sumar las cantidades
         // - Ejemplo: get().items.reduce((total, item) => total + item.quantity, 0)
-        
-        console.log('Implementar getItemCount');
         return 0; // Temporal
       },
     }),

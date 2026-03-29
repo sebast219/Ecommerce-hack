@@ -71,7 +71,6 @@ export const useAuthStore = create<AuthStore>()(
           }
 
           const data = await response.json();
-          console.log('Login response:', data);
           
           // Handle deeply nested backend response
           // Response structure: { success: true, data: { success: true, data: { user, accessToken, refreshToken }, message }, message }
@@ -79,9 +78,6 @@ export const useAuthStore = create<AuthStore>()(
           const userData = innerData?.user || innerData;
           const accessToken = innerData?.accessToken || data.data?.accessToken;
           const refreshToken = innerData?.refreshToken || data.data?.refreshToken;
-          
-          console.log('Extracted userData:', userData);
-          console.log('Extracted tokens:', { accessToken, refreshToken });
 
           set({
 

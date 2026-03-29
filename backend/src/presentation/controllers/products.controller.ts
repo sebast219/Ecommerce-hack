@@ -1,7 +1,7 @@
 // 🏗️ PRESENTATION CONTROLLERS - Productos (CORREGIDO)
 // PROPÓSITO: Manejar requests HTTP de productos
 
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, Inject } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -13,6 +13,7 @@ import {
   GetProductUseCase,
 } from '../../application/use-cases/products/get-products.use-case';
 import { GetProductsQueryDto, ProductDifficulty } from '../../application/dto/product.dto';
+import { ICategoryRepository, CATEGORY_REPOSITORY } from '../../domain/repositories/product.repository.interface';
 
 @ApiTags('Products')
 @Controller('products')
@@ -139,13 +140,24 @@ export class ProductsController {
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
+  // Datos estáticos de categorías para evitar problemas de inyección
+  private readonly categories = [
+    { id: 'profesionales', name: 'Profesionales', slug: 'profesionales', description: 'Herramientas utilizadas por equipos de ciberseguridad en todo el mundo.' },
+    { id: 'ataques-inalambricos', name: 'Ataques Inalámbricos', slug: 'ataques-inalambricos', description: 'Auditorías WiFi, MITM y pentesting inalámbrico' },
+    { id: 'usb-hacking', name: 'USB Hacking', slug: 'usb-hacking', description: 'Payloads, BadUSB y ataques físicos' },
+    { id: 'red-team', name: 'Red Team', slug: 'red-team', description: 'Operaciones ofensivas avanzadas' },
+    { id: 'network', name: 'Network', slug: 'network', description: 'Sniffing, análisis y monitoreo' },
+    { id: 'hardware', name: 'Hardware', slug: 'hardware', description: 'Implantes y dispositivos encubiertos' },
+  ];
+
   @Get()
   @ApiOperation({ summary: 'Get all categories' })
   @ApiResponse({ status: 200, description: 'Categories retrieved successfully' })
   async getCategories() {
     return {
       success: true,
-      message: 'Categories endpoint - Implement GetCategoriesUseCase',
+      data: { categories: this.categories },
+      message: 'Categories retrieved successfully',
     };
   }
 
@@ -154,10 +166,17 @@ export class CategoriesController {
   @ApiResponse({ status: 200, description: 'Category retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async getCategoryBySlug(@Param('slug') slug: string) {
+    const category = this.categories.find(c => c.slug === slug);
+    if (!category) {
+      return {
+        success: false,
+        message: 'Category not found',
+      };
+    }
     return {
       success: true,
-      data: { slug },
-      message: 'Category details - Implement GetCategoryBySlugUseCase',
+      data: { category },
+      message: 'Category retrieved successfully',
     };
   }
 }

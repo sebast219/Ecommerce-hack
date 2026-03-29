@@ -147,11 +147,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     {/* Price */}
                     <div className="text-right">
                       <p className="text-sm font-semibold tabular-nums">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        ${(Number(item.product.price) * item.quantity).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-[10px] text-black/30 tabular-nums">
-                          ${item.product.price.toFixed(2)} c/u
+                          ${Number(item.product.price).toFixed(2)} c/u
                         </p>
                       )}
                     </div>
