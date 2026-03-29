@@ -91,9 +91,12 @@ export default function CheckoutPage() {
     setBillingAddress((prev) => ({ ...prev, [field]: value }));
   };
 
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setIsProcessing(true);
     setError(null);
 
     try {
@@ -111,18 +114,23 @@ export default function CheckoutPage() {
 
       if (response.success) {
         clearCart();
-        router.push(`/checkout/success?orderId=${response.data.id}`);
+        // Pequeño delay para asegurar que la navegación ocurra antes de que el componente desmonte
+        setTimeout(() => {
+          router.push(`/checkout/success?orderId=${response.data.id}`);
+        }, 100);
       } else {
         setError(response.message || 'Error al crear la orden');
+        setIsProcessing(false);
       }
     } catch (err: any) {
       setError(err.message || 'Error al procesar el pago');
+      setIsProcessing(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (items.length === 0 || !isAuthenticated) {
+  if ((items.length === 0 || !isAuthenticated) && !isProcessing) {
     return null;
   }
 
