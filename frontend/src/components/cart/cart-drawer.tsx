@@ -226,7 +226,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
             {/* Actions */}
             <div className="px-7 py-6 space-y-3">
-              <button
+              <Link
+                href="/checkout"
+                onClick={onClose}
                 className="
                   group w-full h-11 rounded-full
                   bg-black text-white
@@ -238,7 +240,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               >
                 Checkout
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
 
               <button
                 onClick={clearCart}
