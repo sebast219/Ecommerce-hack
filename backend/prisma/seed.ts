@@ -19,6 +19,21 @@ enum ProductDifficulty {
 }
 
 async function main() {
+  // Limpieza de datos existentes para evitar duplicados
+  console.log('Limpiando datos existentes...');
+  await prisma.wishlistItem.deleteMany();
+  await prisma.productReview.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.cart.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.productInventory.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  // Nota: No eliminamos users para mantener las cuentas existentes
+  console.log('Datos limpiados exitosamente');
   // Create admin user
   const hashedPassword = await bcrypt.hash('admin123', 10);
   
@@ -116,9 +131,66 @@ async function main() {
     },
   });
 
+  // Nuevas categorías
+  const physicalSecurityCategory = await prisma.category.upsert({
+    where: { slug: 'physical-security' },
+    update: {},
+    create: {
+      name: 'Seguridad Física',
+      slug: 'physical-security',
+      description: 'Herramientas para bypass de controles de acceso físico, cerraduras y sistemas de seguridad perimetral',
+      image: '/images/categories/physical-security.jpg',
+    },
+  });
+
+  const osintCategory = await prisma.category.upsert({
+    where: { slug: 'osint-reconnaissance' },
+    update: {},
+    create: {
+      name: 'OSINT & Reconocimiento',
+      slug: 'osint-reconnaissance',
+      description: 'Herramientas para inteligencia de fuentes abiertas y reconocimiento de objetivos',
+      image: '/images/categories/osint.jpg',
+    },
+  });
+
+  const cryptoCategory = await prisma.category.upsert({
+    where: { slug: 'cryptography' },
+    update: {},
+    create: {
+      name: 'Criptografía',
+      slug: 'cryptography',
+      description: 'Herramientas de cifrado, descifrado y análisis de sistemas criptográficos',
+      image: '/images/categories/cryptography.jpg',
+    },
+  });
+
+  const malwareAnalysisCategory = await prisma.category.upsert({
+    where: { slug: 'malware-analysis' },
+    update: {},
+    create: {
+      name: 'Malware Analysis',
+      slug: 'malware-analysis',
+      description: 'Entornos sandbox y herramientas para análisis e ingeniería inversa de malware',
+      image: '/images/categories/malware-analysis.jpg',
+    },
+  });
+
+  const socialEngineeringCategory = await prisma.category.upsert({
+    where: { slug: 'social-engineering' },
+    update: {},
+    create: {
+      name: 'Social Engineering',
+      slug: 'social-engineering',
+      description: 'Herramientas para pruebas de ingeniería social y simulación de phishing',
+      image: '/images/categories/social-engineering.jpg',
+    },
+  });
+
   // Create cybersecurity products
   await prisma.product.createMany({
     data: [
+      // === PRODUCTOS EXISTENTES ACTUALIZADOS ===
       {
         name: 'USB Rubber Ducky',
         slug: 'usb-rubber-ducky',
@@ -131,7 +203,9 @@ async function main() {
           'https://images-na.ssl-images-amazon.com/images/I/51QlBzBceZL._SL1000_.jpg'
         ],
         tags: ['usb', 'keystroke-injection', 'pentesting', 'hak5'],
-                isActive: true,
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
       },
       {
         name: 'WiFi Pineapple Mark VII',
@@ -145,7 +219,9 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/WiFi-Pineapple-Mark-VII-Base-Unit_1200x1200.jpg'
         ],
         tags: ['wifi', 'rogue-ap', 'karma', 'wireless-audit', 'hak5'],
-                                isActive: true,
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
       },
       {
         name: 'Bash Bunny Mark II',
@@ -159,7 +235,9 @@ async function main() {
           'https://cdn.shopify.com/s/files/1/0063/9428/2711/products/Bash-Bunny-Mark-II_1200x1200.jpg'
         ],
         tags: ['usb', 'multi-attack', 'payloads', 'automation', 'hak5'],
-                isActive: true,
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
       },
       {
         name: 'Flipper Zero',
@@ -174,6 +252,8 @@ async function main() {
         ],
         tags: ['rf', 'rfid', 'nfc', 'sub-ghz', 'infrared', 'gpio'],
         isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
       },
       {
         name: 'LAN Turtle',
@@ -188,6 +268,8 @@ async function main() {
         ],
         tags: ['network', 'ethernet', 'remote-access', 'pentesting', 'hak5'],
         isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
       },
       {
         name: 'Packet Squirrel',
@@ -202,6 +284,8 @@ async function main() {
         ],
         tags: ['network', 'mitm', 'packet-capture', 'pentesting', 'hak5'],
         isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
       },
       {
         name: 'Signal Owl',
@@ -216,6 +300,8 @@ async function main() {
         ],
         tags: ['wifi', 'bluetooth', 'rf', 'wireless-audit', 'hak5'],
         isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
       },
       {
         name: 'Key Croc',
@@ -230,6 +316,350 @@ async function main() {
         ],
         tags: ['keylogger', 'keystroke-injection', 'usb', 'hak5'],
         isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS USB HACKING ===
+      {
+        name: 'O.MG Cable Elite',
+        slug: 'omg-cable-elite',
+        description: 'Cable USB aparentemente normal con implante WiFi integrado. Permite ejecución remota de payloads, keylogging y exfiltración de datos sin detección.',
+        price: 179.99,
+        sku: 'OMG-ELITE-001',
+        categoryId: usbCategory.id,
+        images: ['https://shop.hak5.org/products/omg-cable'],
+        tags: ['usb', 'implant', 'wifi', 'keylogger', 'covert'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'Rubber Ducky Payload Studio Kit',
+        slug: 'rubber-ducky-payload-kit',
+        description: 'Kit completo con USB Rubber Ducky + biblioteca de 50+ payloads preconfigurados para Windows, macOS y Linux. Incluye guía de desarrollo de payloads.',
+        price: 119.99,
+        sku: 'RD-PAYLOAD-KIT',
+        categoryId: usbCategory.id,
+        images: ['https://shop.hak5.org/products/usb-rubber-ducky'],
+        tags: ['usb', 'payload', 'bundle', 'keystroke'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS ATAQUES INALÁMBRICOS ===
+      {
+        name: 'WiFi Pineapple Nano',
+        slug: 'wifi-pineapple-nano',
+        description: 'Versión compacta del WiFi Pineapple para auditorías de campo. Portátil y discreto con todas las capacidades de Rogue AP y análisis de tráfico.',
+        price: 99.99,
+        sku: 'HAK5-WPN001',
+        categoryId: wirelessCategory.id,
+        images: ['https://shop.hak5.org/products/wifi-pineapple'],
+        tags: ['wifi', 'portable', 'rogue-ap', 'audit'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'HackRF One',
+        slug: 'hackrf-one',
+        description: 'Transceptor SDR (Software Defined Radio) de largo alcance. Captura y transmite señales de radio desde 1MHz hasta 6GHz. Ideal para análisis de RF y replay attacks.',
+        price: 329.99,
+        sku: 'HACKRF-ONE-001',
+        categoryId: wirelessCategory.id,
+        images: ['https://greatscottgadgets.com/hackrf/one/'],
+        tags: ['sdr', 'rf', 'radio', 'replay-attack', 'frequency'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      {
+        name: 'Alfa Network AWUS036ACH',
+        slug: 'alfa-awus036ach',
+        description: 'Adaptador WiFi de alta potencia con soporte dual-band AC1200. Compatible con Kali Linux para auditorías WiFi, packet injection y monitor mode.',
+        price: 49.99,
+        sku: 'ALFA-ACH-001',
+        categoryId: wirelessCategory.id,
+        images: ['https://www.alfa.com.tw/products/awus036ach'],
+        tags: ['wifi', 'adapter', 'kali', 'monitor-mode', 'injection'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS HARDWARE IMPLANTS ===
+      {
+        name: 'Shark Jack',
+        slug: 'shark-jack',
+        description: 'Implante de red portátil para reconocimiento rápido. Se conecta a cualquier puerto Ethernet y ejecuta payloads automáticamente para mapeo de red.',
+        price: 49.99,
+        sku: 'HAK5-SJ001',
+        categoryId: hardwareCategory.id,
+        images: ['https://shop.hak5.org/products/shark-jack'],
+        tags: ['network', 'recon', 'ethernet', 'portable', 'hak5'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      {
+        name: 'Screen Crab',
+        slug: 'screen-crab',
+        description: 'Implante HDMI que captura capturas de pantalla y video en tiempo real. Se inserta entre monitor y computadora sin ser detectado.',
+        price: 129.99,
+        sku: 'HAK5-SC001',
+        categoryId: hardwareCategory.id,
+        images: ['https://shop.hak5.org/products/screen-crab'],
+        tags: ['hdmi', 'screen-capture', 'covert', 'implant'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'Plunder Bug',
+        slug: 'plunder-bug',
+        description: 'Tap de red inline para captura pasiva de paquetes. Compatible con aplicaciones móviles de análisis de tráfico. Transparente para la red.',
+        price: 39.99,
+        sku: 'HAK5-PB001',
+        categoryId: hardwareCategory.id,
+        images: ['https://shop.hak5.org/products/plunder-bug'],
+        tags: ['network', 'tap', 'packet-capture', 'passive'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS RED TEAM TOOLS ===
+      {
+        name: 'Proxmark3 RDV4',
+        slug: 'proxmark3-rdv4',
+        description: 'Herramienta profesional para investigación y clonación de RFID/NFC. Soporta LF y HF. Utilizada por pentesters para bypass de control de acceso físico.',
+        price: 349.99,
+        sku: 'PM3-RDV4-001',
+        categoryId: redTeamCategory.id,
+        images: ['https://proxmark.com/'],
+        tags: ['rfid', 'nfc', 'cloning', 'access-control', 'physical'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      {
+        name: 'USB Ninja Cable Pro',
+        slug: 'usb-ninja-cable-pro',
+        description: 'Cable de carga con implante de ataque inalámbrico. Control remoto vía smartphone. Ejecuta keystrokes e inyecta payloads al conectarse.',
+        price: 89.99,
+        sku: 'NINJA-PRO-001',
+        categoryId: redTeamCategory.id,
+        images: ['https://usbninja.com/'],
+        tags: ['usb', 'covert', 'wireless', 'payload', 'physical'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'Hak5 Field Kit',
+        slug: 'hak5-field-kit',
+        description: 'Kit completo de pentesting físico: WiFi Pineapple Nano + Bash Bunny + LAN Turtle + Signal Owl en un maletín profesional. Todo lo necesario para un red team engagement.',
+        price: 599.99,
+        sku: 'HAK5-FIELD-KIT',
+        categoryId: redTeamCategory.id,
+        images: ['https://shop.hak5.org/collections/bundles'],
+        tags: ['bundle', 'field-kit', 'red-team', 'professional', 'hak5'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS NETWORK MONITORING ===
+      {
+        name: 'WiFi Coconut',
+        slug: 'wifi-coconut',
+        description: 'Monitor simultáneo de todos los canales WiFi 2.4GHz. 14 radios integradas para captura completa del espectro. Ideal para análisis forense inalámbrico.',
+        price: 249.99,
+        sku: 'HAKSOL-WC001',
+        categoryId: networkCategory.id,
+        images: ['https://hak5.org/products/wifi-coconut'],
+        tags: ['wifi', 'monitor', 'spectrum', 'forensics', '2.4ghz'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      {
+        name: 'Raspberry Pi 4 Pentest Kit',
+        slug: 'raspberry-pi-pentest-kit',
+        description: 'Raspberry Pi 4 (4GB) preconfigurado con Kali Linux ARM, adaptador WiFi Alfa, case táctico y batería. Servidor de C2 portable y versátil.',
+        price: 189.99,
+        sku: 'RPI4-PENTEST-001',
+        categoryId: networkCategory.id,
+        images: ['https://www.raspberrypi.com/'],
+        tags: ['raspberry-pi', 'kali', 'portable', 'c2', 'server'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS DIGITAL FORENSICS ===
+      {
+        name: 'Cellebrite UFED Touch2',
+        slug: 'cellebrite-ufed-touch2',
+        description: 'Solución forense líder para extracción de datos de dispositivos móviles. Soporta iOS y Android. Utilizada por agencias de ley y equipos forenses corporativos.',
+        price: 2499.99,
+        sku: 'CBR-UFED-T2',
+        categoryId: forensicsCategory.id,
+        images: ['https://www.cellebrite.com/'],
+        tags: ['forensics', 'mobile', 'extraction', 'ios', 'android'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      {
+        name: 'Write Blocker USB 3.0',
+        slug: 'write-blocker-usb',
+        description: 'Bloqueador de escritura hardware para análisis forense. Previene modificación de evidencia digital durante adquisición. Certificado para uso en tribunales.',
+        price: 149.99,
+        sku: 'WB-USB3-001',
+        categoryId: forensicsCategory.id,
+        images: ['https://www.cru-inc.com/products/wiebetech/'],
+        tags: ['forensics', 'write-blocker', 'evidence', 'legal'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS SEGURIDAD FISICA ===
+      {
+        name: 'Lockpick Set Profesional',
+        slug: 'lockpick-set-pro',
+        description: 'Set completo de lockpicking con 24 piezas: ganzuas, tension wrenches, y pick guns para bypass de cerraduras pin-tumbler y wafer. Incluye case de cuero.',
+        price: 89.99,
+        sku: 'LOCK-PRO-SET-001',
+        categoryId: physicalSecurityCategory.id,
+        images: ['https://www.sparrowslockpicks.com/'],
+        tags: ['lockpicking', 'physical', 'bypass', 'entry'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'RFID Duplicator PM3',
+        slug: 'rfid-duplicator-pm3',
+        description: 'Duplicador portatil de tarjetas RFID 125KHz. Copia badges de acceso en segundos. Incluye 10 tarjetas T5577 regrabables y llaveros.',
+        price: 69.99,
+        sku: 'RFID-DUP-PM3-001',
+        categoryId: physicalSecurityCategory.id,
+        images: ['https://www.aliexpress.com/'],
+        tags: ['rfid', 'access-control', 'duplication', 'physical'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS OSINT ===
+      {
+        name: 'Maltego Classic',
+        slug: 'maltego-classic',
+        description: 'Plataforma lider de OSINT para reconocimiento y analisis de relaciones entre personas, dominios, IPs y redes sociales. Licencia anual.',
+        price: 999.99,
+        sku: 'MALTEGO-CLASSIC-001',
+        categoryId: osintCategory.id,
+        images: ['https://www.maltego.com/'],
+        tags: ['osint', 'reconnaissance', 'intelligence', 'links'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: false,
+        licenseType: 'commercial',
+      },
+      {
+        name: 'Shodan Membership',
+        slug: 'shodan-membership',
+        description: 'Membresia anual a Shodan: el buscador de dispositivos conectados a Internet. Acceso a APIs, busquedas avanzadas y monitoreo de exposicion.',
+        price: 49.99,
+        sku: 'SHODAN-MEMBER-001',
+        categoryId: osintCategory.id,
+        images: ['https://www.shodan.io/'],
+        tags: ['osint', 'iot', 'reconnaissance', 'exposure'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: false,
+        licenseType: 'commercial',
+      },
+      // === NUEVOS PRODUCTOS CRIPTOGRAFIA ===
+      {
+        name: 'YubiKey 5 NFC',
+        slug: 'yubikey-5-nfc',
+        description: 'Llave de seguridad hardware FIDO2/U2F con soporte NFC. Autenticacion multifactor, almacenamiento de claves PGP y certificados.',
+        price: 49.99,
+        sku: 'YUBIKEY-5NFC-001',
+        categoryId: cryptoCategory.id,
+        images: ['https://www.yubico.com/'],
+        tags: ['cryptography', '2fa', 'hardware-key', 'fido2'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: true,
+      },
+      {
+        name: 'HSM NitroKey Pro',
+        slug: 'nitrokey-pro',
+        description: 'Hardware Security Module Open Source para almacenamiento seguro de claves criptograficas, firmas de email y cifrado de discos.',
+        price: 119.99,
+        sku: 'NITROKEY-PRO-001',
+        categoryId: cryptoCategory.id,
+        images: ['https://www.nitrokey.com/'],
+        tags: ['cryptography', 'hsm', 'encryption', 'open-source'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: true,
+      },
+      // === NUEVOS PRODUCTOS MALWARE ANALYSIS ===
+      {
+        name: 'REMnux Analysis VM',
+        slug: 'remnux-vm-pro',
+        description: 'Maquina virtual preconfigurada con toolkit completo para analisis de malware: IDA Pro, Ghidra, Radare2, Cuckoo Sandbox.',
+        price: 299.99,
+        sku: 'REMNUX-VM-PRO-001',
+        categoryId: malwareAnalysisCategory.id,
+        images: ['https://remnux.org/'],
+        tags: ['malware', 'analysis', 'reverse-engineering', 'sandbox'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: false,
+        licenseType: 'commercial',
+      },
+      {
+        name: 'Ghidra Pro Suite',
+        slug: 'ghidra-pro-suite',
+        description: 'Entorno de ingenieria inversa avanzado desarrollado por NSA. Incluye decompiladores para x86, ARM, y mas.',
+        price: 0.00,
+        sku: 'GHIDRA-PRO-001',
+        categoryId: malwareAnalysisCategory.id,
+        images: ['https://ghidra-sre.org/'],
+        tags: ['reverse-engineering', 'malware', 'disassembler', 'nsa'],
+        isActive: true,
+        difficulty: 'ADVANCED',
+        isPhysical: false,
+        licenseType: 'open-source',
+        downloadUrl: 'https://github.com/NationalSecurityAgency/ghidra',
+      },
+      // === NUEVOS PRODUCTOS SOCIAL ENGINEERING ===
+      {
+        name: 'GoPhish Enterprise',
+        slug: 'gophish-enterprise',
+        description: 'Plataforma de phishing simulation para entrenamiento de empleados. Reportes detallados, templates personalizables, y API REST.',
+        price: 499.99,
+        sku: 'GOPHISH-ENT-001',
+        categoryId: socialEngineeringCategory.id,
+        images: ['https://getgophish.com/'],
+        tags: ['phishing', 'social-engineering', 'training', 'awareness'],
+        isActive: true,
+        difficulty: 'INTERMEDIATE',
+        isPhysical: false,
+        licenseType: 'commercial',
+      },
+      {
+        name: 'BadUSB Social Kit',
+        slug: 'badusb-social-kit',
+        description: 'Kit de demostracion de ingenieria social: Rubber Ducky con payloads de HID que simulan teclados para pruebas de concientizacion.',
+        price: 149.99,
+        sku: 'BADUSB-SOC-001',
+        categoryId: socialEngineeringCategory.id,
+        images: ['https://shop.hak5.org/'],
+        tags: ['social-engineering', 'usb', 'awareness', 'training'],
+        isActive: true,
+        difficulty: 'BEGINNER',
+        isPhysical: true,
       },
     ],
     skipDuplicates: true,
@@ -255,7 +685,7 @@ async function main() {
   console.log('Admin user: admin@cybersec-store.com / admin123');
   console.log('Regular user: hacker@pro.com / user123');
   console.log(`Created ${products.length} cybersecurity products`);
-  console.log('Categories: Wireless Attacks, USB Hacking, Red Team, Network Monitoring, Hardware Implants, Digital Forensics');
+  console.log('Categories: Wireless Attacks, USB Hacking, Red Team, Network Monitoring, Hardware Implants, Digital Forensics, Seguridad Física, OSINT & Reconocimiento, Criptografía, Malware Analysis, Social Engineering');
 }
 
 main()
