@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCartStore } from '@/store/cart-store';
 import {
   Sheet,
@@ -7,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, Sparkles, Shield } from 'lucide-react';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -57,28 +58,53 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         {/* ── EMPTY STATE ─────────────────────────────────────── */}
         {items.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-7 fade-in">
-            <div className="w-16 h-16 rounded-full border border-black/10 flex items-center justify-center">
-              <ShoppingCart className="h-6 w-6 text-black/25" />
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-7">
+            {/* Icon */}
+            <div className="w-20 h-20 rounded-full bg-black/[0.03] border border-black/10 flex items-center justify-center">
+              <ShoppingCart className="h-8 w-8 text-black/40" />
             </div>
-            <div className="text-center space-y-1">
-              <p className="font-medium text-sm">Carrito vacío</p>
-              <p className="text-xs text-black/40">Aún no has agregado productos.</p>
+
+            {/* Text */}
+            <div className="text-center space-y-2">
+              <h3 className="font-medium text-base text-black/80">
+                Tu carrito está vacío
+              </h3>
+              <p className="text-sm text-black/50 max-w-[240px] leading-relaxed">
+                Explora nuestras herramientas de ciberseguridad y encuentra tu próximo equipo
+              </p>
             </div>
-            <button
-              onClick={onClose}
-              className="
-                group inline-flex items-center gap-2
-                bg-black text-white
-                rounded-full px-6 py-2.5
-                text-xs font-medium uppercase tracking-[0.2em]
-                hover:scale-[1.02] hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)]
-                transition-all duration-300
-              "
-            >
-              Explorar
-              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-            </button>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-2.5 w-full max-w-[200px]">
+              <Link
+                href="/products"
+                onClick={onClose}
+                className="
+                  w-full inline-flex items-center justify-center gap-2
+                  bg-black text-white
+                  rounded-full px-5 py-2.5
+                  text-sm font-medium
+                  hover:bg-black/80
+                  transition-colors
+                "
+              >
+                Explorar productos
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              
+              <Link
+                href="/categories"
+                onClick={onClose}
+                className="
+                  w-full inline-flex items-center justify-center
+                  text-sm text-black/50
+                  hover:text-black/80
+                  transition-colors
+                "
+              >
+                Ver categorías
+              </Link>
+            </div>
           </div>
         )}
 
@@ -147,11 +173,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     {/* Price */}
                     <div className="text-right">
                       <p className="text-sm font-semibold tabular-nums">
-                        ${(Number(item.product.price) * item.quantity).toFixed(2)}
+                        ${((typeof item.product.price === 'number' ? item.product.price : item.product.price?.amount || 0) * item.quantity).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-[10px] text-black/30 tabular-nums">
-                          ${Number(item.product.price).toFixed(2)} c/u
+                          ${(typeof item.product.price === 'number' ? item.product.price : item.product.price?.amount || 0).toFixed(2)} c/u
                         </p>
                       )}
                     </div>

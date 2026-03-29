@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/store/cart-store';
-import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export function CartPage() {
@@ -23,63 +23,103 @@ export function CartPage() {
   /* ── EMPTY STATE ─────────────────────────────────────────────── */
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex flex-col relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+
         {/* Top label */}
-        <div className="max-w-6xl mx-auto w-full px-6 lg:px-12 pt-16 flex items-center justify-between">
-          <span className="uppercase tracking-[0.4em] text-xs text-black/35 font-medium">
+        <div className="max-w-6xl mx-auto w-full px-6 lg:px-12 pt-16 flex items-center justify-between relative z-10">
+          <span className="uppercase tracking-[0.4em] text-xs text-slate-400 font-medium flex items-center gap-2">
+            <Zap className="h-3 w-3 text-emerald-500" />
             Hack 6
           </span>
-          <span className="uppercase tracking-[0.4em] text-xs text-black/35 font-medium">
+          <span className="uppercase tracking-[0.4em] text-xs text-slate-400 font-medium">
             Carrito
           </span>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-8">
-          <div className="w-20 h-20 rounded-full border border-black/10 flex items-center justify-center">
-            <ShoppingCart className="w-8 h-8 text-black/25" />
+        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-10 relative z-10">
+          {/* Animated icon container */}
+          <div className="relative">
+            <div className="absolute inset-0 animate-ping opacity-10">
+              <div className="w-32 h-32 rounded-full border-2 border-emerald-400" />
+            </div>
+            <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-emerald-50 to-cyan-50 border border-emerald-200 flex items-center justify-center relative shadow-xl shadow-emerald-500/10">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/5 to-cyan-500/5" />
+              <div className="absolute inset-2 rounded-xl border border-emerald-200/50" />
+              <ShoppingCart className="w-14 h-14 text-emerald-600 relative z-10" />
+            </div>
+            {/* Floating sparkles */}
+            <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-amber-400 animate-pulse" />
+            <div className="absolute -bottom-1 -left-3 w-4 h-4 rounded-full bg-cyan-400/30 animate-bounce" />
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-3xl font-semibold tracking-[-0.02em]">
-              Carrito vacío
-            </h2>
-            <p className="text-sm text-black/40 max-w-xs">
-              Aún no has agregado productos a tu carrito.
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-4xl font-bold tracking-tight text-slate-800">
+                Tu carrito está vacío
+              </h2>
+              <Shield className="h-6 w-6 text-emerald-500" />
+            </div>
+            <p className="text-base text-slate-500 max-w-md leading-relaxed">
+              Aún no has agregado productos. Explora nuestras herramientas de ciberseguridad profesional y encuentra tu próximo equipo hacking.
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/products"
               className="
                 group inline-flex items-center gap-2
-                bg-black text-white
-                rounded-full px-7 py-3
-                text-sm font-medium
-                hover:scale-[1.02] hover:shadow-[0_10px_40px_rgba(0,0,0,0.18)]
+                bg-gradient-to-r from-slate-900 to-slate-800 text-white
+                rounded-xl px-8 py-4
+                text-sm font-semibold
+                shadow-lg shadow-slate-900/20
+                hover:shadow-xl hover:shadow-emerald-500/20
+                hover:scale-[1.02] hover:from-emerald-600 hover:to-cyan-600
                 transition-all duration-300
               "
             >
-              Ver productos
+              <Shield className="h-4 w-4" />
+              Explorar productos
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               href="/categories"
               className="
-                inline-flex items-center
-                border border-black/20
-                rounded-full px-7 py-3
-                text-sm font-medium text-black/70
-                hover:border-black/40 hover:text-black
+                inline-flex items-center justify-center gap-2
+                bg-white border border-slate-200
+                rounded-xl px-8 py-4
+                text-sm font-semibold text-slate-600
+                shadow-sm
+                hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50
+                hover:shadow-md
                 transition-all duration-300
               "
             >
-              Categorías
+              Ver categorías
             </Link>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="flex items-center gap-6 text-xs text-slate-400 mt-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Envío gratis +$100
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              Garantía extendida
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Soporte 24/7
+            </div>
           </div>
         </div>
 
-        <div className="h-px bg-black/10 mx-6 lg:mx-12 mb-16" />
+        <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mx-6 lg:mx-12 mb-16 relative z-10" />
       </div>
     );
   }
@@ -177,11 +217,11 @@ export function CartPage() {
                     {/* Price */}
                     <div className="text-right">
                       <p className="font-semibold tabular-nums">
-                        ${(Number(item.product.price) * item.quantity).toFixed(2)}
+                        ${((typeof item.product.price === 'number' ? item.product.price : item.product.price?.amount || 0) * item.quantity).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-xs text-black/35 tabular-nums">
-                          ${Number(item.product.price).toFixed(2)} c/u
+                          ${(typeof item.product.price === 'number' ? item.product.price : item.product.price?.amount || 0).toFixed(2)} c/u
                         </p>
                       )}
                     </div>
