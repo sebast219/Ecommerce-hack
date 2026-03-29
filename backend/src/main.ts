@@ -37,7 +37,13 @@ async function bootstrap() {
 
   // EJEMPLO: Configuración CORS
   app.enableCors({
-    origin: configService.get('cors.origin'),
+    origin: [
+      configService.get('cors.origin'),
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:62699',
+      'http://127.0.0.1:62699',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

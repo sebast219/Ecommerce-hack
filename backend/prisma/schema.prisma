@@ -38,8 +38,47 @@ model User {
   refreshTokens RefreshToken[]
   reviews   ProductReview[]
   wishlist  WishlistItem[]
+  addresses Address[]
+  paymentMethods PaymentMethod[]
 
   @@map("users")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  label     String   @default("Mi dirección")
+  street    String
+  city      String
+  state     String
+  zipCode   String?
+  phone     String?
+  isDefault Boolean  @default(false)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model PaymentMethod {
+  id          String   @id @default(cuid())
+  brand       String   // visa, mastercard, amex
+  last4       String   // últimos 4 dígitos
+  expiryMonth String
+  expiryYear  String
+  bank        String?  // bancolombia, davivienda, etc
+  isDefault   Boolean  @default(false)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("payment_methods")
 }
 
 model Category {

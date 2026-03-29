@@ -6,12 +6,11 @@ import {
   Post,
   Body,
   Get,
-  Param,
-  Patch,
-  Delete,
+  Put,
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,11 +25,9 @@ import {
   CreateUserRequest,
   LoginRequest,
 } from '../../application/use-cases/auth/create-user.use-case';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 // EJEMPLO: DTOs para validación de entrada
 export class CreateUserDto implements CreateUserRequest {
@@ -63,6 +60,16 @@ export class LoginDto implements LoginRequest {
   password: string;
 }
 
+export class ChangePasswordDto {
+  @IsString()
+  @MinLength(1)
+  currentPassword: string;
+
+  @IsString()
+  @MinLength(8)
+  newPassword: string;
+}
+
 // EJEMPLO: Controller de autenticación
 @ApiTags('Auth')
 @Controller('auth')
@@ -70,6 +77,7 @@ export class AuthController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   // EJEMPLO: Endpoint de registro
@@ -115,6 +123,68 @@ export class AuthController {
           refreshToken: result.refreshToken,
         },
         message: 'Login successful',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
+  // Endpoint de cambiar contraseña
+  @Put('password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 401, description: 'Current password incorrect' })
+  async changePassword(
+    @Req() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    try {
+      // Get user with password
+      const user = await this.prisma.user.findUnique({
+        where: { id: req.user.userId },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'Usuario no encontrado',
+        };
+      }
+
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(
+        changePasswordDto.currentPassword,
+        user.password,
+      );
+
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: 'Contraseña actual incorrecta',
+        };
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(
+        changePasswordDto.newPassword,
+        10,
+      );
+
+      // Update password
+      await this.prisma.user.update({
+        where: { id: req.user.userId },
+        data: { password: hashedPassword },
+      });
+
+      return {
+        success: true,
+        message: 'Contraseña actualizada exitosamente',
       };
     } catch (error) {
       return {

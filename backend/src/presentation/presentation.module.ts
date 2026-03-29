@@ -3,7 +3,9 @@
 
 import { Module } from '@nestjs/common';
 import { ApplicationModule } from '../application/application.module';
+import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { AuthController } from './controllers/auth.controller';
+import { UsersController } from './controllers/users.controller';
 import { ProductsController, CategoriesController } from './controllers/products.controller';
 import { CartController, WishlistController } from './controllers/cart.controller';
 import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
@@ -59,9 +61,11 @@ export {
 @Module({
   imports: [
     ApplicationModule,
+    InfrastructureModule,
   ],
   controllers: [
     AuthController,
+    UsersController,
     ProductsController,
     CategoriesController,
     CartController,
