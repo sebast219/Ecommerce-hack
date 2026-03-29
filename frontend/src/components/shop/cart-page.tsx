@@ -337,7 +337,8 @@ export function CartPage() {
 
             {/* Checkout */}
             <div className="px-7 py-6 space-y-3">
-              <button
+              <Link
+                href="/checkout"
                 className="
                   group w-full h-12 rounded-full
                   bg-black text-white
@@ -349,7 +350,7 @@ export function CartPage() {
               >
                 Proceder al pago
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
 
               <p className="text-center text-[10px] uppercase tracking-[0.25em] text-black/25">
                 Pago seguro · Encriptación SSL

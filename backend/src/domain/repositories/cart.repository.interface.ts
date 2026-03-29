@@ -21,6 +21,7 @@ export interface ICartRepository {
   // Métodos específicos
   findOrCreateCart(sessionId?: string, userId?: string): Promise<Cart>;
   findCartWithItems(cartId: string): Promise<Cart | null>;
+  findCartWithItemsByUserId(userId: string): Promise<Cart | null>;
   clearCart(cartId: string): Promise<void>;
   
   // Métodos de existencia

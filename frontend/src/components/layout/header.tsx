@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Search, Menu, X, LogOut } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
@@ -100,6 +100,24 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
+            {/* Admin Dashboard Icon */}
+            {user?.role === 'ADMIN' && (
+              <Link
+                href="/admin/dashboard"
+                className="
+                  hidden sm:flex
+                  p-2 rounded-full
+                  text-black/80
+                  transition-all duration-300
+                  hover:bg-gray-100
+                  hover:text-black
+                "
+                title="Dashboard"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+              </Link>
+            )}
+
             {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
@@ -144,6 +162,15 @@ export function Header() {
                 {/* User Dropdown Menu */}
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    {user.role === 'ADMIN' && (
+                      <Link
+                        href="/admin/dashboard"
+                        className="block px-4 py-2 text-sm text-black/70 hover:bg-gray-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    )}
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-black/70 hover:bg-gray-50 transition-colors"

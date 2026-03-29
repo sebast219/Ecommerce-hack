@@ -1,78 +1,137 @@
-// CART STORE - EJERCICIO PRÁCTICO
-// OBJETIVO: Aprender a manejar estado global con Zustand
-
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { CartItem, Product } from '@/types/cart';
 
-// TODO: Define la interfaz de tu store
 interface CartStore {
   items: CartItem[];
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
+  setItems: (items: CartItem[]) => void;
   addItem: (product: Product, quantity?: number) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
+  removeItem: (itemId: string) => void;
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
+  syncWithUser: (userId: string | null) => void;
 }
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+// Storage key generator based on userId
+const getStorageKey = (userId: string | null) => {
+  return userId ? `cart-storage-${userId}` : 'cart-storage-guest';
+};
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      
-      // TODO: Implementa addItem paso a paso
+      userId: null,
+
+      setUserId: (userId: string | null) => {
+        set({ userId });
+      },
+
+      setItems: (items: CartItem[]) => {
+        set({ items });
+      },
+
+      // Sync cart when user changes (login/logout)
+      syncWithUser: (newUserId: string | null) => {
+        const { userId: currentUserId, items } = get();
+        
+        // If user changed
+        if (newUserId !== currentUserId) {
+          console.log(`[CART] User changed from ${currentUserId || 'guest'} to ${newUserId || 'guest'}`);
+          
+          // Save current cart to old user key before switching
+          if (currentUserId) {
+            localStorage.setItem(getStorageKey(currentUserId), JSON.stringify({ state: { items, userId: currentUserId } }));
+          }
+          
+          // Try to load cart for new user
+          const newUserCart = localStorage.getItem(getStorageKey(newUserId));
+          if (newUserCart) {
+            const parsed = JSON.parse(newUserCart);
+            set({ items: parsed.state?.items || [], userId: newUserId });
+          } else {
+            // No cart for this user, start fresh
+            set({ items: [], userId: newUserId });
+          }
+        }
+      },
+
       addItem: (product: Product, quantity = 1) => {
-        // PASO 1: Verificar si el producto ya existe en el carrito
-        // - Usa find() para buscar el item por product.id
-        // - const existingItem = state.items.find(...)
+        const { items, userId } = get();
         
-        // PASO 2: Si existe, actualizar cantidad
-        // - Usa map() para actualizar el item existente
-        // - Si no existe, agregar nuevo item al array
+        console.log(`[CART] Adding item for user ${userId || 'guest'}:`, product.name);
         
-        // PASO 3: Actualizar el estado con set()
-        // - Ejemplo: set((state) => ({ items: [...] }))
+        const existingItem = items.find((item) => item.product.id === product.id);
+
+        if (existingItem) {
+          set({
+            items: items.map((item) =>
+              item.id === existingItem.id
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            ),
+          });
+        } else {
+          const newItem: CartItem = {
+            id: generateId(),
+            product,
+            quantity,
+            addedAt: new Date().toISOString(),
+          };
+          set({ items: [...items, newItem] });
+        }
       },
-      
-      // TODO: Implementa removeItem
-      removeItem: (id: string) => {
-        // PASO 1: Filtrar el array para remover el item
-        // - Usa filter() para excluir el item con el id especificado
-        // - Ejemplo: items.filter(item => item.id !== id)
+
+      updateQuantity: (itemId: string, quantity: number) => {
+        const { items } = get();
+        if (quantity <= 0) {
+          set({ items: items.filter((item) => item.id !== itemId) });
+        } else {
+          set({
+            items: items.map((item) =>
+              item.id === itemId ? { ...item, quantity } : item
+            ),
+          });
+        }
       },
-      
-      // TODO: Implementa updateQuantity
-      updateQuantity: (id: string, quantity: number) => {
-        // PASO 1: Encontrar y actualizar el item
-        // - Usa map() para encontrar el item y actualizar su cantidad
-        // - Validar que quantity > 0
+
+      removeItem: (itemId: string) => {
+        const { items } = get();
+        set({ items: items.filter((item) => item.id !== itemId) });
       },
-      
-      // TODO: Implementa clearCart
+
       clearCart: () => {
-        // PASO 1: Limpiar el array de items
-        // - Ejemplo: set({ items: [] })
+        const { userId } = get();
+        console.log(`[CART] Clearing cart for user ${userId || 'guest'}`);
+        set({ items: [] });
       },
-      
-      // TODO: Implementa getTotal
+
       getTotal: () => {
-        // PASO 1: Calcular el total del carrito
-        // - Usa reduce() para sumar (price * quantity) de cada item
-        // - Ejemplo: get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0)
-        return 0; // Temporal
+        const { items } = get();
+        return items.reduce((total, item) => {
+          const price = typeof item.product.price === 'number' 
+            ? item.product.price 
+            : item.product.price?.amount || 0;
+          return total + price * item.quantity;
+        }, 0);
       },
-      
-      // TODO: Implementa getItemCount
+
       getItemCount: () => {
-        // PASO 1: Contar el total de items en el carrito
-        // - Usa reduce() para sumar las cantidades
-        // - Ejemplo: get().items.reduce((total, item) => total + item.quantity, 0)
-        return 0; // Temporal
+        const { items } = get();
+        return items.reduce((count, item) => count + item.quantity, 0);
       },
     }),
     {
-      name: 'cart-storage', // Nombre en localStorage
+      name: 'cart-storage',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

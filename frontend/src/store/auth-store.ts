@@ -91,6 +91,12 @@ export const useAuthStore = create<AuthStore>()(
 
           });
 
+          // Sincronizar carrito con el nuevo usuario
+          setTimeout(() => {
+            const { syncWithUser } = require('./cart-store').useCartStore.getState();
+            syncWithUser(userData?.id || null);
+          }, 0);
+
         } catch (error) {
 
           throw error;
@@ -127,6 +133,13 @@ export const useAuthStore = create<AuthStore>()(
             refreshToken: data.refresh_token || data.data?.refreshToken,
             isAuthenticated: true,
           });
+          
+          // Sincronizar carrito con el nuevo usuario
+          setTimeout(() => {
+            const userId = (data.data || data.user)?.id;
+            const { syncWithUser } = require('./cart-store').useCartStore.getState();
+            syncWithUser(userId || null);
+          }, 0);
         } catch (error: any) {
           throw new Error(error.message || 'Error al registrarse');
         }
@@ -135,7 +148,10 @@ export const useAuthStore = create<AuthStore>()(
       
 
       logout: () => {
-
+        // Sincronizar carrito antes de cerrar sesión (cambiar a guest)
+        const { syncWithUser } = require('./cart-store').useCartStore.getState();
+        syncWithUser(null);
+        
         set({
 
           user: null,

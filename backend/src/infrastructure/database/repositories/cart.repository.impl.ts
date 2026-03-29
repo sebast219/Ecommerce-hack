@@ -130,6 +130,19 @@ export class CartRepositoryImpl implements ICartRepository {
     return prismaCart ? this.mapPrismaCartToCart(prismaCart) : null;
   }
 
+  async findCartWithItemsByUserId(userId: string): Promise<Cart | null> {
+    const cartItem = await this.prisma.cartItem.findFirst({
+      where: { userId },
+      select: { cartId: true },
+    });
+
+    if (!cartItem) {
+      return null;
+    }
+
+    return this.findCartWithItems(cartItem.cartId);
+  }
+
   async clearCart(cartId: string): Promise<void> {
     await this.prisma.cartItem.deleteMany({
       where: { cartId },

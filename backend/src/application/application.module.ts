@@ -11,6 +11,11 @@ import {
   UpdateCartItemUseCase,
   RemoveFromCartUseCase,
 } from './use-cases/cart/manage-cart.use-case';
+import {
+  CreateOrderUseCase,
+  GetUserOrdersUseCase,
+  GetOrderUseCase,
+} from './use-cases/orders/manage-orders.use-case';
 
 @Module({
   imports: [
@@ -25,6 +30,9 @@ import {
     AddToCartUseCase,
     UpdateCartItemUseCase,
     RemoveFromCartUseCase,
+    CreateOrderUseCase,
+    GetUserOrdersUseCase,
+    GetOrderUseCase,
   ],
   exports: [
     GetProductsUseCase,
@@ -35,6 +43,9 @@ import {
     AddToCartUseCase,
     UpdateCartItemUseCase,
     RemoveFromCartUseCase,
+    CreateOrderUseCase,
+    GetUserOrdersUseCase,
+    GetOrderUseCase,
   ],
 })
 export class ApplicationModule {}

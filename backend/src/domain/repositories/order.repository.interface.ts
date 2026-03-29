@@ -8,6 +8,9 @@ import {
   OrderStatus,
   PaymentStatus,
 } from '../entities/order.entity';
+import { Money } from '../entities/user.entity';
+
+export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
 
 export interface IOrderRepository {
   // Métodos CRUD básicos
@@ -24,12 +27,21 @@ export interface IOrderRepository {
   findByDateRange(startDate: Date, endDate: Date): Promise<Order[]>;
   findByOrderNumber(orderNumber: string): Promise<Order | null>;
   generateOrderNumber(): Promise<string>;
-  
+
   // Métodos de consulta avanzada
   findWithItems(orderId: string): Promise<Order | null>;
   findWithPayment(orderId: string): Promise<Order | null>;
   findUserOrdersWithDetails(userId: string): Promise<Order[]>;
-  
+
+  // Métodos para items y pagos
+  createOrderItem(itemData: {
+    orderId: string;
+    productId: string;
+    quantity: number;
+    price: Money;
+  }): Promise<OrderItem>;
+  createPayment(paymentData: Omit<Payment, 'id'>): Promise<Payment>;
+
   // Métodos de existencia
   existsByOrderNumber(orderNumber: string): Promise<boolean>;
 }

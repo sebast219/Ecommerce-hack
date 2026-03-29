@@ -8,6 +8,7 @@ import { AuthController } from './controllers/auth.controller';
 import { UsersController } from './controllers/users.controller';
 import { ProductsController, CategoriesController } from './controllers/products.controller';
 import { CartController, WishlistController } from './controllers/cart.controller';
+import { OrderController } from './controllers/order.controller';
 import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
 
 // Categories controller - verificar si está en products.controller
@@ -70,6 +71,7 @@ export {
     CategoriesController,
     CartController,
     WishlistController,
+    OrderController,
   ],
   providers: [
     // JwtAuthGuard,
