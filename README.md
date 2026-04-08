@@ -17,7 +17,172 @@ Plataforma de comercio electrónico especializada en herramientas de ciberseguri
 Frontend (Next.js) ↔ API REST (NestJS) ↔ PostgreSQL (Prisma)
 ```
 
-## 🚀 Inicio Rápido
+## 🎨 Decisiones de Diseño y Arquitectura
+
+### 🎯 Propósito y Visión del Proyecto
+
+**¿Por qué una plataforma de ciberseguridad?**
+- **Nicho especializado**: El mercado de herramientas de ciberseguridad está en crecimiento constante
+- **Público objetivo**: Profesionales de pentesting, investigadores de seguridad, estudiantes de ciberseguridad
+- **Diferenciación**: Enfocarse exclusivamente en herramientas técnicas con especificaciones detalladas
+
+### 🏗️ Arquitectura Clean Architecture
+
+**¿Por qué Clean Architecture?**
+- **Separación de responsabilidades**: Cada capa tiene un propósito definido y no depende de otras
+- **Testabilidad**: La lógica de negocio está completamente aislada de infraestructura
+- **Mantenimiento**: Cambios en base de datos o APIs no afectan el core del negocio
+- **Escalabilidad**: Permite agregar nuevas funcionalidades sin romper código existente
+
+**Capas implementadas:**
+1. **Domain**: Entidades puras (User, Product, Order) sin dependencias externas
+2. **Application**: Casos de uso y lógica de negocio
+3. **Infrastructure**: Base de datos (Prisma), APIs externas
+4. **Presentation**: Controllers, middleware y API REST
+
+### 🎨 Diseño Visual y UX/UI
+
+#### **Esquema de Colores**
+- **Primario (#1F2937 - Gris Oscuro)**: Transmite seriedad y profesionalismo técnico
+- **Acento (#10B981 - Verde Esmeralda)**: Representa seguridad, confianza y éxito
+- **Secundario (#3B82F6 - Azul)**: Tecnología, confianza y estabilidad
+- **Neutros (#F9FAFB, #E5E7EB)**: Fondo limpio y legibilidad óptima
+
+**¿Por qué estos colores?**
+- **Grises oscuros**: Asociados con interfaces técnicas y herramientas de desarrollo
+- **Verde esmeralda**: Color universalmente reconocido como "seguro" en sistemas informáticos
+- **Azul tecnológico**: Evoca innovación y confiabilidad en productos digitales
+- **Alto contraste**: Garantiza accesibilidad y legibilidad en diferentes dispositivos
+
+#### **Tipografía**
+- **Inter**: Fuente moderna y legible optimizada para interfaces digitales
+- **Jerarquía clara**: Diferenciación visual entre títulos, subtítulos y contenido
+- **Consistencia**: Sistema de espaciado basado en múltiplos de 4px
+
+### 🛍️ Funcionalidades Específicas
+
+#### **Catálogo de Productos Técnico**
+**¿Por qué filtros especializados?**
+- **Categorías por tipo de ataque**: Wireless, USB, Red Team, Forense
+- **Filtros técnicos**: Nivel de dificultad, compatibilidad, requerimientos
+- **Especificaciones detalladas**: Cada producto incluye specs técnicas relevantes
+
+#### **Sistema de Autenticación Robusto**
+**¿Por qué JWT con refresh tokens?**
+- **Stateless**: Escalabilidad horizontal sin sesiones en servidor
+- **Refresh tokens**: Balance entre seguridad y experiencia de usuario
+- **Roles y permisos**: Jerarquía de acceso (Admin, User, Vendor)
+
+#### **Carrito Persistente**
+**¿Por qué carrito en base de datos?**
+- **Multi-dispositivo**: Usuarios pueden continuar compras en diferentes dispositivos
+- **Recuperación**: Carritos abandonados pueden ser recuperados
+- **Análisis**: Datos para entender comportamiento de compra
+
+### � Decisiones Técnicas y Mejores Prácticas
+
+#### **Stack Tecnológico Seleccionado**
+
+**Frontend - Next.js 14**
+- **¿Por qué Next.js?**: Renderizado híbrido, optimización automática, routing file-based
+- **App Router**: Estructura intuitiva y mejor performance
+- **TypeScript**: Seguridad de tipos y mejor experiencia de desarrollo
+- **Tailwind CSS**: Diseño utility-first, consistencia y mantenibilidad
+
+**Backend - NestJS**
+- **¿Por qué NestJS?**: Arquitectura modular, inyección de dependencias, TypeScript nativo
+- **Decorators**: Código declarativo y auto-documentación
+- **Middleware pipeline**: Control granular de requests
+- **Testing integrado**: Soporte nativo para unit y e2e tests
+
+**Base de Datos - PostgreSQL + Prisma**
+- **PostgreSQL**: Robustez, transacciones ACID, soporte para JSON
+- **Prisma ORM**: Type-safe queries, migrations automáticas, excelente DX
+- **Relaciones optimizadas**: Estructura normalizada para performance
+
+#### **Estado Global - Zustand**
+
+**¿Por qué Zustand sobre Redux?**
+- **Simplicidad**: Menos boilerplate y curva de aprendizaje más suave
+- **TypeScript-first**: Inferencia de tipos automática
+- **Performance**: Re-renderizados optimizados por defecto
+- **Bundle size**: Más ligero que alternativas complejas
+
+#### **Validación de Formularios - React Hook Form + Zod**
+
+**¿Por qué esta combinación?**
+- **React Hook Form**: Performance óptima, re-renderizados mínimos
+- **Zod**: Validación type-safe, inferencia automática de tipos
+- **Integración perfecta**: Compatibilidad nativa entre ambas librerías
+- **Experiencia de usuario**: Validación en tiempo real sin afectar performance
+
+### 🎨 Componentes y Patrones de Diseño
+
+#### **Diseño Atómico**
+- **Atoms**: Botones, inputs, badges (elementos básicos)
+- **Molecules**: Cards de productos, formularios de búsqueda
+- **Organisms**: Header con navegación, grids de productos
+- **Templates**: Layouts de página, estructura de checkout
+- **Pages**: Implementaciones específicas con datos reales
+
+#### **Responsive Design**
+- **Mobile-first**: Diseño optimizado para móviles primero
+- **Breakpoints consistentes**: sm(640px), md(768px), lg(1024px), xl(1280px)
+- **Grid system**: Basado en CSS Grid y Flexbox
+- **Touch-friendly**: Tamaños de click mínimos de 44px
+
+#### **Accesibilidad (a11y)**
+- **Semantic HTML**: Uso correcto de elementos header, nav, main, section
+- **ARIA labels**: Descriptivos para screen readers
+- **Keyboard navigation**: Navegación completa sin mouse
+- **Color contrast**: Ratio mínimo de 4.5:1 para WCAG AA
+
+### � Consideraciones de Seguridad y Negocio
+
+#### **Seguridad Implementada**
+
+**Autenticación y Autorización**
+- **JWT con RS256**: Firmas asimétricas para mayor seguridad
+- **Refresh tokens rotativos**: Previene token reuse attacks
+- **Rate limiting**: Protección contra brute force
+- **Password hashing**: bcrypt con salt rounds configurables
+- **CORS configurado**: Restricción de dominios permitidos
+
+**Validación y Sanitización**
+- **Input validation**: Zod schemas en todos los endpoints
+- **SQL injection prevention**: Prisma ORM con parameterized queries
+- **XSS protection**: Content Security Policy headers
+- **File upload security**: Validación de tipos y tamaños
+
+#### **Decisiones de Negocio**
+
+**Modelo de SaaS Especializado**
+- **B2B focus**: Empresas de ciberseguridad como clientes principales
+- **Suscripciones**: Modelo recurrente para herramientas y actualizaciones
+- **Marketplace**: Plataforma para vendedores verificados
+- **Certificaciones**: Integración con programas de certificación técnica
+
+**Experiencia de Usuario Técnica**
+- **Especificaciones detalladas**: Fichas técnicas completas para cada producto
+- **Comparativas**: Side-by-side de herramientas similares
+- **Reviews técnicos**: Validación por profesionales certificados
+- **Tutoriales integrados**: Guías de uso y mejores prácticas
+
+#### **Escalabilidad y Performance**
+
+**Frontend Optimization**
+- **Code splitting**: Carga dinámica por ruta
+- **Image optimization**: Next.js Image component con lazy loading
+- **Bundle analysis**: Optimización continua del tamaño del bundle
+- **CDN integration**: Distribución global de assets
+
+**Backend Performance**
+- **Database indexing**: Índices optimizados para queries frecuentes
+- **Caching strategy**: Redis para sesiones y datos cacheables
+- **Connection pooling**: Gestión eficiente de conexiones a BD
+- **API rate limiting**: Protección y distribución equitativa de recursos
+
+### �🚀 Inicio Rápido
 
 ### Prerrequisitos
 - Node.js 18+
