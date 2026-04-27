@@ -5,7 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'your-production-domain.com'],
     formats: ['image/webp', 'image/avif'],
   },
   env: {
