@@ -5,7 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   images: {
-    domains: ['localhost', 'your-production-domain.com'],
+    domains: ['localhost', 'ecommerce-hack-ltzy.vercel.app', 'images.unsplash.com'],
     formats: ['image/webp', 'image/avif'],
   },
   env: {
