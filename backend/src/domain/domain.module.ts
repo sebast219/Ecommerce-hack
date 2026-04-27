@@ -2,6 +2,7 @@
 // PROPÓSITO: Exportar todas las entidades, repositorios y servicios del dominio
 
 import { Module } from '@nestjs/common';
+import { EcommerceRulesService } from './services/ecommerce-rules.service';
 
 // EJEMPLO: Exportar entidades del dominio
 export {
@@ -26,16 +27,19 @@ export {
   ProductDomainService,
   OrderDomainService,
 } from './services/user.domain.service';
+export { EcommerceRulesService } from './services/ecommerce-rules.service';
 
 @Module({
   providers: [
     // EJEMPLO: Servicios de dominio (inyectables en Application layer)
+    EcommerceRulesService,
     // UserDomainService,
     // ProductDomainService,
     // OrderDomainService,
   ],
   exports: [
     // EJEMPLO: Exportar servicios para que otros módulos puedan inyectarlos
+    EcommerceRulesService,
     // UserDomainService,
     // ProductDomainService,
     // OrderDomainService,

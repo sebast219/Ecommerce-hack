@@ -5,14 +5,22 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './presentation/filters/http-exception.filter';
 import { LoggingInterceptor } from './presentation/interceptors/logging.interceptor';
 import { TransformInterceptor } from './presentation/interceptors/transform.interceptor';
+import { SecurityInterceptor } from './presentation/interceptors/security.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
+
+  // Servir archivos estáticos de uploads
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   // EJEMPLO: Filtros globales
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -33,6 +41,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
     new TransformInterceptor(),
+    new SecurityInterceptor(),
   );
 
   // EJEMPLO: Configuración CORS
@@ -41,6 +50,8 @@ async function bootstrap() {
       configService.get('cors.origin'),
       'http://localhost:3000',
       'http://127.0.0.1:3000',
+      'http://localhost:3002',
+      'http://127.0.0.1:3002',
       'http://localhost:62699',
       'http://127.0.0.1:62699',
     ],

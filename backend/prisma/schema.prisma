@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -17,14 +17,14 @@ model User {
   firstName String
   lastName  String
   phone     String?
-  role      UserRole @default(USER)
+  role      String @default("USER")
   avatar    String?
   
   // Cybersecurity specific fields
   bio       String?     // professional bio
   company   String?     // company name
-  experienceLevel ExperienceLevel @default(BEGINNER)
-  certifications String[] // security certifications
+  experienceLevel String @default("BEGINNER")
+  certifications String // JSON string array
   linkedinProfile String?
   githubProfile  String?
   isVerified     Boolean @default(false)
@@ -105,26 +105,26 @@ model Product {
   name        String
   slug        String      @unique
   description String?
-  price       Decimal     @db.Decimal(10, 2)
-  comparePrice Decimal?  @db.Decimal(10, 2)
-  cost        Decimal?    @db.Decimal(10, 2)
+  price       Float
+  comparePrice Float?
+  cost        Float?
   sku         String      @unique
   barcode     String?
   trackInventory Boolean @default(true)
   isActive    Boolean     @default(true)
-  images      String[]
-  tags        String[]
-  weight      Decimal?    @db.Decimal(8, 3)
-  dimensions  Json?
+  images      String     // JSON string array
+  tags        String     // JSON string array
+  weight      Float?
+  dimensions  String?
   seoTitle    String?
   seoDescription String?
   
   // Cybersecurity specific fields
-  difficulty  ProductDifficulty @default(BEGINNER)
+  difficulty  String @default("BEGINNER")
   licenseType String?     // open-source, commercial, educational
-  compatibility String[]   // windows, linux, mac, android, ios
-  requirements Json?      // system requirements
-  tutorials   String[]    // tutorial URLs or references
+  compatibility String     // JSON string array
+  requirements String?      // JSON string
+  tutorials   String      // JSON string array
   isPhysical  Boolean     @default(true)
   downloadUrl String?     // for digital products
   
@@ -191,21 +191,21 @@ model CartItem {
 model Order {
   id            String      @id @default(cuid())
   orderNumber   String      @unique
-  status        OrderStatus @default(PENDING)
+  status        String @default("PENDING")
   currency      String      @default("USD")
-  subtotal      Decimal     @db.Decimal(10, 2)
-  tax           Decimal     @db.Decimal(10, 2) @default(0)
-  shipping      Decimal     @db.Decimal(10, 2) @default(0)
-  discount      Decimal     @db.Decimal(10, 2) @default(0)
-  total         Decimal     @db.Decimal(10, 2)
+  subtotal      Float
+  tax           Float @default(0)
+  shipping      Float @default(0)
+  discount      Float @default(0)
+  total         Float
   notes         String?
   
   // Shipping Information
   shippingName    String
   shippingEmail   String
   shippingPhone   String?
-  shippingAddress Json
-  billingAddress  Json?
+  shippingAddress String
+  billingAddress  String?
   
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -223,7 +223,7 @@ model Order {
 model OrderItem {
   id       String @id @default(cuid())
   quantity Int
-  price    Decimal @db.Decimal(10, 2)
+  price    Float
   
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -237,12 +237,12 @@ model OrderItem {
 model Payment {
   id            String       @id @default(cuid())
   orderId       String       @unique
-  amount        Decimal      @db.Decimal(10, 2)
+  amount        Float
   currency      String       @default("USD")
-  status        PaymentStatus @default(PENDING)
+  status        String @default("PENDING")
   provider      String
   providerId    String?
-  providerData  Json?
+  providerData  String?
   failureReason String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -302,45 +302,4 @@ model WishlistItem {
   @@map("wishlist_items")
 }
 
-// Enums
-enum UserRole {
-  USER
-  ADMIN
-  VENDOR
-  MODERATOR
-  INSTRUCTOR
-}
-
-enum ExperienceLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  EXPERT
-}
-
-enum ProductDifficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  EXPERT
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-  DIGITAL_DELIVERY
-}
-
-enum PaymentStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-  CANCELLED
-  REFUNDED
-}
+// Note: Enums converted to strings for SQLite compatibility

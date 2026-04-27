@@ -70,17 +70,17 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
         barcode: productData.barcode,
         trackInventory: productData.trackInventory,
         isActive: productData.isActive,
-        images: productData.images,
-        tags: productData.tags,
+        images: JSON.stringify(productData.images),
+        tags: JSON.stringify(productData.tags),
         weight: productData.weight,
         dimensions: productData.dimensions as any, // Cast a any para compatibilidad con Prisma JsonValue
         seoTitle: productData.seoTitle,
         seoDescription: productData.seoDescription,
         difficulty: productData.difficulty,
         licenseType: productData.licenseType,
-        compatibility: productData.compatibility,
+        compatibility: JSON.stringify(productData.compatibility),
         requirements: productData.requirements,
-        tutorials: productData.tutorials,
+        tutorials: JSON.stringify(productData.tutorials),
         isPhysical: productData.isPhysical,
         downloadUrl: productData.downloadUrl,
         categoryId: productData.categoryId,
@@ -153,10 +153,10 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
     const prismaProducts = await this.prisma.product.findMany({
       where: {
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-          { sku: { contains: query, mode: 'insensitive' } },
-          { tags: { hasSome: [query] } },
+          { name: { contains: query } },
+          { description: { contains: query } },
+          { sku: { contains: query } },
+          { tags: { contains: query } },
         ],
       },
       include: {
@@ -187,7 +187,7 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
   async findByTags(tags: string[]): Promise<Product[]> {
     const prismaProducts = await this.prisma.product.findMany({
       where: {
-        tags: { hasSome: tags },
+        tags: { contains: tags.join('|') },
       },
       include: {
         category: true,
@@ -284,17 +284,17 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
       barcode: prismaProduct.barcode,
       trackInventory: prismaProduct.trackInventory,
       isActive: prismaProduct.isActive,
-      images: prismaProduct.images,
-      tags: prismaProduct.tags,
+      images: JSON.parse(prismaProduct.images || '[]'),
+      tags: JSON.parse(prismaProduct.tags || '[]'),
       weight: prismaProduct.weight ? Number(prismaProduct.weight) : undefined,
       dimensions: prismaProduct.dimensions,
       seoTitle: prismaProduct.seoTitle,
       seoDescription: prismaProduct.seoDescription,
       difficulty: prismaProduct.difficulty as ProductDifficulty,
       licenseType: prismaProduct.licenseType,
-      compatibility: prismaProduct.compatibility,
+      compatibility: JSON.parse(prismaProduct.compatibility || '[]'),
       requirements: prismaProduct.requirements,
-      tutorials: prismaProduct.tutorials,
+      tutorials: JSON.parse(prismaProduct.tutorials || '[]'),
       isPhysical: prismaProduct.isPhysical,
       downloadUrl: prismaProduct.downloadUrl,
       categoryId: prismaProduct.categoryId,
@@ -367,14 +367,14 @@ export class ProductRepositoryImpl implements IProductRepository, ICategoryRepos
 
   async findByName(name: string): Promise<Category | null> {
     const prismaCategory = await this.prisma.category.findFirst({
-      where: { name: { contains: name, mode: 'insensitive' } },
+      where: { name: { contains: name } },
     });
     return prismaCategory ? this.mapPrismaCategoryToCategory(prismaCategory) : null;
   }
 
   async existsByName(name: string): Promise<boolean> {
     const category = await this.prisma.category.findFirst({
-      where: { name: { contains: name, mode: 'insensitive' } },
+      where: { name: { contains: name } },
     });
     return !!category;
   }

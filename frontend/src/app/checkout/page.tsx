@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
 import { ordersApi } from '@/lib/orders-api';
+import { stripePaymentClient, formatCurrency } from '@/lib/stripe';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -122,32 +123,56 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      const orderData = {
-        shippingName: contactInfo.name,
-        shippingEmail: contactInfo.email,
-        shippingPhone: contactInfo.phone,
-        shippingAddress,
-        billingAddress: sameAsShipping ? undefined : billingAddress,
-        notes: '',
-        paymentMethod,
-      };
+      // Validar reglas de negocio antes de procesar
+      if (paymentMethod === 'credit_card') {
+        // Crear checkout session con Stripe para pagos con tarjeta
+        const checkoutSession = await stripePaymentClient.createCheckoutSession({
+          customerId: user?.id,
+          items: items.map(item => ({
+            name: item.product.name,
+            amount: typeof item.product.price === 'number' ? item.product.price : item.product.price?.amount || 0,
+            quantity: item.quantity,
+            description: item.product.description,
+            images: item.product.image ? [item.product.image] : undefined
+          })),
+          successUrl: `${window.location.origin}/payment/success`,
+          cancelUrl: `${window.location.origin}/payment/cancel`,
+          orderId: `order-${Date.now()}`
+        });
 
-      const response = await ordersApi.createOrder(orderData);
-
-      if (response.success) {
-        clearCart();
-        setTimeout(() => {
-          router.push(`/checkout/success?orderId=${response.data.id}`);
-        }, 100);
+        // Redirigir a Stripe Checkout
+        window.location.href = checkoutSession.url;
       } else {
-        setError(response.message || 'Error al crear la orden');
-        setIsProcessing(false);
+        // Procesar otros métodos de pago (PSE, contra entrega)
+        const orderData = {
+          shippingName: contactInfo.name,
+          shippingEmail: contactInfo.email,
+          shippingPhone: contactInfo.phone,
+          shippingAddress,
+          billingAddress: sameAsShipping ? undefined : billingAddress,
+          notes: '',
+          paymentMethod,
+        };
+
+        const response = await ordersApi.createOrder(orderData);
+
+        if (response.success) {
+          clearCart();
+          setTimeout(() => {
+            router.push(`/checkout/success?orderId=${response.data.id}`);
+          }, 100);
+        } else {
+          setError(response.message || 'Error al crear la orden');
+          setIsProcessing(false);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Error al procesar el pago');
       setIsProcessing(false);
     } finally {
-      setIsLoading(false);
+      if (paymentMethod !== 'credit_card') {
+        setIsLoading(false);
+      }
     }
   };
 

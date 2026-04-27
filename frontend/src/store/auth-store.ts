@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
 
-          const response = await fetch('/api/auth/login', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
 
             method: 'POST',
 
@@ -93,16 +93,24 @@ export const useAuthStore = create<AuthStore>()(
       
 
       register: async (userData: { firstName: string; lastName: string; email: string; password: string }) => {
-
+        console.log('=== FRONTEND REGISTER DEBUG ===');
+        console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+        console.log('User data being sent:', userData);
+        
         try {
-
-          const response = await fetch('/api/auth/register', {
+          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`;
+          console.log('Full URL:', fullUrl);
+          
+          const response = await fetch(fullUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(userData),
           });
+          
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
 
           if (!response.ok) {
             const errorData = await response.json();

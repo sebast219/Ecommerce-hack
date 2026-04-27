@@ -24,19 +24,22 @@ export function useCategories(): UseCategoriesReturn {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/categories');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
+      console.log('useCategories - API Response:', result);
       
       // Handle double-nested response structure: { data: { success: true, data: { categories: [...] } } }
       const innerData = result.data || result;
+      console.log('useCategories - Inner Data:', innerData);
       
       // Extract categories from inner data.data or innerData directly
       const categoriesArray = innerData.data?.categories || innerData.categories || [];
+      console.log('useCategories - Categories Array:', categoriesArray);
 
       setCategories(categoriesArray);
     } catch (err: any) {

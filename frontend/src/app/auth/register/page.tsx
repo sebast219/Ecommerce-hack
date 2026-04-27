@@ -112,7 +112,23 @@ export default function RegisterPage() {
 
     e.preventDefault();
 
+    console.log('=== FORM SUBMISSION DEBUG ===');
+
+    console.log('firstName:', firstName);
+
+    console.log('lastName:', lastName);
+
+    console.log('email:', email);
+
+    console.log('password:', password);
+
+    console.log('confirmPassword:', confirmPassword);
+
+
+
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
+
+      console.log('Validation failed: Empty fields');
 
       setError('Completa todos los campos');
 
@@ -120,7 +136,11 @@ export default function RegisterPage() {
 
     }
 
+
+
     if (password !== confirmPassword) {
+
+      console.log('Validation failed: Passwords do not match');
 
       setError('Las contraseñas no coinciden');
 
@@ -128,7 +148,11 @@ export default function RegisterPage() {
 
     }
 
+
+
     if (password.length < 6) {
+
+      console.log('Validation failed: Password too short');
 
       setError('Mínimo 6 caracteres');
 
@@ -136,19 +160,41 @@ export default function RegisterPage() {
 
     }
 
+
+
     try {
 
       setLoading(true);
 
       setError('');
 
+
+
+      console.log('Attempting to register user...');
+
       await register({ firstName, lastName, email, password });
+
+      
+
+      console.log('Registration successful, redirecting...');
 
       router.push('/');
 
-    } catch {
+    } catch (error: any) {
 
-      setError('Error al crear la cuenta');
+      console.error('Register error:', error);
+
+      console.error('Error details:', {
+
+        message: error.message,
+
+        stack: error.stack,
+
+        name: error.name
+
+      });
+
+      setError(error.message || 'Error al crear la cuenta');
 
     } finally {
 

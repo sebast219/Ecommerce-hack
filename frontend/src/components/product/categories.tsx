@@ -1,19 +1,89 @@
 'use client';
 
 import Link from 'next/link';
-import { Wifi, Usb, ShieldAlert, Network, Cpu, Search, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Wifi, Usb, ShieldAlert, Network, Cpu, Search, ArrowRight, Package } from 'lucide-react';
 
-const categories = [
-  { id: 'wireless',   name: 'Ataques Inalámbricos', icon: Wifi,        description: 'Auditorías WiFi y MITM',       productCount: 42 },
-  { id: 'usb-attacks',name: 'USB Hacking',           icon: Usb,         description: 'Rubber Ducky y BadUSB',        productCount: 28 },
-  { id: 'red-team',   name: 'Red Team',              icon: ShieldAlert, description: 'Herramientas ofensivas',       productCount: 35 },
-  { id: 'network',    name: 'Network Monitoring',    icon: Network,     description: 'Sniffing y análisis',          productCount: 51 },
-  { id: 'hardware',   name: 'Hardware Implants',     icon: Cpu,         description: 'Dispositivos encubiertos',     productCount: 19 },
-  { id: 'forensics',  name: 'Forensics',             icon: Search,      description: 'Análisis digital',            productCount: 24 },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  _count?: {
+    products: number;
+  };
+}
+
+const iconMap: { [key: string]: any } = {
+  'wireless-attacks': Wifi,
+  'usb-hacking': Usb,
+  'red-team': ShieldAlert,
+  'network-monitoring': Network,
+  'hardware-implants': Cpu,
+  'forensics': Search,
+  'physical-security': Package,
+  'osint-reconnaissance': Search,
+  'cryptography': ShieldAlert,
+  'malware-analysis': Cpu,
+  'social-engineering': Wifi,
+  'default': Package,
+};
 
 export function Categories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Categories API Response:', data);
+          // Handle nested response structure: data.data.categories contains the actual array
+          const categoriesData = data.data?.categories || data.categories || data.data?.data || data.data || data;
+          console.log('Categories Data Extracted:', categoriesData);
+          if (Array.isArray(categoriesData)) {
+            setCategories(categoriesData);
+            console.log('Categories loaded successfully:', categoriesData.length);
+          }
+        } else {
+          console.error('Failed to fetch categories:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const displayed = categories.slice(0, 3);
+
+  if (loading) {
+    return (
+      <section className="py-32 bg-white text-black">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-black/10 rounded w-64 mb-4"></div>
+            <div className="h-12 bg-black/10 rounded w-96 mb-16"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-black/8 border border-black/8 rounded-2xl overflow-hidden">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white p-8">
+                  <div className="h-6 bg-black/10 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-black/10 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-black/10 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-32 bg-white text-black transition-all duration-500 ease-in-out">
@@ -39,11 +109,13 @@ export function Categories() {
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-black/8 border border-black/8 rounded-2xl overflow-hidden slide-up">
           {displayed.map((category, index) => {
-            const Icon = category.icon;
+            const Icon = iconMap[category.slug] || iconMap['default'];
+            const productCount = category._count?.products || 0;
+            
             return (
               <Link
                 key={category.id}
-                href={`/categories/${category.id}`}
+                href={`/categories/${category.slug}`}
                 className="
                   group bg-white p-8
                   flex flex-col gap-6
@@ -76,7 +148,7 @@ export function Categories() {
                 {/* Bottom */}
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase tracking-[0.25em] text-black/30 group-hover:text-white/30 transition-colors">
-                    {category.productCount} productos
+                    {productCount} productos
                   </span>
                   <ArrowRight className="h-4 w-4 text-black/25 group-hover:text-white/60 transition-all duration-300 group-hover:translate-x-1" />
                 </div>

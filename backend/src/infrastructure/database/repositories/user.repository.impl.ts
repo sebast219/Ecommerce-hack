@@ -51,14 +51,23 @@ export class UserRepositoryImpl implements IUserRepository {
   async create(
     userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<User> {
-    // EJEMPLO: Creación con Prisma
+    // Hash de la contraseña
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    // Creación con Prisma
     const prismaUser = await this.prisma.user.create({
       data: {
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
-        role: userData.role as any, // EJEMPLO: Conversión de tipos
-        password: 'hashed_password_here', // EJEMPLO: Se inyectaría servicio de hashing
+        role: userData.role as any,
+        password: hashedPassword,
+        isVerified: userData.isVerified || false,
+        experienceLevel: userData.experienceLevel as any || 'BEGINNER',
+        certifications: userData.certifications || '[]',
+        phone: userData.phone,
+        avatar: userData.avatar,
       },
     });
 
@@ -113,10 +122,15 @@ export class UserRepositoryImpl implements IUserRepository {
       email: prismaUser.email,
       firstName: prismaUser.firstName,
       lastName: prismaUser.lastName,
-      role: prismaUser.role as UserRole,
+      password: prismaUser.password,
+      role: prismaUser.role as any,
+      isVerified: prismaUser.isVerified || false,
+      experienceLevel: prismaUser.experienceLevel || 'BEGINNER',
+      certifications: (prismaUser.certifications || '[]') as any,
+      phone: prismaUser.phone,
+      avatar: prismaUser.avatar,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
-      password: prismaUser.password,
     };
   }
 
@@ -127,7 +141,13 @@ export class UserRepositoryImpl implements IUserRepository {
       email: prismaUser.email,
       firstName: prismaUser.firstName,
       lastName: prismaUser.lastName,
-      role: prismaUser.role as UserRole,
+      password: prismaUser.password,
+      role: prismaUser.role, // Cambiado a string para compatibilidad con SQLite
+      isVerified: prismaUser.isVerified || false,
+      experienceLevel: prismaUser.experienceLevel || 'BEGINNER',
+      certifications: (prismaUser.certifications || '[]') as any,
+      phone: prismaUser.phone,
+      avatar: prismaUser.avatar,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     };
@@ -178,22 +198,7 @@ export class ProductRepositoryImpl implements IProductRepository {
   async create(
     productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Product> {
-    const prismaProduct = await this.prisma.product.create({
-      data: {
-        name: productData.name,
-        slug: productData.slug,
-        price: productData.price.amount, // EJEMPLO: Mapeo de Money a decimal
-        sku: productData.sku,
-        isActive: productData.isActive,
-        categoryId: 'category_id_here', // EJEMPLO: Vendría del DTO
-      },
-      include: {
-        category: true,
-        inventory: true,
-      },
-    });
-
-    return this.mapPrismaProductToProduct(prismaProduct);
+    throw new Error('Create method not implemented - use ProductRepositoryImpl instead');
   }
 
   // EJEMPLO: Implementaciones de otros métodos...
@@ -253,9 +258,9 @@ export class ProductRepositoryImpl implements IProductRepository {
     const prismaProducts = await this.prisma.product.findMany({
       where: {
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-          { sku: { contains: query, mode: 'insensitive' } },
+          { name: { contains: query } },
+          { description: { contains: query } },
+          { sku: { contains: query } },
         ],
       },
       include: {
@@ -293,10 +298,15 @@ export class ProductRepositoryImpl implements IProductRepository {
       email: prismaUser.email,
       firstName: prismaUser.firstName,
       lastName: prismaUser.lastName,
-      role: prismaUser.role as UserRole,
+      password: prismaUser.password,
+      role: prismaUser.role as any,
+      isVerified: prismaUser.isVerified || false,
+      experienceLevel: prismaUser.experienceLevel || 'BEGINNER',
+      certifications: (prismaUser.certifications || '[]') as any,
+      phone: prismaUser.phone,
+      avatar: prismaUser.avatar,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
-      password: prismaUser.password,
     };
   }
 

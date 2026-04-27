@@ -87,9 +87,16 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() createUserDto: CreateUserDto) {
+    console.log('=== REGISTER DEBUG ===');
+    console.log('Received data:', createUserDto);
+    console.log('firstName:', createUserDto.firstName);
+    console.log('lastName:', createUserDto.lastName);
+    console.log('email:', createUserDto.email);
+    
     // EJEMPLO: El controller solo coordina, no contiene lógica de negocio
     try {
       const result = await this.createUserUseCase.execute(createUserDto);
+      console.log('User created successfully:', result.user);
 
       return {
         success: true,
@@ -112,8 +119,13 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
+    console.log('=== LOGIN DEBUG ===');
+    console.log('Login attempt with email:', loginDto.email);
+    console.log('Login data received:', { email: loginDto.email, passwordProvided: !!loginDto.password });
+    
     try {
       const result = await this.loginUseCase.execute(loginDto);
+      console.log('Login successful for:', loginDto.email);
 
       return {
         success: true,
@@ -125,6 +137,8 @@ export class AuthController {
         message: 'Login successful',
       };
     } catch (error) {
+      console.log('Login failed for:', loginDto.email);
+      console.log('Error:', error.message);
       return {
         success: false,
         message: error.message,

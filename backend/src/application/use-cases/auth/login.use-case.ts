@@ -49,24 +49,22 @@ export class LoginUseCase {
     }
 
     // Crear objeto user sin contraseña para el resto del flujo
-    const { password: _, ...user } = userWithPassword;
+    const { password: _, ...userWithoutPassword } = userWithPassword;
 
-    // Generar tokens
-    const accessToken = this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+    // Generar tokens - agregar password temporal para cumplir con tipo User
+    const userWithTempPassword = { ...userWithoutPassword, password: '' };
+    const accessToken = this.generateAccessToken(userWithTempPassword);
+    const refreshToken = await this.generateRefreshToken(userWithTempPassword);
 
     // Limpiar tokens anteriores del usuario
-    await this.refreshTokenRepository.deleteByUserId(user.id);
+    await this.refreshTokenRepository.deleteByUserId(userWithoutPassword.id);
 
     // Guardar nuevo refresh token
     await this.refreshTokenRepository.create({
       token: refreshToken,
-      userId: user.id,
+      userId: userWithoutPassword.id,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
     });
-
-    // Retornar respuesta sin contraseña
-    const { password, ...userWithoutPassword } = user as any;
 
     return {
       user: userWithoutPassword,

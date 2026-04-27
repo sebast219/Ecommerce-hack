@@ -77,7 +77,11 @@ export class CreateUserUseCase {
       email: request.email,
       firstName: request.firstName,
       lastName: request.lastName,
+      password: request.password, // Incluir password
       role: (request.role as any) || 'USER',
+      isVerified: false, // Valor por defecto
+      experienceLevel: 'BEGINNER', // Valor por defecto
+      certifications: '[]', // Valor por defecto para compatibilidad con SQLite
     };
   }
 }
