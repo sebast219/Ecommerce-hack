@@ -150,11 +150,11 @@ export default function RegisterPage() {
 
 
 
-    if (password.length < 6) {
+    if (password.length < 8) {
 
       console.log('Validation failed: Password too short');
 
-      setError('Mínimo 6 caracteres');
+      setError('Mínimo 8 caracteres');
 
       return;
 
