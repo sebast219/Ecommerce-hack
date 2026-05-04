@@ -64,7 +64,9 @@ export class CartRepositoryImpl implements ICartRepository {
     return prismaCart ? this.mapPrismaCartToCart(prismaCart) : null;
   }
 
-  async create(cartData: Omit<Cart, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cart> {
+  async create(
+    cartData: Omit<Cart, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Cart> {
     const prismaCart = await this.prisma.cart.create({
       data: {
         userId: 'temp-user-id', // TODO: Obtener userId real
@@ -154,7 +156,9 @@ export class CartRepositoryImpl implements ICartRepository {
     return {
       id: prismaCart.id,
       sessionId: prismaCart.sessionId,
-      items: prismaCart.items.map((item: any) => this.mapPrismaCartItemToCartItem(item)),
+      items: prismaCart.items.map((item: any) =>
+        this.mapPrismaCartItemToCartItem(item),
+      ),
       createdAt: prismaCart.createdAt,
       updatedAt: prismaCart.updatedAt,
     };
@@ -244,7 +248,10 @@ export class CartItemRepositoryImpl implements ICartItemRepository {
     return prismaItems.map((item) => this.mapPrismaCartItemToCartItem(item));
   }
 
-  async findByCartAndProduct(cartId: string, productId: string): Promise<CartItem | null> {
+  async findByCartAndProduct(
+    cartId: string,
+    productId: string,
+  ): Promise<CartItem | null> {
     const prismaItem = await this.prisma.cartItem.findUnique({
       where: {
         cartId_productId: {
@@ -322,10 +329,14 @@ export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
       where: { id },
     });
 
-    return prismaToken ? this.mapPrismaRefreshTokenToRefreshToken(prismaToken) : null;
+    return prismaToken
+      ? this.mapPrismaRefreshTokenToRefreshToken(prismaToken)
+      : null;
   }
 
-  async create(tokenData: Omit<RefreshToken, 'id' | 'createdAt'>): Promise<RefreshToken> {
+  async create(
+    tokenData: Omit<RefreshToken, 'id' | 'createdAt'>,
+  ): Promise<RefreshToken> {
     const prismaToken = await this.prisma.refreshToken.create({
       data: {
         tokenHash: tokenData.tokenHash,
@@ -354,7 +365,9 @@ export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
       where: { tokenHash },
     });
 
-    return prismaToken ? this.mapPrismaRefreshTokenToRefreshToken(prismaToken) : null;
+    return prismaToken
+      ? this.mapPrismaRefreshTokenToRefreshToken(prismaToken)
+      : null;
   }
 
   async findByUserId(userId: string): Promise<RefreshToken[]> {
@@ -362,7 +375,9 @@ export class RefreshTokenRepositoryImpl implements IRefreshTokenRepository {
       where: { userId },
     });
 
-    return prismaTokens.map((token) => this.mapPrismaRefreshTokenToRefreshToken(token));
+    return prismaTokens.map((token) =>
+      this.mapPrismaRefreshTokenToRefreshToken(token),
+    );
   }
 
   async deleteByUserId(userId: string): Promise<void> {

@@ -7,8 +7,8 @@ export interface TestUser {
   email: string;
   firstName: string;
   lastName: string;
-  password: string;        // Plain text para tests
-  hashedPassword: string;  // Hash almacenado en DB
+  password: string; // Plain text para tests
+  hashedPassword: string; // Hash almacenado en DB
   role: string;
 }
 

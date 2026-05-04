@@ -58,14 +58,12 @@ describe('API Endpoints (e2e)', () => {
 
       it('should return error for duplicate email', async () => {
         // Create user first
-        await request(server)
-          .post('/api/v1/auth/register')
-          .send({
-            email: 'duplicate@example.com',
-            firstName: 'Jane',
-            lastName: 'Doe',
-            password: 'StrongP@ssw0rd123!',
-          });
+        await request(server).post('/api/v1/auth/register').send({
+          email: 'duplicate@example.com',
+          firstName: 'Jane',
+          lastName: 'Doe',
+          password: 'StrongP@ssw0rd123!',
+        });
 
         // Try to create same user again
         return request(server)
@@ -111,7 +109,9 @@ describe('API Endpoints (e2e)', () => {
           .expect(400)
           .expect((res) => {
             expect(res.body.success).toBe(false);
-            expect(res.body.message).toContain('Password must be at least 8 characters');
+            expect(res.body.message).toContain(
+              'Password must be at least 8 characters',
+            );
           });
       });
     });
@@ -129,7 +129,7 @@ describe('API Endpoints (e2e)', () => {
             lastName: 'User',
             password: 'LoginP@ssw0rd123!',
           });
-        
+
         user = response.body.data.user;
       });
 
@@ -316,7 +316,9 @@ describe('API Endpoints (e2e)', () => {
           .expect((res) => {
             expect(res.body.success).toBe(true);
             expect(res.body.data.products).toBeDefined();
-            expect(res.body.message).toBe('Search results retrieved successfully');
+            expect(res.body.message).toBe(
+              'Search results retrieved successfully',
+            );
           });
       });
     });
@@ -330,7 +332,9 @@ describe('API Endpoints (e2e)', () => {
           .expect(200)
           .expect((res) => {
             expect(res.body.success).toBe(true);
-            expect(res.body.message).toBe('Categories endpoint - Implement GetCategoriesUseCase');
+            expect(res.body.message).toBe(
+              'Categories endpoint - Implement GetCategoriesUseCase',
+            );
           });
       });
     });

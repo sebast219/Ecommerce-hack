@@ -16,13 +16,18 @@ export class HandleStripeWebhookUseCase {
     private readonly orderEmail: OrderEmailService,
   ) {}
 
-  async execute(rawBody: Buffer, signature: string): Promise<{ received: boolean }> {
+  async execute(
+    rawBody: Buffer,
+    signature: string,
+  ): Promise<{ received: boolean }> {
     // 1. VERIFICAR FIRMA
     let event;
     try {
       event = await this.stripe.handleWebhook(rawBody, signature);
     } catch (error: any) {
-      this.logger.error(`Webhook signature verification failed: ${error.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${error.message}`,
+      );
       throw new BadRequestException(`Webhook Error: ${error.message}`);
     }
 
@@ -37,7 +42,9 @@ export class HandleStripeWebhookUseCase {
     });
 
     if (existing) {
-      this.logger.log(`Stripe event ${event.id} already processed (idempotent)`);
+      this.logger.log(
+        `Stripe event ${event.id} already processed (idempotent)`,
+      );
       return { received: true };
     }
 
@@ -69,7 +76,9 @@ export class HandleStripeWebhookUseCase {
     const orderId = paymentIntent.metadata?.orderId;
 
     if (!orderId) {
-      this.logger.warn(`Payment succeeded but no orderId in metadata: ${paymentIntent.id}`);
+      this.logger.warn(
+        `Payment succeeded but no orderId in metadata: ${paymentIntent.id}`,
+      );
       return;
     }
 
@@ -78,7 +87,9 @@ export class HandleStripeWebhookUseCase {
     });
 
     if (!order) {
-      this.logger.error(`Order ${orderId} not found for payment ${paymentIntent.id}`);
+      this.logger.error(
+        `Order ${orderId} not found for payment ${paymentIntent.id}`,
+      );
       return;
     }
 
@@ -113,13 +124,11 @@ export class HandleStripeWebhookUseCase {
     this.logger.log(`Order ${order.orderNumber} marked as PAID`);
 
     // 3. Trigger email de confirmación (no bloqueante)
-    this.orderEmail
-      .sendOrderConfirmation(orderId)
-      .catch((error) => {
-        this.logger.error(
-          `Failed to send confirmation email for order ${orderId}: ${error.message}`,
-        );
-      });
+    this.orderEmail.sendOrderConfirmation(orderId).catch((error) => {
+      this.logger.error(
+        `Failed to send confirmation email for order ${orderId}: ${error.message}`,
+      );
+    });
   }
 
   private async handlePaymentFailed(event: any) {

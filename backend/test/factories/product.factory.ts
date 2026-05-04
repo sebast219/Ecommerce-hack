@@ -35,7 +35,8 @@ export class ProductFactory {
         images: overrides.images || '["https://example.com/image.jpg"]',
         tags: overrides.tags || '["test"]',
         difficulty: overrides.difficulty || 'BEGINNER',
-        compatibility: overrides.compatibility || '["windows", "macos", "linux"]',
+        compatibility:
+          overrides.compatibility || '["windows", "macos", "linux"]',
         tutorials: overrides.tutorials || '["https://example.com/tutorial"]',
         isPhysical: overrides.isPhysical ?? true,
         categoryId,

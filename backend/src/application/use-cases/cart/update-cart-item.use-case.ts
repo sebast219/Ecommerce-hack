@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
 @Injectable()
@@ -50,7 +55,11 @@ export class UpdateCartItemUseCase {
       include: {
         product: {
           select: {
-            id: true, name: true, slug: true, price: true, images: true,
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            images: true,
           },
         },
       },

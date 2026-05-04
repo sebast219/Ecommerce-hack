@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsInt, Min, IsEnum, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  IsEnum,
+  MaxLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -30,7 +37,9 @@ export class GetOrdersQueryDto {
   @Min(1)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ enum: ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'] })
+  @ApiPropertyOptional({
+    enum: ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+  })
   @IsOptional()
   @IsEnum(['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'])
   status?: string;

@@ -10,7 +10,11 @@ export class DashboardService {
 
   async getStats() {
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -18,16 +22,16 @@ export class DashboardService {
     // Ventas totales
     const totalSales = await this.prisma.order.aggregate({
       where: {
-        status: { in: ['COMPLETED', 'PAID'] }
+        status: { in: ['COMPLETED', 'PAID'] },
       },
-      _sum: { total: true }
+      _sum: { total: true },
     });
 
     // Pedidos hoy
     const todayOrders = await this.prisma.order.count({
       where: {
-        createdAt: { gte: startOfDay }
-      }
+        createdAt: { gte: startOfDay },
+      },
     });
 
     // Pedidos mes pasado para calcular cambio
@@ -35,28 +39,28 @@ export class DashboardService {
       where: {
         createdAt: {
           gte: startOfLastMonth,
-          lte: endOfLastMonth
-        }
-      }
+          lte: endOfLastMonth,
+        },
+      },
     });
 
     // Pedidos este mes
     const thisMonthOrders = await this.prisma.order.count({
       where: {
-        createdAt: { gte: startOfMonth }
-      }
+        createdAt: { gte: startOfMonth },
+      },
     });
 
     // Productos activos
     const activeProducts = await this.prisma.product.count({
-      where: { isActive: true }
+      where: { isActive: true },
     });
 
     // Usuarios nuevos hoy
     const newUsersToday = await this.prisma.user.count({
       where: {
-        createdAt: { gte: startOfDay }
-      }
+        createdAt: { gte: startOfDay },
+      },
     });
 
     // Usuarios nuevos mes pasado
@@ -64,26 +68,33 @@ export class DashboardService {
       where: {
         createdAt: {
           gte: startOfLastMonth,
-          lte: endOfLastMonth
-        }
-      }
+          lte: endOfLastMonth,
+        },
+      },
     });
 
     // Usuarios nuevos este mes
     const thisMonthUsers = await this.prisma.user.count({
       where: {
-        createdAt: { gte: startOfMonth }
-      }
+        createdAt: { gte: startOfMonth },
+      },
     });
 
     // Calcular porcentajes de cambio
-    const ordersChange = lastMonthOrders > 0 
-      ? ((thisMonthOrders - lastMonthOrders) / lastMonthOrders * 100).toFixed(1)
-      : '0.0';
+    const ordersChange =
+      lastMonthOrders > 0
+        ? (
+            ((thisMonthOrders - lastMonthOrders) / lastMonthOrders) *
+            100
+          ).toFixed(1)
+        : '0.0';
 
-    const usersChange = lastMonthUsers > 0
-      ? ((thisMonthUsers - lastMonthUsers) / lastMonthUsers * 100).toFixed(1)
-      : '0.0';
+    const usersChange =
+      lastMonthUsers > 0
+        ? (((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100).toFixed(
+            1,
+          )
+        : '0.0';
 
     return [
       {
@@ -91,29 +102,35 @@ export class DashboardService {
         value: `$${(totalSales._sum.total || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         change: '+12.5%', // Placeholder - se puede calcular con datos históricos
         trend: 'up' as const,
-        icon: 'DollarSign'
+        icon: 'DollarSign',
       },
       {
         label: 'Pedidos Hoy',
         value: todayOrders.toString(),
-        change: ordersChange.startsWith('-') ? ordersChange : `+${ordersChange}%`,
-        trend: ordersChange.startsWith('-') ? 'down' as const : 'up' as const,
-        icon: 'ShoppingCart'
+        change: ordersChange.startsWith('-')
+          ? ordersChange
+          : `+${ordersChange}%`,
+        trend: ordersChange.startsWith('-')
+          ? ('down' as const)
+          : ('up' as const),
+        icon: 'ShoppingCart',
       },
       {
         label: 'Productos Activos',
         value: activeProducts.toLocaleString('es-ES'),
         change: '+3.1%', // Placeholder
         trend: 'up' as const,
-        icon: 'Package'
+        icon: 'Package',
       },
       {
         label: 'Usuarios Nuevos',
         value: newUsersToday.toString(),
         change: usersChange.startsWith('-') ? usersChange : `+${usersChange}%`,
-        trend: usersChange.startsWith('-') ? 'down' as const : 'up' as const,
-        icon: 'Users'
-      }
+        trend: usersChange.startsWith('-')
+          ? ('down' as const)
+          : ('up' as const),
+        icon: 'Users',
+      },
     ];
   }
 
@@ -126,28 +143,28 @@ export class DashboardService {
           select: {
             firstName: true,
             lastName: true,
-            email: true
-          }
+            email: true,
+          },
         },
         items: {
           include: {
             product: {
               select: {
-                name: true
-              }
-            }
-          }
-        }
-      }
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return orders.map(order => ({
+    return orders.map((order) => ({
       id: `#${order.orderNumber}`,
       customer: `${order.user.firstName} ${order.user.lastName}`,
       product: order.items[0]?.product.name || 'Multiple products',
       amount: `$${order.total.toFixed(2)}`,
       status: this.translateStatus(order.status),
-      date: this.formatRelativeTime(order.createdAt)
+      date: this.formatRelativeTime(order.createdAt),
     }));
   }
 
@@ -158,26 +175,33 @@ export class DashboardService {
       include: {
         orderItems: {
           include: {
-            order: true
-          }
-        }
-      }
+            order: true,
+          },
+        },
+      },
     });
 
     return topProducts
-      .map(product => {
+      .map((product) => {
         // Filtrar solo los pedidos completados o pagados
-        const validOrderItems = product.orderItems.filter(item => 
-          item.order && ['COMPLETED', 'PAID'].includes(item.order.status)
+        const validOrderItems = product.orderItems.filter(
+          (item) =>
+            item.order && ['COMPLETED', 'PAID'].includes(item.order.status),
         );
-        const totalSales = validOrderItems.reduce((sum, item) => sum + item.quantity, 0);
-        const totalRevenue = validOrderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
+        const totalSales = validOrderItems.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
+        const totalRevenue = validOrderItems.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0,
+        );
+
         return {
           name: product.name,
           sales: totalSales,
-          revenue: `$${totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-          growth: `+${Math.floor(Math.random() * 25 + 5)}%` // Placeholder - se puede calcular con datos históricos
+          revenue: `$${totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
+          growth: `+${Math.floor(Math.random() * 25 + 5)}%`, // Placeholder - se puede calcular con datos históricos
         };
       })
       .sort((a, b) => b.sales - a.sales)
@@ -192,12 +216,12 @@ export class DashboardService {
     const orders = await this.prisma.order.findMany({
       where: {
         createdAt: { gte: thirtyDaysAgo },
-        status: { in: ['COMPLETED', 'PAID'] }
+        status: { in: ['COMPLETED', 'PAID'] },
       },
       select: {
         total: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     // Agrupar por día
@@ -208,7 +232,7 @@ export class DashboardService {
       dailySales[dateKey] = 0;
     }
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const dateKey = order.createdAt.toISOString().split('T')[0];
       if (dailySales.hasOwnProperty(dateKey)) {
         dailySales[dateKey] += order.total;
@@ -216,9 +240,9 @@ export class DashboardService {
     });
 
     // Convertir al formato esperado para el gráfico
-    const chartData = Object.values(dailySales).map(sales => ({
+    const chartData = Object.values(dailySales).map((sales) => ({
       value: sales,
-      label: `$${sales.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+      label: `$${sales.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`,
     }));
 
     return chartData;
@@ -226,23 +250,26 @@ export class DashboardService {
 
   private translateStatus(status: string): string {
     const statusMap: Record<string, string> = {
-      'PENDING': 'Pendiente',
-      'PAID': 'En proceso',
-      'COMPLETED': 'Completado',
-      'CANCELLED': 'Cancelado',
-      'SHIPPED': 'Enviado',
-      'DELIVERED': 'Entregado'
+      PENDING: 'Pendiente',
+      PAID: 'En proceso',
+      COMPLETED: 'Completado',
+      CANCELLED: 'Cancelado',
+      SHIPPED: 'Enviado',
+      DELIVERED: 'Entregado',
     };
     return statusMap[status] || status;
   }
 
   private formatRelativeTime(date: Date): string {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60),
+    );
 
     if (diffInMinutes < 60) {
       return `Hace ${diffInMinutes} min`;
-    } else if (diffInMinutes < 1440) { // 24 horas
+    } else if (diffInMinutes < 1440) {
+      // 24 horas
       const hours = Math.floor(diffInMinutes / 60);
       return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
     } else {

@@ -34,7 +34,7 @@ export class StripeService {
 
   constructor(private configService: ConfigService) {
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    
+
     // Temporalmente deshabilitado para demostración
     if (!stripeSecretKey) {
       console.log('⚠️ Stripe no configurado - usando modo demo');
@@ -57,7 +57,7 @@ export class StripeService {
         status: 'requires_payment_method',
       };
     }
-    
+
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(paymentData.amount * 100), // Convertir a centavos
@@ -108,8 +108,9 @@ export class StripeService {
   // Confirmar pago
   async confirmPayment(paymentIntentId: string): Promise<any> {
     try {
-      const paymentIntent = await this.stripe.paymentIntents.confirm(paymentIntentId);
-      
+      const paymentIntent =
+        await this.stripe.paymentIntents.confirm(paymentIntentId);
+
       this.logger.log(`Payment confirmed: ${paymentIntent.id}`);
       return paymentIntent;
     } catch (error) {
@@ -150,13 +151,13 @@ export class StripeService {
         payment_status: 'unpaid',
       };
     }
-    
+
     try {
       const session = await this.stripe.checkout.sessions.create({
         customer: params.customerId,
         payment_method_types: ['card'],
         mode: 'payment',
-        line_items: params.items.map(item => ({
+        line_items: params.items.map((item) => ({
           price_data: {
             currency: 'usd',
             product_data: {
@@ -207,8 +208,10 @@ export class StripeService {
 
   // Webhook handler para eventos de Stripe
   async handleWebhook(rawBody: Buffer, signature: string): Promise<any> {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
-    
+    const webhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
+
     if (!webhookSecret) {
       throw new Error('STRIPE_WEBHOOK_SECRET is required');
     }
@@ -217,7 +220,7 @@ export class StripeService {
       const event = this.stripe.webhooks.constructEvent(
         rawBody,
         signature,
-        webhookSecret
+        webhookSecret,
       );
 
       this.logger.log(`Webhook event received: ${event.type}`);
@@ -239,7 +242,10 @@ export class StripeService {
   }
 
   // Actualizar cliente
-  async updateCustomer(customerId: string, updateData: Partial<CreateCustomerDto>): Promise<any> {
+  async updateCustomer(
+    customerId: string,
+    updateData: Partial<CreateCustomerDto>,
+  ): Promise<any> {
     try {
       return await this.stripe.customers.update(customerId, updateData);
     } catch (error) {

@@ -18,9 +18,9 @@ export class RateLimiterService {
 
   // Configuración
   private readonly IP_MAX_ATTEMPTS = 10;
-  private readonly IP_WINDOW_MS = 15 * 60 * 1000;     // 15 minutos
+  private readonly IP_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
   private readonly EMAIL_MAX_ATTEMPTS = 5;
-  private readonly EMAIL_WINDOW_MS = 15 * 60 * 1000;  // 15 minutos
+  private readonly EMAIL_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
   private readonly BLOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutos block
   private readonly GLOBAL_MAX_RPS = 100;
 
@@ -33,13 +33,21 @@ export class RateLimiterService {
    * Verifica rate limit compuesto: IP + Email + Global
    * Retorna { allowed: boolean, retryAfter?: number, reason?: string }
    */
-  checkLoginRateLimit(ip: string, email?: string): {
+  checkLoginRateLimit(
+    ip: string,
+    email?: string,
+  ): {
     allowed: boolean;
     retryAfter?: number;
     reason?: string;
   } {
     // 1. Check IP rate limit
-    const ipResult = this.checkLimit(this.ipLimits, ip, this.IP_MAX_ATTEMPTS, this.IP_WINDOW_MS);
+    const ipResult = this.checkLimit(
+      this.ipLimits,
+      ip,
+      this.IP_MAX_ATTEMPTS,
+      this.IP_WINDOW_MS,
+    );
     if (!ipResult.allowed) {
       this.logger.warn(`Rate limit exceeded for IP: ${this.maskIp(ip)}`);
       return { ...ipResult, reason: 'Too many requests from this IP' };
@@ -48,11 +56,19 @@ export class RateLimiterService {
     // 2. Check email rate limit (si se proporciona)
     if (email) {
       const emailResult = this.checkLimit(
-        this.emailLimits, email.toLowerCase(), this.EMAIL_MAX_ATTEMPTS, this.EMAIL_WINDOW_MS
+        this.emailLimits,
+        email.toLowerCase(),
+        this.EMAIL_MAX_ATTEMPTS,
+        this.EMAIL_WINDOW_MS,
       );
       if (!emailResult.allowed) {
-        this.logger.warn(`Rate limit exceeded for email: ${this.maskEmail(email)}`);
-        return { ...emailResult, reason: 'Too many login attempts for this account' };
+        this.logger.warn(
+          `Rate limit exceeded for email: ${this.maskEmail(email)}`,
+        );
+        return {
+          ...emailResult,
+          reason: 'Too many login attempts for this account',
+        };
       }
     }
 
@@ -70,9 +86,19 @@ export class RateLimiterService {
       return;
     }
 
-    this.incrementLimit(this.ipLimits, ip, this.IP_MAX_ATTEMPTS, this.IP_WINDOW_MS);
+    this.incrementLimit(
+      this.ipLimits,
+      ip,
+      this.IP_MAX_ATTEMPTS,
+      this.IP_WINDOW_MS,
+    );
     if (email) {
-      this.incrementLimit(this.emailLimits, email.toLowerCase(), this.EMAIL_MAX_ATTEMPTS, this.EMAIL_WINDOW_MS);
+      this.incrementLimit(
+        this.emailLimits,
+        email.toLowerCase(),
+        this.EMAIL_MAX_ATTEMPTS,
+        this.EMAIL_WINDOW_MS,
+      );
     }
   }
 
@@ -145,19 +171,27 @@ export class RateLimiterService {
     if (existing.count >= maxAttempts) {
       existing.blocked = true;
       existing.blockedUntil = now + this.BLOCK_DURATION_MS;
-      this.logger.warn(`Account/IP blocked: ${key} after ${existing.count} attempts`);
+      this.logger.warn(
+        `Account/IP blocked: ${key} after ${existing.count} attempts`,
+      );
     }
   }
 
   private cleanup(): void {
     const now = Date.now();
     for (const [key, entry] of this.ipLimits) {
-      if (now - entry.lastAttempt > this.IP_WINDOW_MS && (!entry.blocked || now > entry.blockedUntil)) {
+      if (
+        now - entry.lastAttempt > this.IP_WINDOW_MS &&
+        (!entry.blocked || now > entry.blockedUntil)
+      ) {
         this.ipLimits.delete(key);
       }
     }
     for (const [key, entry] of this.emailLimits) {
-      if (now - entry.lastAttempt > this.EMAIL_WINDOW_MS && (!entry.blocked || now > entry.blockedUntil)) {
+      if (
+        now - entry.lastAttempt > this.EMAIL_WINDOW_MS &&
+        (!entry.blocked || now > entry.blockedUntil)
+      ) {
         this.emailLimits.delete(key);
       }
     }

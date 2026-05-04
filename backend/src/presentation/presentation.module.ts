@@ -6,14 +6,25 @@ import { ApplicationModule } from '../application/application.module';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { AuthController } from './controllers/auth.controller';
 import { UsersController } from './controllers/users.controller';
-import { ProductsController, CategoriesController } from './controllers/products.controller';
+import {
+  ProductsController,
+  CategoriesController,
+} from './controllers/products.controller';
 import { AdminProductsController } from './controllers/admin.products.controller';
-import { CartController, WishlistController } from './controllers/cart.controller';
+import {
+  CartController,
+  WishlistController,
+} from './controllers/cart.controller';
 import { OrderController } from './controllers/order.controller';
 import { PaymentController } from './controllers/payment.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { DashboardController } from './controllers/dashboard.controller';
-import { JwtAuthGuard, RolesGuard, PermissionsGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
+import {
+  JwtAuthGuard,
+  RolesGuard,
+  PermissionsGuard,
+  ThrottlingGuard,
+} from './guards/jwt-auth.guard';
 
 // Categories controller - verificar si está en products.controller
 // import { CategoriesController } from './controllers/categories.controller';
@@ -64,10 +75,7 @@ export {
 } from './decorators/roles.decorator';
 
 @Module({
-  imports: [
-    ApplicationModule,
-    InfrastructureModule,
-  ],
+  imports: [ApplicationModule, InfrastructureModule],
   controllers: [
     AuthController,
     UsersController,

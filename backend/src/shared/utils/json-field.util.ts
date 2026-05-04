@@ -3,7 +3,9 @@ export function serializeJson(data: any): string | null {
   return JSON.stringify(data);
 }
 
-export function deserializeJson<T = any>(data: string | null | undefined): T | null {
+export function deserializeJson<T = any>(
+  data: string | null | undefined,
+): T | null {
   if (!data) return null;
   try {
     return JSON.parse(data) as T;
@@ -18,7 +20,9 @@ export function serializeArray(arr: any[] | undefined | null): string {
   return JSON.stringify(arr);
 }
 
-export function deserializeArray<T = any>(data: string | null | undefined): T[] {
+export function deserializeArray<T = any>(
+  data: string | null | undefined,
+): T[] {
   if (!data) return [];
   try {
     const parsed = JSON.parse(data);

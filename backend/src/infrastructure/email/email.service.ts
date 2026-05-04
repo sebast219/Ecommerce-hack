@@ -48,7 +48,9 @@ export class EmailService implements OnModuleInit {
    * - Idempotencia (no envía duplicados)
    * - Logging completo
    */
-  async send(params: SendEmailParams): Promise<{ success: boolean; emailId?: string }> {
+  async send(
+    params: SendEmailParams,
+  ): Promise<{ success: boolean; emailId?: string }> {
     // IDEMPOTENCY CHECK
     const existing = await this.prisma.emailLog.findUnique({
       where: { idempotencyKey: params.idempotencyKey },
@@ -92,14 +94,19 @@ export class EmailService implements OnModuleInit {
     });
 
     if (!this.isEnabled) {
-      this.logger.warn(`Email disabled, skipping: ${params.subject} to ${params.to}`);
+      this.logger.warn(
+        `Email disabled, skipping: ${params.subject} to ${params.to}`,
+      );
       // En desarrollo, marcar como enviado para no bloquear el flujo
       await this.prisma.emailLog.update({
         where: { id: emailLog.id },
         data: {
           status: 'SENT',
           sentAt: new Date(),
-          metadata: JSON.stringify({ ...(params.metadata || {}), simulated: true }),
+          metadata: JSON.stringify({
+            ...(params.metadata || {}),
+            simulated: true,
+          }),
         },
       });
       return { success: true };
@@ -124,7 +131,9 @@ export class EmailService implements OnModuleInit {
         },
       });
 
-      this.logger.log(`Email sent: ${params.subject} -> ${this.maskEmail(params.to)}`);
+      this.logger.log(
+        `Email sent: ${params.subject} -> ${this.maskEmail(params.to)}`,
+      );
       return { success: true, emailId: result.data?.id };
     } catch (error: any) {
       this.logger.error(

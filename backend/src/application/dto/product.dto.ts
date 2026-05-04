@@ -1,20 +1,20 @@
 // 🏗️ APPLICATION DTOs - Productos con validación (CORREGIDO)
 // PROPÓSITO: Definir estructuras de datos con validación robusta
 
-import { 
-  IsString, 
-  IsNumber, 
-  IsOptional, 
-  IsEnum, 
-  IsArray, 
-  Min, 
-  Max, 
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  IsArray,
+  Min,
+  Max,
   Matches,
   IsBoolean,
   IsUrl,
   ArrayNotEmpty,
   ValidateNested,
-  Length
+  Length,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -48,21 +48,39 @@ export class ProductDimensionsDto {
 }
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'WiFi Pineapple Mark VII', description: 'Product name' })
+  @ApiProperty({
+    example: 'WiFi Pineapple Mark VII',
+    description: 'Product name',
+  })
   @IsString({ message: 'Product name must be a string' })
-  @Length(3, 200, { message: 'Product name must be between 3 and 200 characters' })
+  @Length(3, 200, {
+    message: 'Product name must be between 3 and 200 characters',
+  })
   name: string;
 
-  @ApiProperty({ example: 'wifi-pineapple-mark-vii', description: 'Product slug' })
+  @ApiProperty({
+    example: 'wifi-pineapple-mark-vii',
+    description: 'Product slug',
+  })
   @IsString({ message: 'Product slug must be a string' })
-  @Matches(/^[a-z0-9-]+$/, { message: 'Product slug can only contain lowercase letters, numbers, and hyphens' })
-  @Length(3, 100, { message: 'Product slug must be between 3 and 100 characters' })
+  @Matches(/^[a-z0-9-]+$/, {
+    message:
+      'Product slug can only contain lowercase letters, numbers, and hyphens',
+  })
+  @Length(3, 100, {
+    message: 'Product slug must be between 3 and 100 characters',
+  })
   slug: string;
 
-  @ApiPropertyOptional({ example: 'Advanced WiFi auditing platform', description: 'Product description' })
+  @ApiPropertyOptional({
+    example: 'Advanced WiFi auditing platform',
+    description: 'Product description',
+  })
   @IsOptional()
   @IsString({ message: 'Product description must be a string' })
-  @Length(0, 2000, { message: 'Product description cannot exceed 2000 characters' })
+  @Length(0, 2000, {
+    message: 'Product description cannot exceed 2000 characters',
+  })
   description?: string;
 
   @ApiProperty({ example: 299.99, description: 'Product price' })
@@ -82,7 +100,10 @@ export class CreateProductDto {
   @Length(3, 50, { message: 'Product SKU must be between 3 and 50 characters' })
   sku: string;
 
-  @ApiPropertyOptional({ example: '1234567890123', description: 'Product barcode' })
+  @ApiPropertyOptional({
+    example: '1234567890123',
+    description: 'Product barcode',
+  })
   @IsOptional()
   @IsString({ message: 'Product barcode must be a string' })
   @Matches(/^\d+$/, { message: 'Barcode can only contain numbers' })
@@ -96,13 +117,19 @@ export class CreateProductDto {
   @IsBoolean({ message: 'Product active status must be a boolean' })
   isActive: boolean;
 
-  @ApiProperty({ example: ['https://example.com/image1.jpg'], description: 'Product images' })
+  @ApiProperty({
+    example: ['https://example.com/image1.jpg'],
+    description: 'Product images',
+  })
   @IsArray({ message: 'Product images must be an array' })
   @ArrayNotEmpty({ message: 'Product must have at least one image' })
   @IsUrl({}, { each: true, message: 'Each image must be a valid URL' })
   images: string[];
 
-  @ApiProperty({ example: ['wifi', 'pentesting', 'audit'], description: 'Product tags' })
+  @ApiProperty({
+    example: ['wifi', 'pentesting', 'audit'],
+    description: 'Product tags',
+  })
   @IsArray({ message: 'Product tags must be an array' })
   @IsString({ each: true, message: 'Each tag must be a string' })
   tags: string[];
@@ -113,45 +140,67 @@ export class CreateProductDto {
   @Min(0.001, { message: 'Product weight must be greater than 0' })
   weight?: number;
 
-  @ApiPropertyOptional({ type: ProductDimensionsDto, description: 'Product dimensions' })
+  @ApiPropertyOptional({
+    type: ProductDimensionsDto,
+    description: 'Product dimensions',
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => ProductDimensionsDto)
   dimensions?: ProductDimensionsDto;
 
-  @ApiPropertyOptional({ example: 'WiFi Pineapple Mark VII', description: 'SEO title' })
+  @ApiPropertyOptional({
+    example: 'WiFi Pineapple Mark VII',
+    description: 'SEO title',
+  })
   @IsOptional()
   @IsString({ message: 'SEO title must be a string' })
   @Length(0, 60, { message: 'SEO title cannot exceed 60 characters' })
   seoTitle?: string;
 
-  @ApiPropertyOptional({ example: 'Advanced WiFi auditing platform for penetration testing', description: 'SEO description' })
+  @ApiPropertyOptional({
+    example: 'Advanced WiFi auditing platform for penetration testing',
+    description: 'SEO description',
+  })
   @IsOptional()
   @IsString({ message: 'SEO description must be a string' })
   @Length(0, 160, { message: 'SEO description cannot exceed 160 characters' })
   seoDescription?: string;
 
-  @ApiProperty({ example: 'INTERMEDIATE', enum: ProductDifficulty, description: 'Product difficulty level' })
-  @IsEnum(ProductDifficulty, { message: 'Product difficulty must be a valid difficulty level' })
+  @ApiProperty({
+    example: 'INTERMEDIATE',
+    enum: ProductDifficulty,
+    description: 'Product difficulty level',
+  })
+  @IsEnum(ProductDifficulty, {
+    message: 'Product difficulty must be a valid difficulty level',
+  })
   difficulty: ProductDifficulty;
 
   @ApiPropertyOptional({ example: 'commercial', description: 'License type' })
   @IsOptional()
   @IsString({ message: 'License type must be a string' })
-  @IsEnum(['open-source', 'commercial', 'educational', 'freeware'], { 
-    message: 'License type must be open-source, commercial, educational, or freeware' 
+  @IsEnum(['open-source', 'commercial', 'educational', 'freeware'], {
+    message:
+      'License type must be open-source, commercial, educational, or freeware',
   })
   licenseType?: string;
 
-  @ApiProperty({ example: ['windows', 'linux', 'mac'], description: 'Product compatibility' })
+  @ApiProperty({
+    example: ['windows', 'linux', 'mac'],
+    description: 'Product compatibility',
+  })
   @IsArray({ message: 'Product compatibility must be an array' })
-  @IsEnum(['windows', 'linux', 'mac', 'android', 'ios'], { 
-    each: true, 
-    message: 'Each compatibility option must be valid' 
+  @IsEnum(['windows', 'linux', 'mac', 'android', 'ios'], {
+    each: true,
+    message: 'Each compatibility option must be valid',
   })
   compatibility: string[];
 
-  @ApiProperty({ example: ['https://example.com/tutorial'], description: 'Product tutorials' })
+  @ApiProperty({
+    example: ['https://example.com/tutorial'],
+    description: 'Product tutorials',
+  })
   @IsArray({ message: 'Product tutorials must be an array' })
   @IsUrl({}, { each: true, message: 'Each tutorial must be a valid URL' })
   tutorials: string[];
@@ -160,7 +209,10 @@ export class CreateProductDto {
   @IsBoolean({ message: 'Product physical status must be a boolean' })
   isPhysical: boolean;
 
-  @ApiPropertyOptional({ example: 'https://example.com/download', description: 'Download URL for digital products' })
+  @ApiPropertyOptional({
+    example: 'https://example.com/download',
+    description: 'Download URL for digital products',
+  })
   @IsOptional()
   @IsUrl({}, { message: 'Download URL must be a valid URL' })
   downloadUrl?: string;
@@ -172,22 +224,38 @@ export class CreateProductDto {
 }
 
 export class UpdateProductDto {
-  @ApiPropertyOptional({ example: 'WiFi Pineapple Mark VII', description: 'Product name' })
+  @ApiPropertyOptional({
+    example: 'WiFi Pineapple Mark VII',
+    description: 'Product name',
+  })
   @IsOptional()
   @IsString({ message: 'Product name must be a string' })
-  @Length(3, 200, { message: 'Product name must be between 3 and 200 characters' })
+  @Length(3, 200, {
+    message: 'Product name must be between 3 and 200 characters',
+  })
   name?: string;
 
-  @ApiPropertyOptional({ example: 'wifi-pineapple-mark-vii', description: 'Product slug' })
+  @ApiPropertyOptional({
+    example: 'wifi-pineapple-mark-vii',
+    description: 'Product slug',
+  })
   @IsOptional()
   @IsString({ message: 'Product slug must be a string' })
-  @Matches(/^[a-z0-9-]+$/, { message: 'Product slug can only contain lowercase letters, numbers, and hyphens' })
+  @Matches(/^[a-z0-9-]+$/, {
+    message:
+      'Product slug can only contain lowercase letters, numbers, and hyphens',
+  })
   slug?: string;
 
-  @ApiPropertyOptional({ example: 'Advanced WiFi auditing platform', description: 'Product description' })
+  @ApiPropertyOptional({
+    example: 'Advanced WiFi auditing platform',
+    description: 'Product description',
+  })
   @IsOptional()
   @IsString({ message: 'Product description must be a string' })
-  @Length(0, 2000, { message: 'Product description cannot exceed 2000 characters' })
+  @Length(0, 2000, {
+    message: 'Product description cannot exceed 2000 characters',
+  })
   description?: string;
 
   @ApiPropertyOptional({ example: 299.99, description: 'Product price' })
@@ -208,7 +276,10 @@ export class UpdateProductDto {
   @Length(3, 50, { message: 'Product SKU must be between 3 and 50 characters' })
   sku?: string;
 
-  @ApiPropertyOptional({ example: '1234567890123', description: 'Product barcode' })
+  @ApiPropertyOptional({
+    example: '1234567890123',
+    description: 'Product barcode',
+  })
   @IsOptional()
   @IsString({ message: 'Product barcode must be a string' })
   @Matches(/^\d+$/, { message: 'Barcode can only contain numbers' })
@@ -224,21 +295,33 @@ export class UpdateProductDto {
   @IsBoolean({ message: 'Product active status must be a boolean' })
   isActive?: boolean;
 
-  @ApiPropertyOptional({ example: ['https://example.com/image1.jpg'], description: 'Product images' })
+  @ApiPropertyOptional({
+    example: ['https://example.com/image1.jpg'],
+    description: 'Product images',
+  })
   @IsOptional()
   @IsArray({ message: 'Product images must be an array' })
   @IsUrl({}, { each: true, message: 'Each image must be a valid URL' })
   images?: string[];
 
-  @ApiPropertyOptional({ example: ['wifi', 'pentesting', 'audit'], description: 'Product tags' })
+  @ApiPropertyOptional({
+    example: ['wifi', 'pentesting', 'audit'],
+    description: 'Product tags',
+  })
   @IsOptional()
   @IsArray({ message: 'Product tags must be an array' })
   @IsString({ each: true, message: 'Each tag must be a string' })
   tags?: string[];
 
-  @ApiPropertyOptional({ example: 'INTERMEDIATE', enum: ProductDifficulty, description: 'Product difficulty level' })
+  @ApiPropertyOptional({
+    example: 'INTERMEDIATE',
+    enum: ProductDifficulty,
+    description: 'Product difficulty level',
+  })
   @IsOptional()
-  @IsEnum(ProductDifficulty, { message: 'Product difficulty must be a valid difficulty level' })
+  @IsEnum(ProductDifficulty, {
+    message: 'Product difficulty must be a valid difficulty level',
+  })
   difficulty?: ProductDifficulty;
 
   @ApiPropertyOptional({ example: true, description: 'Product is physical' })
@@ -246,7 +329,10 @@ export class UpdateProductDto {
   @IsBoolean({ message: 'Product physical status must be a boolean' })
   isPhysical?: boolean;
 
-  @ApiPropertyOptional({ example: 'category-id-here', description: 'Category ID' })
+  @ApiPropertyOptional({
+    example: 'category-id-here',
+    description: 'Category ID',
+  })
   @IsOptional()
   @IsString({ message: 'Category ID must be a string' })
   @Length(1, 100, { message: 'Category ID is required' })
@@ -269,14 +355,23 @@ export class GetProductsQueryDto {
   @Type(() => Number)
   limit?: number;
 
-  @ApiPropertyOptional({ example: 'category-id', description: 'Category ID filter' })
+  @ApiPropertyOptional({
+    example: 'category-id',
+    description: 'Category ID filter',
+  })
   @IsOptional()
   @IsString({ message: 'Category ID must be a string' })
   categoryId?: string;
 
-  @ApiPropertyOptional({ example: 'INTERMEDIATE', enum: ProductDifficulty, description: 'Difficulty filter' })
+  @ApiPropertyOptional({
+    example: 'INTERMEDIATE',
+    enum: ProductDifficulty,
+    description: 'Difficulty filter',
+  })
   @IsOptional()
-  @IsEnum(ProductDifficulty, { message: 'Difficulty must be a valid difficulty level' })
+  @IsEnum(ProductDifficulty, {
+    message: 'Difficulty must be a valid difficulty level',
+  })
   difficulty?: ProductDifficulty;
 
   @ApiPropertyOptional({ example: 'wifi', description: 'Search term' })
@@ -284,7 +379,10 @@ export class GetProductsQueryDto {
   @IsString({ message: 'Search term must be a string' })
   search?: string;
 
-  @ApiPropertyOptional({ example: ['wifi', 'pentesting'], description: 'Tags filter' })
+  @ApiPropertyOptional({
+    example: ['wifi', 'pentesting'],
+    description: 'Tags filter',
+  })
   @IsOptional()
   @IsArray({ message: 'Tags must be an array' })
   tags?: string[];
@@ -303,17 +401,30 @@ export class GetProductsQueryDto {
   @Type(() => Number)
   maxPrice?: number;
 
-  @ApiPropertyOptional({ example: 'name', enum: ['name', 'price', 'createdAt'], description: 'Sort by field' })
+  @ApiPropertyOptional({
+    example: 'name',
+    enum: ['name', 'price', 'createdAt'],
+    description: 'Sort by field',
+  })
   @IsOptional()
-  @IsEnum(['name', 'price', 'createdAt'], { message: 'Sort by must be name, price, or createdAt' })
+  @IsEnum(['name', 'price', 'createdAt'], {
+    message: 'Sort by must be name, price, or createdAt',
+  })
   sortBy?: 'name' | 'price' | 'createdAt';
 
-  @ApiPropertyOptional({ example: 'desc', enum: ['asc', 'desc'], description: 'Sort order' })
+  @ApiPropertyOptional({
+    example: 'desc',
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
   @IsOptional()
   @IsEnum(['asc', 'desc'], { message: 'Sort order must be asc or desc' })
   sortOrder?: 'asc' | 'desc';
 
-  @ApiPropertyOptional({ example: true, description: 'Filter by active status' })
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter by active status',
+  })
   @IsOptional()
   @IsBoolean({ message: 'Active filter must be a boolean' })
   @Transform(({ value }) => {

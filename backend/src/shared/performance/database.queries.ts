@@ -265,15 +265,15 @@ export const productFilters = {
   // Filtro por precio con rangos
   priceFilter: (minPrice?: number, maxPrice?: number) => {
     const filter: any = {};
-    
+
     if (minPrice !== undefined) {
       filter.gte = minPrice;
     }
-    
+
     if (maxPrice !== undefined) {
       filter.lte = maxPrice;
     }
-    
+
     return { price: Object.keys(filter).length > 0 ? filter : undefined };
   },
 
@@ -342,10 +342,7 @@ export const complexQueries = {
         },
       },
     },
-    orderBy: [
-      { price: 'asc' },
-      { createdAt: 'desc' },
-    ],
+    orderBy: [{ price: 'asc' }, { createdAt: 'desc' }],
   }),
 
   // Productos nuevos
@@ -391,7 +388,10 @@ export const complexQueries = {
     }
 
     if (params.minPrice !== undefined || params.maxPrice !== undefined) {
-      where.price = productFilters.priceFilter(params.minPrice, params.maxPrice).price;
+      where.price = productFilters.priceFilter(
+        params.minPrice,
+        params.maxPrice,
+      ).price;
     }
 
     if (params.difficulties && params.difficulties.length > 0) {

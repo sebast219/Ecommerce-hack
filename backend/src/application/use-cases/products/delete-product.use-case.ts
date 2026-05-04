@@ -28,7 +28,9 @@ export class DeleteProductUseCase {
 
     // Verificar si el producto tiene pedidos asociados
     if (existingProduct._count.orderItems > 0) {
-      throw new Error('Cannot delete product with existing orders. Consider deactivating it instead.');
+      throw new Error(
+        'Cannot delete product with existing orders. Consider deactivating it instead.',
+      );
     }
 
     // Eliminar el producto (Prisma manejará las relaciones en cascada)

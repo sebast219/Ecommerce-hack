@@ -23,7 +23,7 @@ export interface IUserRepository {
   // Métodos específicos del dominio
   findByRole(role: string): Promise<User[]>;
   existsByEmail(email: string): Promise<boolean>;
-  
+
   // Métodos de autenticación
   findByEmailForAuth(email: string): Promise<UserWithPassword | null>;
   updatePassword(userId: string, hashedPassword: string): Promise<void>;

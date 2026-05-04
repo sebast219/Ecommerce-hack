@@ -1,14 +1,21 @@
 // 🏗️ PRESENTATION CONTROLLERS - Productos (CORREGIDO)
 // PROPÓSITO: Manejar requests HTTP de productos
 
-import { Controller, Get, Post, Patch, Delete, Query, Param, Body, Inject, UseFilters, UseGuards } from '@nestjs/common';
-import { NotFoundExceptionFilter } from '../filters/not-found.filter';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Query,
+  Param,
+  Body,
+  Inject,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
+import { NotFoundExceptionFilter } from '../filters/not-found.filter';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import {
   GetProductsUseCase,
   GetProductUseCase,
@@ -16,8 +23,16 @@ import {
 import { CreateProductUseCase } from '../../application/use-cases/products/create-product.use-case';
 import { UpdateProductUseCase } from '../../application/use-cases/products/update-product.use-case';
 import { DeleteProductUseCase } from '../../application/use-cases/products/delete-product.use-case';
-import { GetProductsQueryDto, ProductDifficulty, CreateProductDto, UpdateProductDto } from '../../application/dto/product.dto';
-import { ICategoryRepository, CATEGORY_REPOSITORY } from '../../domain/repositories/product.repository.interface';
+import {
+  GetProductsQueryDto,
+  ProductDifficulty,
+  CreateProductDto,
+  UpdateProductDto,
+} from '../../application/dto/product.dto';
+import {
+  ICategoryRepository,
+  CATEGORY_REPOSITORY,
+} from '../../domain/repositories/product.repository.interface';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -39,11 +54,19 @@ export class ProductsController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
-  @ApiQuery({ name: 'difficulty', required: false, enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'] })
+  @ApiQuery({
+    name: 'difficulty',
+    required: false,
+    enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'],
+  })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
-  @ApiQuery({ name: 'sortBy', required: false, enum: ['name', 'price', 'createdAt'] })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'price', 'createdAt'],
+  })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   async getProducts(@Query() query: GetProductsQueryDto) {
     try {
@@ -64,7 +87,10 @@ export class ProductsController {
 
   @Get('search/:term')
   @ApiOperation({ summary: 'Search products by term' })
-  @ApiResponse({ status: 200, description: 'Search results retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Search results retrieved successfully',
+  })
   async searchProducts(@Param('term') term: string) {
     try {
       const result = await this.getProductsUseCase.execute({
@@ -116,7 +142,10 @@ export class ProductsController {
 
   @Get('category/:categoryId')
   @ApiOperation({ summary: 'Get products by category' })
-  @ApiResponse({ status: 200, description: 'Category products retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Category products retrieved successfully',
+  })
   async getProductsByCategory(
     @Param('categoryId') categoryId: string,
     @Query() query: Partial<GetProductsQueryDto>,
@@ -148,11 +177,14 @@ export class ProductsController {
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   async createProduct(@Body() createProductDto: CreateProductDto) {
     try {
       const result = await this.createProductUseCase.execute(createProductDto);
-      
+
       return {
         success: true,
         data: result.product,
@@ -173,7 +205,10 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   async updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -183,7 +218,7 @@ export class ProductsController {
         id,
         ...updateProductDto,
       });
-      
+
       return {
         success: true,
         data: result.product,
@@ -204,11 +239,14 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   async deleteProduct(@Param('id') id: string) {
     try {
       await this.deleteProductUseCase.execute({ id });
-      
+
       return {
         success: true,
         data: null,
@@ -228,17 +266,51 @@ export class ProductsController {
 export class CategoriesController {
   // Datos estáticos de categorías para evitar problemas de inyección
   private readonly categories = [
-    { id: 'profesionales', name: 'Profesionales', slug: 'profesionales', description: 'Herramientas utilizadas por equipos de ciberseguridad en todo el mundo.' },
-    { id: 'ataques-inalambricos', name: 'Ataques Inalámbricos', slug: 'ataques-inalambricos', description: 'Auditorías WiFi, MITM y pentesting inalámbrico' },
-    { id: 'usb-hacking', name: 'USB Hacking', slug: 'usb-hacking', description: 'Payloads, BadUSB y ataques físicos' },
-    { id: 'red-team', name: 'Red Team', slug: 'red-team', description: 'Operaciones ofensivas avanzadas' },
-    { id: 'network', name: 'Network', slug: 'network', description: 'Sniffing, análisis y monitoreo' },
-    { id: 'hardware', name: 'Hardware', slug: 'hardware', description: 'Implantes y dispositivos encubiertos' },
+    {
+      id: 'profesionales',
+      name: 'Profesionales',
+      slug: 'profesionales',
+      description:
+        'Herramientas utilizadas por equipos de ciberseguridad en todo el mundo.',
+    },
+    {
+      id: 'ataques-inalambricos',
+      name: 'Ataques Inalámbricos',
+      slug: 'ataques-inalambricos',
+      description: 'Auditorías WiFi, MITM y pentesting inalámbrico',
+    },
+    {
+      id: 'usb-hacking',
+      name: 'USB Hacking',
+      slug: 'usb-hacking',
+      description: 'Payloads, BadUSB y ataques físicos',
+    },
+    {
+      id: 'red-team',
+      name: 'Red Team',
+      slug: 'red-team',
+      description: 'Operaciones ofensivas avanzadas',
+    },
+    {
+      id: 'network',
+      name: 'Network',
+      slug: 'network',
+      description: 'Sniffing, análisis y monitoreo',
+    },
+    {
+      id: 'hardware',
+      name: 'Hardware',
+      slug: 'hardware',
+      description: 'Implantes y dispositivos encubiertos',
+    },
   ];
 
   @Get()
   @ApiOperation({ summary: 'Get all categories' })
-  @ApiResponse({ status: 200, description: 'Categories retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Categories retrieved successfully',
+  })
   async getCategories() {
     return {
       success: true,
@@ -252,7 +324,7 @@ export class CategoriesController {
   @ApiResponse({ status: 200, description: 'Category retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async getCategoryBySlug(@Param('slug') slug: string) {
-    const category = this.categories.find(c => c.slug === slug);
+    const category = this.categories.find((c) => c.slug === slug);
     if (!category) {
       return {
         success: false,

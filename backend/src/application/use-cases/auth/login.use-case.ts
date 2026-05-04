@@ -5,7 +5,11 @@ import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../../../domain/entities/user.entity';
-import { IUserRepository, UserWithPassword, USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
+import {
+  IUserRepository,
+  UserWithPassword,
+  USER_REPOSITORY,
+} from '../../../domain/repositories/user.repository.interface';
 import { RefreshTokenRepositoryImpl } from '../../../infrastructure/database/repositories/cart.repository.impl';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
 import * as crypto from 'crypto';
@@ -47,13 +51,18 @@ export class LoginUseCase {
 
     // Buscar usuario
     // Buscar usuario con contraseña para autenticación
-    const userWithPassword = await this.userRepository.findByEmailForAuth(request.email);
+    const userWithPassword = await this.userRepository.findByEmailForAuth(
+      request.email,
+    );
     if (!userWithPassword) {
       throw new Error('Invalid credentials');
     }
 
     // Validar contraseña
-    const isPasswordValid = await bcrypt.compare(request.password, userWithPassword.password);
+    const isPasswordValid = await bcrypt.compare(
+      request.password,
+      userWithPassword.password,
+    );
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
@@ -70,7 +79,10 @@ export class LoginUseCase {
     await this.refreshTokenRepository.deleteByUserId(userWithoutPassword.id);
 
     // Guardar nuevo refresh token con hash
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
     const familyId = this.generateFamilyId();
 
     await this.refreshTokenRepository.create({
@@ -108,7 +120,9 @@ export class LoginUseCase {
     };
 
     return this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'test-super-secret-refresh-key-for-testing-only',
+      secret:
+        process.env.JWT_REFRESH_SECRET ||
+        'test-super-secret-refresh-key-for-testing-only',
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     });
   }

@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
 export interface AddToCartCommand {
@@ -73,7 +78,11 @@ export class AddToCartUseCase {
         include: {
           product: {
             select: {
-              id: true, name: true, slug: true, price: true, images: true,
+              id: true,
+              name: true,
+              slug: true,
+              price: true,
+              images: true,
             },
           },
         },
@@ -90,7 +99,11 @@ export class AddToCartUseCase {
       include: {
         product: {
           select: {
-            id: true, name: true, slug: true, price: true, images: true,
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            images: true,
           },
         },
       },

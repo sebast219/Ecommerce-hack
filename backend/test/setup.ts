@@ -2,7 +2,8 @@
 // Configurar variables de entorno para tests ANTES de cualquier importación
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-super-secret-jwt-key-for-testing-only';
-process.env.JWT_REFRESH_SECRET = 'test-super-secret-refresh-key-for-testing-only';
+process.env.JWT_REFRESH_SECRET =
+  'test-super-secret-refresh-key-for-testing-only';
 process.env.JWT_EXPIRES_IN = '24h';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 process.env.DATABASE_URL = 'file:./test.db';
@@ -18,7 +19,6 @@ export class TestSetup {
   public static prisma: PrismaService;
 
   static async initialize(): Promise<INestApplication> {
-
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -26,12 +26,14 @@ export class TestSetup {
     const app = moduleFixture.createNestApplication();
 
     // Replicar EXACTA configuración de producción
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: false },
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: { enableImplicitConversion: false },
+      }),
+    );
 
     app.setGlobalPrefix('api/v1');
 
@@ -77,7 +79,10 @@ export class TestSetup {
       }
     } catch (error) {
       // Ignorar errores de cleanup (modelos que no existen)
-      console.warn('Cleanup warning:', error instanceof Error ? error.message : String(error));
+      console.warn(
+        'Cleanup warning:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 

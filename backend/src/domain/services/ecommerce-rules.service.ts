@@ -38,7 +38,10 @@ export class EcommerceRulesService {
   private readonly logger = new Logger(EcommerceRulesService.name);
 
   // Reglas de validación de productos para ciberseguridad
-  validateProduct(product: ProductValidationRule): { isValid: boolean; errors: string[] } {
+  validateProduct(product: ProductValidationRule): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Validaciones básicas
@@ -57,17 +60,19 @@ export class EcommerceRulesService {
     // Validaciones de categorías especializadas
     const validCategories = [
       'wireless-attacks',
-      'usb-hacking', 
+      'usb-hacking',
       'red-team-tools',
       'forense',
       'network-security',
       'encryption-tools',
       'password-recovery',
-      'hardware-hacking'
+      'hardware-hacking',
     ];
 
     if (!validCategories.includes(product.category)) {
-      errors.push(`Invalid category. Valid categories: ${validCategories.join(', ')}`);
+      errors.push(
+        `Invalid category. Valid categories: ${validCategories.join(', ')}`,
+      );
     }
 
     // Validaciones de precio
@@ -89,12 +94,15 @@ export class EcommerceRulesService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   // Validaciones de pedido
-  validateOrder(order: OrderValidationRule): { isValid: boolean; errors: string[] } {
+  validateOrder(order: OrderValidationRule): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Validaciones de items
@@ -126,9 +134,14 @@ export class EcommerceRulesService {
     });
 
     // Validación del monto total
-    const calculatedTotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const calculatedTotal = order.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
     if (Math.abs(calculatedTotal - order.totalAmount) > 0.01) {
-      errors.push(`Total amount mismatch. Expected: ${calculatedTotal}, Provided: ${order.totalAmount}`);
+      errors.push(
+        `Total amount mismatch. Expected: ${calculatedTotal}, Provided: ${order.totalAmount}`,
+      );
     }
 
     if (order.totalAmount > 50000) {
@@ -160,15 +173,15 @@ export class EcommerceRulesService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   // Aplicar reglas de descuento
   applyDiscountRules(
-    subtotal: number, 
-    items: any[], 
-    discountRules: DiscountRule[]
+    subtotal: number,
+    items: any[],
+    discountRules: DiscountRule[],
   ): { total: number; appliedDiscounts: any[] } {
     let total = subtotal;
     const appliedDiscounts: any[] = [];
@@ -177,71 +190,86 @@ export class EcommerceRulesService {
       if (this.isDiscountApplicable(rule, subtotal, items)) {
         const discountAmount = this.calculateDiscount(rule, subtotal);
         total -= discountAmount;
-        
+
         appliedDiscounts.push({
           ruleId: rule.type,
           description: this.getDiscountDescription(rule),
-          amount: discountAmount
+          amount: discountAmount,
         });
 
-        this.logger.log(`Applied discount: ${rule.type}, Amount: $${discountAmount}`);
+        this.logger.log(
+          `Applied discount: ${rule.type}, Amount: $${discountAmount}`,
+        );
       }
     }
 
     return {
       total: Math.max(0, total),
-      appliedDiscounts
+      appliedDiscounts,
     };
   }
 
   // Validar disponibilidad de stock
-  validateStockAvailability(items: Array<{ productId: string; quantity: number }>): Promise<{ 
-    isValid: boolean; 
-    unavailableItems: Array<{ productId: string; requested: number; available: number }> 
+  validateStockAvailability(
+    items: Array<{ productId: string; quantity: number }>,
+  ): Promise<{
+    isValid: boolean;
+    unavailableItems: Array<{
+      productId: string;
+      requested: number;
+      available: number;
+    }>;
   }> {
     // Esta función debería conectarse a tu repositorio de productos
     // Por ahora, es una implementación simulada
     return new Promise((resolve) => {
-      const unavailableItems: Array<{ productId: string; requested: number; available: number }> = [];
-      
+      const unavailableItems: Array<{
+        productId: string;
+        requested: number;
+        available: number;
+      }> = [];
+
       // Simulación de validación de stock
-      items.forEach(item => {
+      items.forEach((item) => {
         // Aquí deberías consultar el stock real del producto
         const availableStock = 100; // Valor simulado
-        
+
         if (item.quantity > availableStock) {
           unavailableItems.push({
             productId: item.productId,
             requested: item.quantity,
-            available: availableStock
+            available: availableStock,
           });
         }
       });
 
       resolve({
         isValid: unavailableItems.length === 0,
-        unavailableItems
+        unavailableItems,
       });
     });
   }
 
   // Calcular costos de envío
   calculateShippingCost(
-    items: any[], 
-    shippingAddress: any, 
-    shippingMethod: 'STANDARD' | 'EXPRESS' | 'OVERNIGHT'
+    items: any[],
+    shippingAddress: any,
+    shippingMethod: 'STANDARD' | 'EXPRESS' | 'OVERNIGHT',
   ): number {
     // Reglas de envío basadas en peso y ubicación
     const baseCost = {
       STANDARD: 5.99,
       EXPRESS: 12.99,
-      OVERNIGHT: 24.99
+      OVERNIGHT: 24.99,
     };
 
     let cost = baseCost[shippingMethod];
 
     // Costo adicional por peso total (simulado)
-    const totalWeight = items.reduce((sum, item) => sum + (item.weight || 1), 0);
+    const totalWeight = items.reduce(
+      (sum, item) => sum + (item.weight || 1),
+      0,
+    );
     if (totalWeight > 5) {
       cost += (totalWeight - 5) * 2;
     }
@@ -252,7 +280,10 @@ export class EcommerceRulesService {
     }
 
     // Envío gratis para pedidos mayores a $100
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
     if (subtotal >= 100) {
       cost = 0;
     }
@@ -261,12 +292,23 @@ export class EcommerceRulesService {
   }
 
   // Validar método de pago
-  validatePaymentMethod(paymentMethod: string, amount: number): { isValid: boolean; errors: string[] } {
+  validatePaymentMethod(
+    paymentMethod: string,
+    amount: number,
+  ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    const validMethods = ['credit_card', 'debit_card', 'paypal', 'stripe', 'crypto'];
+    const validMethods = [
+      'credit_card',
+      'debit_card',
+      'paypal',
+      'stripe',
+      'crypto',
+    ];
 
     if (!validMethods.includes(paymentMethod)) {
-      errors.push(`Invalid payment method. Valid methods: ${validMethods.join(', ')}`);
+      errors.push(
+        `Invalid payment method. Valid methods: ${validMethods.join(', ')}`,
+      );
     }
 
     // Límites por método de pago
@@ -275,40 +317,45 @@ export class EcommerceRulesService {
       debit_card: 5000,
       paypal: 3000,
       stripe: 15000,
-      crypto: 50000
+      crypto: 50000,
     };
 
     if (amount > limits[paymentMethod]) {
-      errors.push(`Amount exceeds limit for ${paymentMethod}. Maximum: $${limits[paymentMethod]}`);
+      errors.push(
+        `Amount exceeds limit for ${paymentMethod}. Maximum: $${limits[paymentMethod]}`,
+      );
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   // Métodos privados
-  private validateCategorySpecificRules(product: ProductValidationRule, errors: string[]): void {
+  private validateCategorySpecificRules(
+    product: ProductValidationRule,
+    errors: string[],
+  ): void {
     switch (product.category) {
       case 'wireless-attacks':
         if (!product.specs || !product.specs.frequency) {
           errors.push('Wireless attack products must specify frequency range');
         }
         break;
-      
+
       case 'usb-hacking':
         if (!product.specs || !product.specs.compatibility) {
           errors.push('USB hacking products must specify compatibility');
         }
         break;
-      
+
       case 'red-team-tools':
         if (!product.specs || !product.specs.license) {
           errors.push('Red team tools must specify license type');
         }
         break;
-      
+
       case 'forense':
         if (!product.specs || !product.specs.supportedFormats) {
           errors.push('Forensic tools must specify supported formats');
@@ -317,7 +364,11 @@ export class EcommerceRulesService {
     }
   }
 
-  private isDiscountApplicable(rule: DiscountRule, subtotal: number, items: any[]): boolean {
+  private isDiscountApplicable(
+    rule: DiscountRule,
+    subtotal: number,
+    items: any[],
+  ): boolean {
     // Verificar fecha de expiración
     if (rule.expirationDate && new Date() > rule.expirationDate) {
       return false;
@@ -330,8 +381,8 @@ export class EcommerceRulesService {
 
     // Verificar categorías aplicables
     if (rule.applicableCategories && rule.applicableCategories.length > 0) {
-      const hasApplicableCategory = items.some(item => 
-        rule.applicableCategories.includes(item.category)
+      const hasApplicableCategory = items.some((item) =>
+        rule.applicableCategories.includes(item.category),
       );
       if (!hasApplicableCategory) {
         return false;

@@ -4,12 +4,12 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 export interface JwtPayload {
-  sub: string;      // User ID
+  sub: string; // User ID
   email: string;
   role: string;
   iat?: number;
   exp?: number;
-  jti?: string;     // JWT ID único
+  jti?: string; // JWT ID único
 }
 
 export interface TokenPair {
@@ -28,11 +28,15 @@ export class JwtTokenService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.accessTokenTTL = 900;      // 15 minutos
-    this.refreshTokenTTL = 604800;  // 7 días
+    this.accessTokenTTL = 900; // 15 minutos
+    this.refreshTokenTTL = 604800; // 7 días
   }
 
-  async generateTokenPair(user: { id: string; email: string; role: string }): Promise<TokenPair> {
+  async generateTokenPair(user: {
+    id: string;
+    email: string;
+    role: string;
+  }): Promise<TokenPair> {
     const jti = this.generateJti();
 
     const payload: JwtPayload = {

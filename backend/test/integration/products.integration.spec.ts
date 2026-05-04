@@ -5,7 +5,14 @@ import { UserFactory } from '../factories/user.factory';
 import { ProductFactory } from '../factories/product.factory';
 
 // Importar funciones de Jest para que TypeScript las reconozca
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  beforeEach,
+  afterAll,
+} from '@jest/globals';
 
 describe('Products Integration Tests', () => {
   let userFactory: UserFactory;
@@ -113,7 +120,9 @@ describe('Products Integration Tests', () => {
         .get('/api/v1/products?sortBy=price&sortOrder=asc')
         .expect(200);
 
-      const prices = response.body.data.products.map((p: any) => p.price.amount);
+      const prices = response.body.data.products.map(
+        (p: any) => p.price.amount,
+      );
       expect(prices).toEqual([...prices].sort((a: number, b: number) => a - b));
     });
 

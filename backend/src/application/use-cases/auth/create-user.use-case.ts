@@ -4,7 +4,10 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../../domain/entities/user.entity';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from '../../../domain/repositories/user.repository.interface';
 import { RefreshTokenRepositoryImpl } from '../../../infrastructure/database/repositories/cart.repository.impl';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
 import * as crypto from 'crypto';
@@ -54,7 +57,8 @@ export class CreateUserUseCase {
     const createdUser = await this.userRepository.create(user);
 
     // Generar tokens como en LoginUseCase
-    const { accessToken, refreshToken } = await this.generateTokens(createdUser);
+    const { accessToken, refreshToken } =
+      await this.generateTokens(createdUser);
 
     // Remover password del response
     const { password, ...userWithoutPassword } = createdUser as any;
@@ -68,17 +72,24 @@ export class CreateUserUseCase {
   }
 
   // EJEMPLO: Método para generar tokens
-  private async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+  private async generateTokens(
+    user: User,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = { sub: user.id, email: user.email, role: user.role };
-    
+
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'test-super-secret-refresh-key-for-testing-only',
+      secret:
+        process.env.JWT_REFRESH_SECRET ||
+        'test-super-secret-refresh-key-for-testing-only',
       expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     });
 
     // Guardar refresh token en la base de datos
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
     const familyId = crypto.randomUUID();
 
     await this.refreshTokenRepository.create({

@@ -6,7 +6,9 @@ const logger = new Logger('EnvValidation');
 
 const envSchema = z.object({
   // Server
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.coerce.number().min(1).max(65535).default(3001),
 
   // Database
@@ -32,9 +34,9 @@ export function validateEnv(): EnvConfig {
   const result = envSchema.safeParse(process.env);
 
   if (!result.success) {
-    const errors = result.error.issues.map(
-      issue => `  ${issue.path.join('.')}: ${issue.message}` 
-    ).join('\n');
+    const errors = result.error.issues
+      .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+      .join('\n');
 
     logger.error(`Environment validation failed:\n${errors}`);
     throw new Error('Invalid environment configuration');

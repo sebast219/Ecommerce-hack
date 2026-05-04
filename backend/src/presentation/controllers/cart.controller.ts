@@ -1,10 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param,
-  UseGuards, Req, HttpCode, HttpStatus,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { AddToCartDto, UpdateCartItemDto } from '../../application/dto/cart.dto';
+import {
+  AddToCartDto,
+  UpdateCartItemDto,
+} from '../../application/dto/cart.dto';
 import { AddToCartUseCase } from '../../application/use-cases/cart/add-to-cart.use-case';
 import { GetCartUseCase } from '../../application/use-cases/cart/get-cart.use-case';
 import { UpdateCartItemUseCase } from '../../application/use-cases/cart/update-cart-item.use-case';
@@ -50,7 +62,11 @@ export class CartController {
     @Param('id') id: string,
     @Body() dto: UpdateCartItemDto,
   ) {
-    const item = await this.updateCartItem.execute(req.user.id, id, dto.quantity);
+    const item = await this.updateCartItem.execute(
+      req.user.id,
+      id,
+      dto.quantity,
+    );
     return { success: true, data: item };
   }
 

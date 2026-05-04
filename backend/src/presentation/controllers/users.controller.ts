@@ -266,7 +266,7 @@ export class UsersController {
         try {
           const fs = require('fs');
           const path = require('path');
-          
+
           // Extraer el tipo y los datos base64
           const matches = dto.avatar.match(/^data:image\/(\w+);base64,(.+)$/);
           if (!matches) {
@@ -276,24 +276,24 @@ export class UsersController {
               message: 'Formato de imagen inválido',
             };
           }
-          
+
           const imageType = matches[1];
           const base64Data = matches[2];
           const buffer = Buffer.from(base64Data, 'base64');
-          
+
           // Crear nombre de archivo único
-          const filename = `${req.user.id}-${Date.now()}-${Math.round(Math.random() * 1E9)}.${imageType}`;
+          const filename = `${req.user.id}-${Date.now()}-${Math.round(Math.random() * 1e9)}.${imageType}`;
           const uploadPath = join(process.cwd(), 'uploads', 'avatars');
           const filePath = path.join(uploadPath, filename);
-          
+
           // Asegurar que el directorio exista
           if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
           }
-          
+
           // Guardar archivo
           fs.writeFileSync(filePath, buffer);
-          
+
           // Guardar la URL relativa en la base de datos
           updateData.avatar = `/uploads/avatars/${filename}`;
           console.log('Base64 avatar saved as:', updateData.avatar);
@@ -351,14 +351,20 @@ export class UsersController {
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `${req.user.id}-${uniqueSuffix}${ext}`);
         },
       }),
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/image\/(jpg|jpeg|png|gif)$/)) {
-          return cb(new Error('Solo se permiten archivos de imagen (jpg, jpeg, png, gif)'), false);
+          return cb(
+            new Error(
+              'Solo se permiten archivos de imagen (jpg, jpeg, png, gif)',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -384,7 +390,7 @@ export class UsersController {
     console.log('=== UPLOAD AVATAR DEBUG ===');
     console.log('User ID:', req.user.id);
     console.log('File received:', file ? 'YES' : 'NO');
-    
+
     if (!file) {
       console.log('ERROR: No file provided');
       return {
@@ -403,7 +409,7 @@ export class UsersController {
     // Guardar la ruta del archivo en la base de datos
     const avatarUrl = `/uploads/avatars/${file.filename}`;
     console.log('Avatar URL to save:', avatarUrl);
-    
+
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id: req.user.id },
@@ -416,9 +422,9 @@ export class UsersController {
           avatar: true,
         },
       });
-      
+
       console.log('User updated successfully:', updatedUser);
-      
+
       return {
         success: true,
         data: {

@@ -67,7 +67,10 @@ export class OrderRepositoryImpl implements IOrderRepository {
         notes: orderData.notes,
         customerEmail: orderData.shippingEmail, // Mapear a customerEmail
         customerName: orderData.shippingName, // Mapear a customerName
-        shippingAddressId: typeof orderData.shippingAddress === 'string' ? orderData.shippingAddress : null,
+        shippingAddressId:
+          typeof orderData.shippingAddress === 'string'
+            ? orderData.shippingAddress
+            : null,
         userId: orderData.userId,
       },
       include: {
@@ -170,7 +173,9 @@ export class OrderRepositoryImpl implements IOrderRepository {
   async generateOrderNumber(): Promise<string> {
     const date = new Date();
     const year = date.getFullYear().toString();
-    const sequence = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const sequence = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
     const orderNumber = `ORD-${year}-${sequence}`;
 
     // Verificar que no exista
@@ -242,9 +247,7 @@ export class OrderRepositoryImpl implements IOrderRepository {
     return this.mapPrismaOrderItemToOrderItem(prismaItem);
   }
 
-  async createPayment(
-    paymentData: Omit<Payment, 'id'>,
-  ): Promise<Payment> {
+  async createPayment(paymentData: Omit<Payment, 'id'>): Promise<Payment> {
     const prismaPayment = await this.prisma.payment.create({
       data: {
         orderId: paymentData.orderId,

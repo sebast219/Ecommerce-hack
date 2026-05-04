@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
 @Injectable()
@@ -34,7 +38,7 @@ export class GetOrderByIdUseCase {
       subtotal: Number(order.subtotal),
       tax: Number(order.tax),
       shipping: Number(order.shipping),
-      items: order.items.map(i => ({
+      items: order.items.map((i) => ({
         ...i,
         price: Number(i.price),
       })),

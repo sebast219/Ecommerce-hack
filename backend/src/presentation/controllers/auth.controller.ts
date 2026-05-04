@@ -29,9 +29,7 @@ import {
   LoginUseCase,
   LoginRequest,
 } from '../../application/use-cases/auth/login.use-case';
-import {
-  RefreshTokenUseCase,
-} from '../../application/use-cases/auth/refresh-token.use-case';
+import { RefreshTokenUseCase } from '../../application/use-cases/auth/refresh-token.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -41,15 +39,15 @@ export class CreateUserDto implements CreateUserRequest {
   @IsEmail()
   @Transform(({ value }) => value?.trim().toLowerCase())
   email: string;
-  
+
   @IsString()
   @MinLength(2)
   firstName: string;
-  
+
   @IsString()
   @MinLength(2)
   lastName: string;
-  
+
   @IsString()
   @MinLength(6)
   password: string;
@@ -59,7 +57,7 @@ export class LoginDto implements LoginRequest {
   @IsEmail()
   @Transform(({ value }) => value?.trim().toLowerCase())
   email: string;
-  
+
   @IsString()
   @MinLength(6)
   password: string;
@@ -123,7 +121,7 @@ export class AuthController {
 
       // Remover password del response por seguridad
       const { password, ...userWithoutPassword } = result.user as any;
-      
+
       return {
         success: true,
         data: {
@@ -146,7 +144,9 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     try {
-      const result = await this.refreshTokenUseCase.execute({ refreshToken: refreshTokenDto.refreshToken });
+      const result = await this.refreshTokenUseCase.execute({
+        refreshToken: refreshTokenDto.refreshToken,
+      });
 
       return {
         success: true,

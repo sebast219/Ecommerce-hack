@@ -53,7 +53,9 @@ export class OrderExpirationCron {
           description: 'Order expired without payment',
         });
       } catch (error: any) {
-        this.logger.error(`Failed to expire order ${order.orderNumber}: ${error.message}`);
+        this.logger.error(
+          `Failed to expire order ${order.orderNumber}: ${error.message}`,
+        );
       }
     }
   }

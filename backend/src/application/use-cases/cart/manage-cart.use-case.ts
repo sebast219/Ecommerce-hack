@@ -7,13 +7,11 @@ import { ICartRepository } from '../../../domain/repositories/cart.repository.in
 import { ICartItemRepository } from '../../../domain/repositories/cart.repository.interface';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
 import { Inject } from '@nestjs/common';
-import { 
+import {
   CART_REPOSITORY,
-  CART_ITEM_REPOSITORY 
+  CART_ITEM_REPOSITORY,
 } from '../../../domain/repositories/cart.repository.interface';
-import { 
-  PRODUCT_REPOSITORY 
-} from '../../../domain/repositories/product.repository.interface';
+import { PRODUCT_REPOSITORY } from '../../../domain/repositories/product.repository.interface';
 
 export interface AddToCartRequest {
   productId: string;
@@ -58,7 +56,10 @@ export class AddToCartUseCase {
     }
 
     // Verificar stock
-    const hasStock = await this.productRepository.checkStock(productId, quantity);
+    const hasStock = await this.productRepository.checkStock(
+      productId,
+      quantity,
+    );
     if (!hasStock) {
       throw new Error('Insufficient stock');
     }
@@ -83,7 +84,10 @@ export class AddToCartUseCase {
         throw new Error('Insufficient stock for requested quantity');
       }
 
-      await this.cartItemRepository.updateQuantity(existingItem.id, newQuantity);
+      await this.cartItemRepository.updateQuantity(
+        existingItem.id,
+        newQuantity,
+      );
     } else {
       // Crear nuevo item
       await this.cartItemRepository.create({
@@ -124,7 +128,9 @@ export class UpdateCartItemUseCase {
     private readonly productRepository: IProductRepository,
   ) {}
 
-  async execute(request: UpdateCartItemRequest): Promise<UpdateCartItemResponse> {
+  async execute(
+    request: UpdateCartItemRequest,
+  ): Promise<UpdateCartItemResponse> {
     const { cartItemId, quantity } = request;
 
     // Validar cantidad
@@ -180,7 +186,9 @@ export class RemoveFromCartUseCase {
     private readonly cartRepository: ICartRepository,
   ) {}
 
-  async execute(request: RemoveFromCartRequest): Promise<RemoveFromCartResponse> {
+  async execute(
+    request: RemoveFromCartRequest,
+  ): Promise<RemoveFromCartResponse> {
     const { cartItemId } = request;
 
     // Obtener item del carrito

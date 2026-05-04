@@ -57,7 +57,11 @@ export class AppLoggerService implements LoggerService {
     }
   }
 
-  private writeLog(level: LogLevel, message: string, context?: LogContext): void {
+  private writeLog(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+  ): void {
     const timestamp = new Date().toISOString();
 
     if (this.isProduction) {
@@ -76,7 +80,7 @@ export class AppLoggerService implements LoggerService {
       const coloredLevel = this.colorize(level);
       console.log(
         `${emoji} [${timestamp}] ${coloredLevel} [${this.context}] ${message}`,
-        context ? JSON.stringify(this.sanitizeContext(context), null, 2) : ''
+        context ? JSON.stringify(this.sanitizeContext(context), null, 2) : '',
       );
     }
   }
@@ -88,18 +92,28 @@ export class AppLoggerService implements LoggerService {
     return message
       .replace(/password['":\s]*['"]\S+['"]/gi, 'password: "[REDACTED]"')
       .replace(/token['":\s]*['"]\S+['"]/gi, 'token: "[REDACTED]"')
-      .replace(/authorization['":\s]*['"]\S+['"]/gi, 'authorization: "[REDACTED]"')
+      .replace(
+        /authorization['":\s]*['"]\S+['"]/gi,
+        'authorization: "[REDACTED]"',
+      )
       .replace(/\b[\w._%+-]+@[\w.-]+\.[A-Z]{2,}\b/gi, '[EMAIL_REDACTED]');
   }
 
   private sanitizeContext(context?: LogContext): LogContext {
     if (!context) return {};
-    
+
     const sanitized = { ...context };
-    const sensitiveKeys = ['password', 'token', 'secret', 'authorization', 'creditCard', 'ssn'];
-    
+    const sensitiveKeys = [
+      'password',
+      'token',
+      'secret',
+      'authorization',
+      'creditCard',
+      'ssn',
+    ];
+
     for (const key of Object.keys(sanitized)) {
-      if (sensitiveKeys.some(sk => key.toLowerCase().includes(sk))) {
+      if (sensitiveKeys.some((sk) => key.toLowerCase().includes(sk))) {
         sanitized[key] = '[REDACTED]';
       }
     }

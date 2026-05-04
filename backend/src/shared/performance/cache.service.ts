@@ -130,7 +130,7 @@ export class CacheService {
       if (now - item.timestamp > item.ttl) {
         expired++;
       }
-      
+
       // Estimación simple del tamaño en memoria
       memoryUsage += JSON.stringify(item.data).length * 2; // 2 bytes por caracter
     }
@@ -196,14 +196,22 @@ export class CacheService {
 
 // Decorador para caché de métodos
 export function Cacheable(ttl?: number) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const cacheService = this.cacheService as CacheService;
       const cacheKey = `${target.constructor.name}:${propertyName}:${JSON.stringify(args)}`;
 
-      return cacheService.getOrCreate(cacheKey, () => method.apply(this, args), ttl);
+      return cacheService.getOrCreate(
+        cacheKey,
+        () => method.apply(this, args),
+        ttl,
+      );
     };
 
     return descriptor;
@@ -212,12 +220,16 @@ export function Cacheable(ttl?: number) {
 
 // Decorador para invalidación de caché
 export function CacheInvalidate(pattern: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const result = await method.apply(this, args);
-      
+
       const cacheService = this.cacheService as CacheService;
       cacheService.deletePattern(pattern);
 

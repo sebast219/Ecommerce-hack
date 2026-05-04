@@ -7,7 +7,10 @@ import { LoginUseCase } from '../../src/application/use-cases/auth/login.use-cas
 import { RefreshTokenUseCase } from '../../src/application/use-cases/auth/refresh-token.use-case';
 import { UserRepositoryImpl } from '../../src/infrastructure/database/repositories/user.repository.impl';
 import { UserDomainService } from '../../src/domain/services/user.domain.service';
-import { USER_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from '../../src/domain/repositories/user.repository.interface';
+import {
+  USER_REPOSITORY,
+  REFRESH_TOKEN_REPOSITORY,
+} from '../../src/domain/repositories/user.repository.interface';
 import { RefreshTokenService } from '../../src/infrastructure/auth/refresh-token.service';
 import { RateLimiterService } from '../../src/infrastructure/security/rate-limiter.service';
 
@@ -34,9 +37,9 @@ describe('Security Tests - Authentication', () => {
           useValue: {
             get: jest.fn((key: string) => {
               const config = {
-                'JWT_SECRET': 'test-secret-key-with-32-chars-minimum',
-                'JWT_REFRESH_SECRET': 'test-refresh-secret-key-with-32-chars',
-                'BCRYPT_ROUNDS': 12,
+                JWT_SECRET: 'test-secret-key-with-32-chars-minimum',
+                JWT_REFRESH_SECRET: 'test-refresh-secret-key-with-32-chars',
+                BCRYPT_ROUNDS: 12,
               };
               return config[key];
             }),
@@ -64,7 +67,7 @@ describe('Security Tests - Authentication', () => {
       };
 
       const result = await createUserUseCase.execute(userData);
-      
+
       // El rol debe ser USER por defecto, no ADMIN
       expect(result.user.role).toBe('USER');
       expect(result.user.role).not.toBe('ADMIN');
@@ -91,19 +94,20 @@ describe('Security Tests - Authentication', () => {
       // Crear token con algoritmo incorrecto (simulado)
       const maliciousToken = jwtService.sign(
         { sub: 'user123', email: 'test@example.com' },
-        { algorithm: 'none' } // Intento de bypass
+        { algorithm: 'none' }, // Intento de bypass
       );
 
-      await expect(refreshTokenUseCase.execute({ refreshToken: maliciousToken }))
-        .rejects.toThrow('Invalid or expired refresh token');
+      await expect(
+        refreshTokenUseCase.execute({ refreshToken: maliciousToken }),
+      ).rejects.toThrow('Invalid or expired refresh token');
     });
 
     it('should validate algorithm explicitly', async () => {
       const payload = { sub: 'user123', email: 'test@example.com' };
-      
+
       // Token válido con HS256
       const validToken = jwtService.sign(payload);
-      
+
       // Verificar que el algoritmo sea HS256
       const decoded = jwtService.decode(validToken, { complete: true });
       expect(decoded.header.alg).toBe('HS256');
@@ -159,13 +163,15 @@ describe('Security Tests - Authentication', () => {
 
   describe('Token Family Security', () => {
     it('should detect reuse attack', async () => {
-      const refreshTokenService = module.get<RefreshTokenService>(RefreshTokenService);
-      
+      const refreshTokenService =
+        module.get<RefreshTokenService>(RefreshTokenService);
+
       // Simular token reuse
       const oldToken = 'old-refresh-token';
-      
+
       // Primer uso del token (normal)
-      jest.spyOn(refreshTokenService, 'rotateRefreshToken')
+      jest
+        .spyOn(refreshTokenService, 'rotateRefreshToken')
         .mockResolvedValueOnce({
           accessToken: 'new-access-token',
           refreshToken: 'new-refresh-token',
@@ -173,20 +179,28 @@ describe('Security Tests - Authentication', () => {
         });
 
       // Segundo uso del mismo token (reuse attack)
-      jest.spyOn(refreshTokenService, 'rotateRefreshToken')
-        .mockRejectedValueOnce(new Error('Token reuse detected - all sessions invalidated'));
+      jest
+        .spyOn(refreshTokenService, 'rotateRefreshToken')
+        .mockRejectedValueOnce(
+          new Error('Token reuse detected - all sessions invalidated'),
+        );
 
       // El segundo uso debe lanzar error
-      await expect(refreshTokenService.rotateRefreshToken(oldToken))
-        .rejects.toThrow('Token reuse detected - all sessions invalidated');
+      await expect(
+        refreshTokenService.rotateRefreshToken(oldToken),
+      ).rejects.toThrow('Token reuse detected - all sessions invalidated');
     });
 
     it('should invalidate entire family on reuse', async () => {
-      const refreshTokenService = module.get<RefreshTokenService>(RefreshTokenService);
-      
+      const refreshTokenService =
+        module.get<RefreshTokenService>(RefreshTokenService);
+
       // Mock para simular invalidación de familia
-      const revokeAllSpy = jest.spyOn(refreshTokenService, 'revokeAllUserTokens');
-      
+      const revokeAllSpy = jest.spyOn(
+        refreshTokenService,
+        'revokeAllUserTokens',
+      );
+
       try {
         await refreshTokenService.rotateRefreshToken('reused-token');
       } catch (error) {
@@ -218,8 +232,9 @@ describe('Security Tests - Authentication', () => {
           password,
         };
 
-        await expect(createUserUseCase.execute(userData))
-          .rejects.toThrow(/password/i);
+        await expect(createUserUseCase.execute(userData)).rejects.toThrow(
+          /password/i,
+        );
       }
     });
 
@@ -232,7 +247,7 @@ describe('Security Tests - Authentication', () => {
       };
 
       const result = await createUserUseCase.execute(userData);
-      
+
       // El usuario debe haber sido creado exitosamente
       expect(result.user.email).toBe(userData.email);
       expect(result.user.firstName).toBe(userData.firstName);
@@ -280,8 +295,9 @@ describe('Security Tests - Authentication', () => {
           password: 'StrongP@ssw0rd123!',
         };
 
-        await expect(createUserUseCase.execute(userData))
-          .rejects.toThrow(/email/i);
+        await expect(createUserUseCase.execute(userData)).rejects.toThrow(
+          /email/i,
+        );
       }
     });
   });

@@ -15,7 +15,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { CreateOrderDto, GetOrdersQueryDto } from '../../application/dto/order.dto';
+import {
+  CreateOrderDto,
+  GetOrdersQueryDto,
+} from '../../application/dto/order.dto';
 import { CreateOrderUseCase } from '../../application/use-cases/order/create-order.use-case';
 import { GetOrdersUseCase } from '../../application/use-cases/order/get-orders.use-case';
 import { GetOrderByIdUseCase } from '../../application/use-cases/order/get-order-by-id.use-case';
@@ -60,14 +63,22 @@ export class OrderController {
   @Get(':id')
   @ApiOperation({ summary: 'Get order details by ID' })
   async getById(@Req() req: any, @Param('id') id: string) {
-    const order = await this.getOrderById.execute(id, req.user.id, req.user.role);
+    const order = await this.getOrderById.execute(
+      id,
+      req.user.id,
+      req.user.role,
+    );
     return { success: true, data: order };
   }
 
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Cancel an order' })
   async cancel(@Req() req: any, @Param('id') id: string) {
-    const order = await this.cancelOrder.execute(id, req.user.id, req.user.role);
+    const order = await this.cancelOrder.execute(
+      id,
+      req.user.id,
+      req.user.role,
+    );
     return { success: true, data: order };
   }
 }

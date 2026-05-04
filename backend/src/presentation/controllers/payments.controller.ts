@@ -1,22 +1,25 @@
 // 💳 PAYMENTS CONTROLLER - Endpoints de procesamiento de pagos
 // PROPÓSITO: Exponer API REST para integración con Stripe
 
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Body, 
-  Param, 
-  Headers, 
-  HttpCode, 
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Headers,
+  HttpCode,
   HttpStatus,
   Logger,
   Req,
-  BadRequestException
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { StripeService } from '../../infrastructure/services/stripe.service';
-import { CreatePaymentIntentDto, CreateCustomerDto } from '../../infrastructure/services/stripe.service';
+import {
+  CreatePaymentIntentDto,
+  CreateCustomerDto,
+} from '../../infrastructure/services/stripe.service';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -27,12 +30,16 @@ export class PaymentsController {
 
   @Post('create-payment-intent')
   @ApiOperation({ summary: 'Crear intención de pago' })
-  @ApiResponse({ status: 200, description: 'Intención de pago creada exitosamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Intención de pago creada exitosamente',
+  })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   async createPaymentIntent(@Body() paymentData: CreatePaymentIntentDto) {
     try {
-      const paymentIntent = await this.stripeService.createPaymentIntent(paymentData);
-      
+      const paymentIntent =
+        await this.stripeService.createPaymentIntent(paymentData);
+
       return {
         success: true,
         data: {
@@ -42,7 +49,7 @@ export class PaymentsController {
           currency: paymentIntent.currency,
           status: paymentIntent.status,
         },
-        message: 'Payment intent created successfully'
+        message: 'Payment intent created successfully',
       };
     } catch (error) {
       this.logger.error('Error creating payment intent:', error);
@@ -56,7 +63,7 @@ export class PaymentsController {
   async createCustomer(@Body() customerData: CreateCustomerDto) {
     try {
       const customer = await this.stripeService.createCustomer(customerData);
-      
+
       return {
         success: true,
         data: {
@@ -64,7 +71,7 @@ export class PaymentsController {
           email: customer.email,
           name: customer.name,
         },
-        message: 'Customer created successfully'
+        message: 'Customer created successfully',
       };
     } catch (error) {
       this.logger.error('Error creating customer:', error);
@@ -75,22 +82,26 @@ export class PaymentsController {
   @Post('checkout-session')
   @ApiOperation({ summary: 'Crear sesión de checkout' })
   @ApiResponse({ status: 200, description: 'Sesión de checkout creada' })
-  async createCheckoutSession(@Body() checkoutData: {
-    customerId?: string;
-    items: Array<{
-      name: string;
-      amount: number;
-      quantity: number;
-      description?: string;
-      images?: string[];
-    }>;
-    successUrl: string;
-    cancelUrl: string;
-    orderId?: string;
-  }) {
+  async createCheckoutSession(
+    @Body()
+    checkoutData: {
+      customerId?: string;
+      items: Array<{
+        name: string;
+        amount: number;
+        quantity: number;
+        description?: string;
+        images?: string[];
+      }>;
+      successUrl: string;
+      cancelUrl: string;
+      orderId?: string;
+    },
+  ) {
     try {
-      const session = await this.stripeService.createCheckoutSession(checkoutData);
-      
+      const session =
+        await this.stripeService.createCheckoutSession(checkoutData);
+
       return {
         success: true,
         data: {
@@ -98,7 +109,7 @@ export class PaymentsController {
           url: session.url,
           paymentStatus: session.payment_status,
         },
-        message: 'Checkout session created successfully'
+        message: 'Checkout session created successfully',
       };
     } catch (error) {
       this.logger.error('Error creating checkout session:', error);
@@ -111,12 +122,13 @@ export class PaymentsController {
   @ApiResponse({ status: 200, description: 'Intención de pago encontrada' })
   async getPaymentIntent(@Param('id') paymentIntentId: string) {
     try {
-      const paymentIntent = await this.stripeService.getPaymentIntent(paymentIntentId);
-      
+      const paymentIntent =
+        await this.stripeService.getPaymentIntent(paymentIntentId);
+
       return {
         success: true,
         data: paymentIntent,
-        message: 'Payment intent retrieved successfully'
+        message: 'Payment intent retrieved successfully',
       };
     } catch (error) {
       this.logger.error('Error retrieving payment intent:', error);
@@ -129,12 +141,13 @@ export class PaymentsController {
   @ApiResponse({ status: 200, description: 'Pago confirmado' })
   async confirmPayment(@Param('id') paymentIntentId: string) {
     try {
-      const paymentIntent = await this.stripeService.confirmPayment(paymentIntentId);
-      
+      const paymentIntent =
+        await this.stripeService.confirmPayment(paymentIntentId);
+
       return {
         success: true,
         data: paymentIntent,
-        message: 'Payment confirmed successfully'
+        message: 'Payment confirmed successfully',
       };
     } catch (error) {
       this.logger.error('Error confirming payment:', error);
@@ -145,20 +158,19 @@ export class PaymentsController {
   @Post('refund')
   @ApiOperation({ summary: 'Procesar reembolso' })
   @ApiResponse({ status: 200, description: 'Reembolso procesado' })
-  async createRefund(@Body() refundData: {
-    paymentIntentId: string;
-    amount?: number;
-  }) {
+  async createRefund(
+    @Body() refundData: { paymentIntentId: string; amount?: number },
+  ) {
     try {
       const refund = await this.stripeService.createRefund(
         refundData.paymentIntentId,
-        refundData.amount
+        refundData.amount,
       );
-      
+
       return {
         success: true,
         data: refund,
-        message: 'Refund processed successfully'
+        message: 'Refund processed successfully',
       };
     } catch (error) {
       this.logger.error('Error creating refund:', error);
@@ -172,11 +184,11 @@ export class PaymentsController {
   async getCustomer(@Param('id') customerId: string) {
     try {
       const customer = await this.stripeService.getCustomer(customerId);
-      
+
       return {
         success: true,
         data: customer,
-        message: 'Customer retrieved successfully'
+        message: 'Customer retrieved successfully',
       };
     } catch (error) {
       this.logger.error('Error retrieving customer:', error);
@@ -192,12 +204,12 @@ export class PaymentsController {
   async handleWebhook(
     @Req() req: any,
     @Headers('stripe-signature') signature: string,
-    @Body() body: any
+    @Body() body: any,
   ) {
     try {
       const event = await this.stripeService.handleWebhook(
         Buffer.from(JSON.stringify(body)),
-        signature
+        signature,
       );
 
       // Procesar diferentes tipos de eventos

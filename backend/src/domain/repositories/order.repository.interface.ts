@@ -49,9 +49,7 @@ export interface IOrderRepository {
 export interface IOrderItemRepository {
   // Métodos CRUD básicos
   findById(id: string): Promise<OrderItem | null>;
-  create(
-    itemData: Omit<OrderItem, 'id'>,
-  ): Promise<OrderItem>;
+  create(itemData: Omit<OrderItem, 'id'>): Promise<OrderItem>;
   update(id: string, itemData: Partial<OrderItem>): Promise<OrderItem>;
   delete(id: string): Promise<void>;
 
@@ -75,7 +73,7 @@ export interface IPaymentRepository {
   findByStatus(status: PaymentStatus): Promise<Payment[]>;
   findByProvider(provider: string): Promise<Payment[]>;
   findByProviderId(providerId: string): Promise<Payment | null>;
-  
+
   // Métodos de consulta
   findPaymentsByDateRange(startDate: Date, endDate: Date): Promise<Payment[]>;
   findFailedPayments(): Promise<Payment[]>;

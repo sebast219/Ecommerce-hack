@@ -1,5 +1,9 @@
 // Product Repository Interface con Paginación y Filtros
-import { PaginatedResult, PaginationParams, ProductFilters } from './pagination.interface';
+import {
+  PaginatedResult,
+  PaginationParams,
+  ProductFilters,
+} from './pagination.interface';
 
 // Product DTOs sin dependencias de Prisma
 export interface ProductSummary {
@@ -29,9 +33,9 @@ export interface ProductDetail extends ProductSummary {
 export interface IProductRepository {
   findPaginated(
     params: PaginationParams,
-    filters?: ProductFilters
+    filters?: ProductFilters,
   ): Promise<PaginatedResult<ProductSummary>>;
-  
+
   findBySlug(slug: string): Promise<ProductDetail | null>;
   findById(id: string): Promise<ProductDetail | null>;
   create(data: CreateProductData): Promise<ProductDetail>;
@@ -39,7 +43,10 @@ export interface IProductRepository {
   delete(id: string): Promise<void>;
   findFeatured(limit?: number): Promise<ProductSummary[]>;
   search(query: string, limit?: number): Promise<ProductSummary[]>;
-  findByCategory(categoryId: string, params: PaginationParams): Promise<PaginatedResult<ProductSummary>>;
+  findByCategory(
+    categoryId: string,
+    params: PaginationParams,
+  ): Promise<PaginatedResult<ProductSummary>>;
   getLowStockProducts(): Promise<ProductSummary[]>;
   updateInventory(productId: string, quantity: number): Promise<void>;
 }

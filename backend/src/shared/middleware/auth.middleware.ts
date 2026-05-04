@@ -26,7 +26,7 @@ export interface JwtPayload {
 export const authenticateToken = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -34,7 +34,7 @@ export const authenticateToken = (
   if (!token) {
     res.status(401).json({
       success: false,
-      message: 'Access token is required'
+      message: 'Access token is required',
     });
     return;
   }
@@ -43,7 +43,7 @@ export const authenticateToken = (
   if (!jwtSecret) {
     res.status(500).json({
       success: false,
-      message: 'JWT secret not configured'
+      message: 'JWT secret not configured',
     });
     return;
   }
@@ -53,17 +53,17 @@ export const authenticateToken = (
       if (err.name === 'TokenExpiredError') {
         res.status(403).json({
           success: false,
-          message: 'Token has expired'
+          message: 'Token has expired',
         });
       } else if (err.name === 'JsonWebTokenError') {
         res.status(403).json({
           success: false,
-          message: 'Invalid token'
+          message: 'Invalid token',
         });
       } else {
         res.status(403).json({
           success: false,
-          message: 'Token validation failed'
+          message: 'Token validation failed',
         });
       }
       return;
@@ -107,16 +107,12 @@ export const generateTokens = (payload: {
     throw new Error('JWT secrets not configured');
   }
 
-  const accessToken = jwt.sign(
-    payload,
-    jwtSecret,
-    { expiresIn: '24h' }
-  );
+  const accessToken = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
 
   const refreshToken = jwt.sign(
     { ...payload, type: 'refresh' },
     jwtRefreshSecret,
-    { expiresIn: '7d' }
+    { expiresIn: '7d' },
   );
 
   return { accessToken, refreshToken };
@@ -146,7 +142,7 @@ export const validateRefreshToken = (token: string): JwtPayload => {
 export const optionalAuth = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -176,11 +172,15 @@ export const optionalAuth = (
 
 // Middleware de roles compartido
 export const requireRole = (...allowedRoles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): void => {
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: 'Authentication required',
       });
       return;
     }
@@ -188,7 +188,7 @@ export const requireRole = (...allowedRoles: string[]) => {
     if (!allowedRoles.includes(req.user.role)) {
       res.status(403).json({
         success: false,
-        message: 'Insufficient permissions'
+        message: 'Insufficient permissions',
       });
       return;
     }

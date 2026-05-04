@@ -2,8 +2,15 @@
 // PROPÓSITO: Casos de uso para gestión de productos
 
 import { Injectable, Inject } from '@nestjs/common';
-import { Product, ProductDifficulty } from '../../../domain/entities/product.entity';
-import { IProductRepository, PRODUCT_REPOSITORY, CATEGORY_REPOSITORY } from '../../../domain/repositories/product.repository.interface';
+import {
+  Product,
+  ProductDifficulty,
+} from '../../../domain/entities/product.entity';
+import {
+  IProductRepository,
+  PRODUCT_REPOSITORY,
+  CATEGORY_REPOSITORY,
+} from '../../../domain/repositories/product.repository.interface';
 import { ICategoryRepository } from '../../../domain/repositories/product.repository.interface';
 
 export interface GetProductsRequest {
@@ -75,12 +82,12 @@ export class GetProductsUseCase {
 
     // Aplicar filtro active si se especificó
     if (active !== undefined) {
-      products = products.filter(product => product.isActive === active);
+      products = products.filter((product) => product.isActive === active);
     }
 
     // Filtrar por precio si se especifica
     if (minPrice !== undefined || maxPrice !== undefined) {
-      products = products.filter(product => {
+      products = products.filter((product) => {
         const price = product.price.amount;
         if (minPrice !== undefined && price < minPrice) return false;
         if (maxPrice !== undefined && price > maxPrice) return false;

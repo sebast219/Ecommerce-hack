@@ -38,13 +38,13 @@ describe('Authentication Integration Tests', () => {
       console.log('Response headers:', response.headers);
 
       expect(response.status).toBe(201);
-      
+
       // Verificar la estructura del response
       if (response.body.success === false) {
         console.log('Registration failed with message:', response.body.message);
         throw new Error(`Registration failed: ${response.body.message}`);
       }
-      
+
       expect(response.body.success).toBe(true);
       expect(response.body.data.user.email).toBe(validUser.email);
       expect(response.body.data.accessToken).toBeDefined();
@@ -251,8 +251,9 @@ describe('Authentication Integration Tests', () => {
 
     it('should reject requests with expired token (401)', async () => {
       // Token con expiración en el pasado
-      const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZXhwIjoxfQ.invalid';
-      
+      const expiredToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZXhwIjoxfQ.invalid';
+
       await request(TestSetup.app.getHttpServer())
         .get('/api/v1/users/me')
         .set('Authorization', `Bearer ${expiredToken}`)

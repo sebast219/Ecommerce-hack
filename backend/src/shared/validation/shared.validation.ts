@@ -8,7 +8,9 @@ export const validateEmail = (email: string): boolean => {
 };
 
 // Validación de contraseña
-export const validatePassword = (password: string): {
+export const validatePassword = (
+  password: string,
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -41,12 +43,15 @@ export const validatePassword = (password: string): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de nombre
-export const validateName = (name: string, fieldName: string = 'Name'): {
+export const validateName = (
+  name: string,
+  fieldName: string = 'Name',
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -71,12 +76,14 @@ export const validateName = (name: string, fieldName: string = 'Name'): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de teléfono
-export const validatePhone = (phone?: string): {
+export const validatePhone = (
+  phone?: string,
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -88,12 +95,14 @@ export const validatePhone = (phone?: string): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de precio
-export const validatePrice = (price: number): {
+export const validatePrice = (
+  price: number,
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -114,12 +123,14 @@ export const validatePrice = (price: number): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de SKU
-export const validateSku = (sku: string): {
+export const validateSku = (
+  sku: string,
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -140,12 +151,14 @@ export const validateSku = (sku: string): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de slug
-export const validateSlug = (slug: string): {
+export const validateSlug = (
+  slug: string,
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -161,12 +174,14 @@ export const validateSlug = (slug: string): {
   }
 
   if (!/^[a-z0-9-]+$/.test(slug)) {
-    errors.push('Slug can only contain lowercase letters, numbers, and hyphens');
+    errors.push(
+      'Slug can only contain lowercase letters, numbers, and hyphens',
+    );
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
@@ -181,7 +196,9 @@ export const validateUrl = (url: string): boolean => {
 };
 
 // Validación de imágenes (array de URLs)
-export const validateImages = (images: string[]): {
+export const validateImages = (
+  images: string[],
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -205,12 +222,14 @@ export const validateImages = (images: string[]): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de tags
-export const validateTags = (tags: string[]): {
+export const validateTags = (
+  tags: string[],
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -229,12 +248,15 @@ export const validateTags = (tags: string[]): {
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 // Validación de paginación
-export const validatePagination = (page?: number, limit?: number): {
+export const validatePagination = (
+  page?: number,
+  limit?: number,
+): {
   isValid: boolean;
   errors: string[];
   normalizedPage: number;
@@ -263,7 +285,7 @@ export const validatePagination = (page?: number, limit?: number): {
     isValid: errors.length === 0,
     errors,
     normalizedPage,
-    normalizedLimit
+    normalizedLimit,
   };
 };
 
@@ -305,7 +327,7 @@ export const validateRegister = (data: {
 
   return {
     isValid: allErrors.length === 0,
-    errors: allErrors
+    errors: allErrors,
   };
 };
 
@@ -329,7 +351,7 @@ export const validateLogin = (data: {
 
   return {
     isValid: allErrors.length === 0,
-    errors: allErrors
+    errors: allErrors,
   };
 };
 
@@ -373,7 +395,7 @@ export const validateCreateProduct = (data: {
 
   return {
     isValid: allErrors.length === 0,
-    errors: allErrors
+    errors: allErrors,
   };
 };
 

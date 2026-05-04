@@ -8,7 +8,10 @@ import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { CreateUserUseCase } from './use-cases/auth/create-user.use-case';
 import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { RefreshTokenUseCase } from './use-cases/auth/refresh-token.use-case';
-import { GetProductsUseCase, GetProductUseCase } from './use-cases/products/get-products.use-case';
+import {
+  GetProductsUseCase,
+  GetProductUseCase,
+} from './use-cases/products/get-products.use-case';
 import { CreateProductUseCase } from './use-cases/products/create-product.use-case';
 import { UpdateProductUseCase } from './use-cases/products/update-product.use-case';
 import { DeleteProductUseCase } from './use-cases/products/delete-product.use-case';
@@ -41,9 +44,7 @@ import { GetOrderTrackingUseCase } from './use-cases/order/get-order-tracking.us
 import { DashboardService } from './services/dashboard.service';
 
 @Module({
-  imports: [
-    InfrastructureModule,
-  ],
+  imports: [InfrastructureModule],
   providers: [
     GetProductsUseCase,
     GetProductUseCase,
@@ -53,31 +54,31 @@ import { DashboardService } from './services/dashboard.service';
     CreateUserUseCase,
     LoginUseCase,
     RefreshTokenUseCase,
-    
+
     // Cart Use Cases
     AddToCartUseCase,
     GetCartUseCase,
     UpdateCartItemUseCase,
     RemoveFromCartUseCase,
     ClearCartUseCase,
-    
+
     // Order Use Cases
     CreateOrderUseCase,
     GetOrdersUseCase,
     GetOrderByIdUseCase,
     CancelOrderUseCase,
-    
+
     // Payment Use Cases
     CreatePaymentIntentUseCase,
     HandleStripeWebhookUseCase,
-    
+
     // Order Services
     OrderEmailService,
     GetOrderTrackingUseCase,
-    
+
     // Dashboard Service
     DashboardService,
-    
+
     UserDomainService,
   ],
   exports: [
@@ -90,24 +91,24 @@ import { DashboardService } from './services/dashboard.service';
     CreateUserUseCase,
     LoginUseCase,
     RefreshTokenUseCase,
-    
+
     // Cart Use Cases
     AddToCartUseCase,
     GetCartUseCase,
     UpdateCartItemUseCase,
     RemoveFromCartUseCase,
     ClearCartUseCase,
-    
+
     // Order Use Cases
     CreateOrderUseCase,
     GetOrdersUseCase,
     GetOrderByIdUseCase,
     CancelOrderUseCase,
-    
+
     // Payment Use Cases
     CreatePaymentIntentUseCase,
     HandleStripeWebhookUseCase,
-    
+
     // Dashboard Service
     DashboardService,
   ],

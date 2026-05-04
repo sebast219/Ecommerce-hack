@@ -1,5 +1,9 @@
 import {
-  Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger,
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { StripeResilientService } from '../../../infrastructure/payments/stripe-resilient.service';
@@ -34,7 +38,9 @@ export class CreatePaymentIntentUseCase {
 
     // Si ya tiene paymentIntent, devolver el existente
     if (order.stripePaymentId) {
-      const existing = await this.stripe.confirmPaymentIntent(order.stripePaymentId);
+      const existing = await this.stripe.confirmPaymentIntent(
+        order.stripePaymentId,
+      );
       if (existing.status !== 'succeeded' && existing.status !== 'canceled') {
         return {
           clientSecret: existing.client_secret,

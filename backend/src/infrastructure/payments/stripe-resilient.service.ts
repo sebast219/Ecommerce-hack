@@ -8,7 +8,7 @@ export class StripeResilientService {
 
   constructor() {
     const secretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
-    
+
     this.stripe = new Stripe(secretKey, {
       typescript: true,
     });
@@ -29,7 +29,9 @@ export class StripeResilientService {
         },
       });
 
-      this.logger.log(`Payment intent created: ${paymentIntent.id} for $${amount}`);
+      this.logger.log(
+        `Payment intent created: ${paymentIntent.id} for $${amount}`,
+      );
       return paymentIntent;
     } catch (error: any) {
       this.logger.error(`Failed to create payment intent: ${error.message}`);
@@ -39,10 +41,13 @@ export class StripeResilientService {
 
   async confirmPaymentIntent(paymentIntentId: string) {
     try {
-      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent =
+        await this.stripe.paymentIntents.retrieve(paymentIntentId);
       return paymentIntent;
     } catch (error: any) {
-      this.logger.error(`Failed to retrieve payment intent ${paymentIntentId}: ${error.message}`);
+      this.logger.error(
+        `Failed to retrieve payment intent ${paymentIntentId}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -61,7 +66,9 @@ export class StripeResilientService {
       );
       return event;
     } catch (error: any) {
-      this.logger.error(`Webhook signature verification failed: ${error.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${error.message}`,
+      );
       throw error;
     }
   }

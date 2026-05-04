@@ -64,7 +64,7 @@ export class UserRepositoryImpl implements IUserRepository {
         role: userData.role as any,
         password: hashedPassword,
         isVerified: userData.isVerified || false,
-        experienceLevel: userData.experienceLevel as any || 'BEGINNER',
+        experienceLevel: (userData.experienceLevel as any) || 'BEGINNER',
         certifications: userData.certifications || '[]',
         phone: userData.phone,
         avatar: userData.avatar,
@@ -205,7 +205,9 @@ export class ProductRepositoryImpl implements IProductRepository {
   async create(
     productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<Product> {
-    throw new Error('Create method not implemented - use ProductRepositoryImpl instead');
+    throw new Error(
+      'Create method not implemented - use ProductRepositoryImpl instead',
+    );
   }
 
   // EJEMPLO: Implementaciones de otros métodos...

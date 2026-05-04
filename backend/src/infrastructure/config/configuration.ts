@@ -12,7 +12,7 @@ export default () => {
     },
     jwt: {
       secret: env.JWT_SECRET,
-      accessTokenTTL: 900,    // 15 min
+      accessTokenTTL: 900, // 15 min
       refreshTokenTTL: 604800, // 7 días
     },
     stripe: {

@@ -67,7 +67,9 @@ export class LoggerService {
       category,
       message,
       context,
-      error: error?.message || (typeof error === 'string' ? error : error?.toString()),
+      error:
+        error?.message ||
+        (typeof error === 'string' ? error : error?.toString()),
       stack: error?.stack,
     };
 
@@ -111,7 +113,13 @@ export class LoggerService {
     return formatted;
   }
 
-  private log(level: LogLevel, category: LogCategory, message: string, context?: any, error?: Error): void {
+  private log(
+    level: LogLevel,
+    category: LogCategory,
+    message: string,
+    context?: any,
+    error?: Error,
+  ): void {
     const entry = this.createLogEntry(level, category, message, context, error);
     const formatted = this.formatLog(entry);
 
@@ -135,7 +143,12 @@ export class LoggerService {
   }
 
   // Métodos de logging por nivel
-  error(category: LogCategory, message: string, context?: any, error?: Error): void {
+  error(
+    category: LogCategory,
+    message: string,
+    context?: any,
+    error?: Error,
+  ): void {
     this.log(LogLevel.ERROR, category, message, context, error);
   }
 
@@ -242,7 +255,12 @@ export class LoggerService {
     });
   }
 
-  logCacheOperation(operation: string, key: string, hit: boolean, duration?: number): void {
+  logCacheOperation(
+    operation: string,
+    key: string,
+    hit: boolean,
+    duration?: number,
+  ): void {
     this.logPerformance(`Cache ${operation}`, duration || 0, {
       key,
       hit,
@@ -257,7 +275,13 @@ export class LoggerService {
     });
   }
 
-  logPaymentEvent(event: string, paymentId: string, amount: number, status: string, context?: any): void {
+  logPaymentEvent(
+    event: string,
+    paymentId: string,
+    amount: number,
+    status: string,
+    context?: any,
+  ): void {
     this.logPayment(`Payment Event: ${event}`, {
       paymentId,
       amount,
@@ -266,8 +290,17 @@ export class LoggerService {
     });
   }
 
-  logSecurityEvent(event: string, severity: 'low' | 'medium' | 'high', context?: any): void {
-    const level = severity === 'high' ? LogLevel.ERROR : severity === 'medium' ? LogLevel.WARN : LogLevel.INFO;
+  logSecurityEvent(
+    event: string,
+    severity: 'low' | 'medium' | 'high',
+    context?: any,
+  ): void {
+    const level =
+      severity === 'high'
+        ? LogLevel.ERROR
+        : severity === 'medium'
+          ? LogLevel.WARN
+          : LogLevel.INFO;
     this.log(level, LogCategory.SECURITY, `Security Event: ${event}`, {
       severity,
       ...context,
@@ -275,15 +308,19 @@ export class LoggerService {
   }
 
   // Métodos de consulta
-  getLogs(level?: LogLevel, category?: LogCategory, limit?: number): LogEntry[] {
+  getLogs(
+    level?: LogLevel,
+    category?: LogCategory,
+    limit?: number,
+  ): LogEntry[] {
     let filtered = this.logs;
 
     if (level) {
-      filtered = filtered.filter(log => log.level === level);
+      filtered = filtered.filter((log) => log.level === level);
     }
 
     if (category) {
-      filtered = filtered.filter(log => log.category === category);
+      filtered = filtered.filter((log) => log.category === category);
     }
 
     if (limit) {
@@ -299,15 +336,23 @@ export class LoggerService {
     byCategory: Record<LogCategory, number>;
     recent: LogEntry[];
   } {
-    const byLevel = Object.values(LogLevel).reduce((acc, level) => {
-      acc[level] = this.logs.filter(log => log.level === level).length;
-      return acc;
-    }, {} as Record<LogLevel, number>);
+    const byLevel = Object.values(LogLevel).reduce(
+      (acc, level) => {
+        acc[level] = this.logs.filter((log) => log.level === level).length;
+        return acc;
+      },
+      {} as Record<LogLevel, number>,
+    );
 
-    const byCategory = Object.values(LogCategory).reduce((acc, category) => {
-      acc[category] = this.logs.filter(log => log.category === category).length;
-      return acc;
-    }, {} as Record<LogCategory, number>);
+    const byCategory = Object.values(LogCategory).reduce(
+      (acc, category) => {
+        acc[category] = this.logs.filter(
+          (log) => log.category === category,
+        ).length;
+        return acc;
+      },
+      {} as Record<LogCategory, number>,
+    );
 
     return {
       total: this.logs.length,
@@ -327,7 +372,7 @@ export class LoggerService {
     const beforeCount = this.logs.length;
 
     // Mantener solo logs de la última hora
-    this.logs = this.logs.filter(log => {
+    this.logs = this.logs.filter((log) => {
       const logTime = new Date(log.timestamp).getTime();
       return logTime > oneHourAgo;
     });
@@ -341,14 +386,16 @@ export class LoggerService {
   // Exportar logs para análisis
   exportLogs(): string {
     const header = 'timestamp,level,category,message,userId,duration\n';
-    const rows = this.logs.map(log => [
-      log.timestamp,
-      log.level,
-      log.category,
-      `"${log.message.replace(/"/g, '""')}"`,
-      log.userId || '',
-      log.duration || '',
-    ].join(','));
+    const rows = this.logs.map((log) =>
+      [
+        log.timestamp,
+        log.level,
+        log.category,
+        `"${log.message.replace(/"/g, '""')}"`,
+        log.userId || '',
+        log.duration || '',
+      ].join(','),
+    );
 
     return header + rows.join('\n');
   }
@@ -369,11 +416,11 @@ export function createLoggingMiddleware(logger: LoggerService) {
 
     // Capturar respuesta
     const originalSend = res.send;
-    res.send = function(body) {
+    res.send = function (body) {
       const duration = Date.now() - startTime;
-      
+
       logger.logRequest(req, res, duration);
-      
+
       return originalSend.call(this, body);
     };
 
@@ -382,8 +429,16 @@ export function createLoggingMiddleware(logger: LoggerService) {
 }
 
 // Decorador para logging de métodos
-export function LogExecution(category: LogCategory, includeArgs = false, includeResult = false) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+export function LogExecution(
+  category: LogCategory,
+  includeArgs = false,
+  includeResult = false,
+) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -394,21 +449,27 @@ export function LogExecution(category: LogCategory, includeArgs = false, include
         const result = await method.apply(this, args);
         const duration = Date.now() - startTime;
 
-        let context: any = { duration };
+        const context: any = { duration };
         if (includeArgs) context.args = args;
-        if (includeResult) context.result = typeof result === 'object' ? 'object' : result;
+        if (includeResult)
+          context.result = typeof result === 'object' ? 'object' : result;
 
         logger.info(category, `${propertyName} executed successfully`, context);
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
 
-        let context: any = { duration, error: error.message };
+        const context: any = { duration, error: error.message };
         if (includeArgs) context.args = args;
 
-        logger.error(category, `${propertyName} failed`, context, error as Error);
-        
+        logger.error(
+          category,
+          `${propertyName} failed`,
+          context,
+          error as Error,
+        );
+
         throw error;
       }
     };

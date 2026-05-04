@@ -4,7 +4,10 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../../domain/entities/user.entity';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from '../../../domain/repositories/user.repository.interface';
 import { RefreshTokenRepositoryImpl } from '../../../infrastructure/database/repositories/cart.repository.impl';
 import * as crypto from 'crypto';
 
@@ -35,7 +38,9 @@ export class RefreshTokenUseCase {
 
     // Crear JwtService para refresh tokens
     this.jwtRefreshService = new JwtService({
-      secret: process.env.JWT_REFRESH_SECRET || 'test-super-secret-refresh-key-for-testing-only',
+      secret:
+        process.env.JWT_REFRESH_SECRET ||
+        'test-super-secret-refresh-key-for-testing-only',
       signOptions: { expiresIn: '7d' },
     });
   }
@@ -43,10 +48,14 @@ export class RefreshTokenUseCase {
   async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     // Verificar el refresh token
     const payload = this.verifyRefreshToken(request.refreshToken);
-    
+
     // Buscar el token en la base de datos usando hash
-    const tokenHash = crypto.createHash('sha256').update(request.refreshToken).digest('hex');
-    const storedToken = await this.refreshTokenRepository.findByTokenHash(tokenHash);
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(request.refreshToken)
+      .digest('hex');
+    const storedToken =
+      await this.refreshTokenRepository.findByTokenHash(tokenHash);
     if (!storedToken) {
       throw new Error('Invalid refresh token');
     }
@@ -81,8 +90,11 @@ export class RefreshTokenUseCase {
     });
 
     // Guardar nuevo refresh token con hash
-    const newTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
-    
+    const newTokenHash = crypto
+      .createHash('sha256')
+      .update(newRefreshToken)
+      .digest('hex');
+
     await this.refreshTokenRepository.create({
       tokenHash: newTokenHash,
       familyId: storedToken.familyId, // Mantener misma familia

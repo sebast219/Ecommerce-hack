@@ -28,9 +28,9 @@ async function bootstrap() {
   // EJEMPLO: Pipes globales - VALIDACIÓN BLINDADA
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,              // Elimina campos no decorados
-      forbidNonWhitelisted: true,   // Error si envían campos extra
-      transform: true,              // Auto-transform tipos
+      whitelist: true, // Elimina campos no decorados
+      forbidNonWhitelisted: true, // Error si envían campos extra
+      transform: true, // Auto-transform tipos
       transformOptions: {
         enableImplicitConversion: false, // NO conversión implícita
       },
@@ -49,10 +49,11 @@ async function bootstrap() {
   // EJEMPLO: Configuración CORS SEGURO
   const nodeEnv = configService.get('NODE_ENV', 'development');
   const isProduction = nodeEnv === 'production';
-  
-  const allowedOrigins = configService.get('CORS_ORIGINS', '')
+
+  const allowedOrigins = configService
+    .get('CORS_ORIGINS', '')
     .split(',')
-    .map(o => o.trim())
+    .map((o) => o.trim())
     .filter(Boolean);
 
   app.enableCors({

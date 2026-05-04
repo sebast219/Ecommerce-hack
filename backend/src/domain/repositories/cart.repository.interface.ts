@@ -23,7 +23,7 @@ export interface ICartRepository {
   findCartWithItems(cartId: string): Promise<Cart | null>;
   findCartWithItemsByUserId(userId: string): Promise<Cart | null>;
   clearCart(cartId: string): Promise<void>;
-  
+
   // Métodos de existencia
   existsBySessionId(sessionId: string): Promise<boolean>;
 }
@@ -38,10 +38,13 @@ export interface ICartItemRepository {
   // Métodos específicos
   findByCartId(cartId: string): Promise<CartItem[]>;
   findByProductId(productId: string): Promise<CartItem[]>;
-  findByCartAndProduct(cartId: string, productId: string): Promise<CartItem | null>;
+  findByCartAndProduct(
+    cartId: string,
+    productId: string,
+  ): Promise<CartItem | null>;
   updateQuantity(itemId: string, quantity: number): Promise<CartItem>;
   deleteByCartId(cartId: string): Promise<void>;
-  
+
   // Métodos de consulta
   getCartTotal(cartId: string): Promise<number>;
   getCartItemCount(cartId: string): Promise<number>;
@@ -56,23 +59,34 @@ export interface IWishlistRepository {
   // Métodos específicos
   findByUserId(userId: string): Promise<WishlistItem[]>;
   findByProductId(productId: string): Promise<WishlistItem[]>;
-  findByUserAndProduct(userId: string, productId: string): Promise<WishlistItem | null>;
+  findByUserAndProduct(
+    userId: string,
+    productId: string,
+  ): Promise<WishlistItem | null>;
   deleteByUserId(userId: string): Promise<void>;
 }
 
 export interface IProductReviewRepository {
   // Métodos CRUD básicos
   findById(id: string): Promise<ProductReview | null>;
-  create(reviewData: Omit<ProductReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<ProductReview>;
-  update(id: string, reviewData: Partial<ProductReview>): Promise<ProductReview>;
+  create(
+    reviewData: Omit<ProductReview, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ProductReview>;
+  update(
+    id: string,
+    reviewData: Partial<ProductReview>,
+  ): Promise<ProductReview>;
   delete(id: string): Promise<void>;
 
   // Métodos específicos
   findByProductId(productId: string): Promise<ProductReview[]>;
   findByUserId(userId: string): Promise<ProductReview[]>;
-  findByUserAndProduct(userId: string, productId: string): Promise<ProductReview | null>;
+  findByUserAndProduct(
+    userId: string,
+    productId: string,
+  ): Promise<ProductReview | null>;
   findVerifiedReviews(): Promise<ProductReview[]>;
-  
+
   // Métodos de consulta
   getProductAverageRating(productId: string): Promise<number>;
   getProductReviewCount(productId: string): Promise<number>;
@@ -81,7 +95,9 @@ export interface IProductReviewRepository {
 export interface IRefreshTokenRepository {
   // Métodos CRUD básicos
   findById(id: string): Promise<RefreshToken | null>;
-  create(tokenData: Omit<RefreshToken, 'id' | 'createdAt'>): Promise<RefreshToken>;
+  create(
+    tokenData: Omit<RefreshToken, 'id' | 'createdAt'>,
+  ): Promise<RefreshToken>;
   delete(id: string): Promise<void>;
 
   // Métodos específicos
@@ -89,7 +105,7 @@ export interface IRefreshTokenRepository {
   findByUserId(userId: string): Promise<RefreshToken[]>;
   deleteByUserId(userId: string): Promise<void>;
   deleteExpiredTokens(): Promise<void>;
-  
+
   // Métodos de validación
   isValidToken(token: string): Promise<boolean>;
   isTokenExpired(token: string): Promise<boolean>;

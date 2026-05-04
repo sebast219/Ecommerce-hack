@@ -5,7 +5,10 @@ import { Injectable, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { IUserRepository, USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from '../../domain/repositories/user.repository.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET') || 'test-secret-key-for-development',
+      secretOrKey:
+        configService.get('JWT_SECRET') || 'test-secret-key-for-development',
       algorithms: ['HS256'], // PREVENIR Algorithm Confusion Attack
     });
   }
@@ -25,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Validar que el usuario existe en la base de datos
     const user = await this.userRepository.findById(payload.sub);
-    
+
     if (!user) {
       throw new Error('User not found');
     }

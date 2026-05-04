@@ -1,7 +1,11 @@
 // 🏗️ APPLICATION USE CASES - Gestión de Órdenes
 // PROPÓSITO: Casos de uso para creación y gestión de órdenes
 
-import { Order, OrderStatus, PaymentStatus } from '../../../domain/entities/order.entity';
+import {
+  Order,
+  OrderStatus,
+  PaymentStatus,
+} from '../../../domain/entities/order.entity';
 import { Money } from '../../../domain/entities/user.entity';
 import { IOrderRepository } from '../../../domain/repositories/order.repository.interface';
 import { ICartRepository } from '../../../domain/repositories/cart.repository.interface';
@@ -71,7 +75,8 @@ export class CreateOrderUseCase {
 
     // Calcular totales
     let subtotal = 0;
-    const orderItems: { productId: string; quantity: number; price: number }[] = [];
+    const orderItems: { productId: string; quantity: number; price: number }[] =
+      [];
 
     for (const cartItem of cart.items) {
       const product = await this.productRepository.findById(cartItem.productId);
@@ -91,9 +96,10 @@ export class CreateOrderUseCase {
         throw new Error(`Insufficient stock for ${product.name}`);
       }
 
-      const price = typeof product.price === 'object' && 'amount' in product.price
-        ? product.price.amount
-        : Number(product.price);
+      const price =
+        typeof product.price === 'object' && 'amount' in product.price
+          ? product.price.amount
+          : Number(product.price);
       subtotal += price * cartItem.quantity;
 
       orderItems.push({

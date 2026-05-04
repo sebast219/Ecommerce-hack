@@ -245,23 +245,23 @@ export const SharedDTOs = {
   LoginDto: {} as LoginDto,
   RefreshTokenDto: {} as RefreshTokenDto,
   AuthResponse: {} as AuthResponse,
-  
+
   // Products
   GetProductsQueryDto: {} as GetProductsQueryDto,
   CreateProductDto: {} as CreateProductDto,
   UpdateProductDto: {} as UpdateProductDto,
   ProductResponse: {} as ProductResponse,
-  
+
   // Cart
   AddToCartDto: {} as AddToCartDto,
   UpdateCartItemDto: {} as UpdateCartItemDto,
   GetCartDto: {} as GetCartDto,
   CartResponse: {} as CartResponse,
   CartItemResponse: {} as CartItemResponse,
-  
+
   // Categories
   CategoryResponse: {} as CategoryResponse,
-  
+
   // Responses
   ApiResponse: {} as ApiResponse,
   PaginatedResponse: {} as PaginatedResponse,

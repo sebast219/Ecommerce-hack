@@ -29,22 +29,25 @@ describe('Security Tests', () => {
       '<iframe src="javascript:alert(1)">',
     ];
 
-    it.each(xssPayloads)('should sanitize XSS payload in name: %s', async (payload) => {
-      const response = await request(TestSetup.app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .send({
-          email: 'xss@test.com',
-          firstName: payload,
-          lastName: 'Test',
-          password: 'StrongP@ssw0rd123!',
-        });
+    it.each(xssPayloads)(
+      'should sanitize XSS payload in name: %s',
+      async (payload) => {
+        const response = await request(TestSetup.app.getHttpServer())
+          .post('/api/v1/auth/register')
+          .send({
+            email: 'xss@test.com',
+            firstName: payload,
+            lastName: 'Test',
+            password: 'StrongP@ssw0rd123!',
+          });
 
-      // Debe rechazar (validation) o sanitizar
-      if (response.status === 201) {
-        expect(response.body.data.user.firstName).not.toContain('<script>');
-        expect(response.body.data.user.firstName).not.toContain('onerror');
-      }
-    });
+        // Debe rechazar (validation) o sanitizar
+        if (response.status === 201) {
+          expect(response.body.data.user.firstName).not.toContain('<script>');
+          expect(response.body.data.user.firstName).not.toContain('onerror');
+        }
+      },
+    );
   });
 
   // SQL INJECTION PREVENTION
@@ -57,24 +60,31 @@ describe('Security Tests', () => {
       "' UNION SELECT * FROM users --",
     ];
 
-    it.each(sqlPayloads)('should prevent SQL injection in login: %s', async (payload) => {
-      const response = await request(TestSetup.app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({
-          email: payload,
-          password: payload,
-        });
+    it.each(sqlPayloads)(
+      'should prevent SQL injection in login: %s',
+      async (payload) => {
+        const response = await request(TestSetup.app.getHttpServer())
+          .post('/api/v1/auth/login')
+          .send({
+            email: payload,
+            password: payload,
+          });
 
-      // Debe ser 400 (validation) o 401 (auth failed), nunca 500
-      expect(response.status).toBeLessThan(500);
-    });
+        // Debe ser 400 (validation) o 401 (auth failed), nunca 500
+        expect(response.status).toBeLessThan(500);
+      },
+    );
 
-    it.each(sqlPayloads)('should prevent SQL injection in product search: %s', async (payload) => {
-      const response = await request(TestSetup.app.getHttpServer())
-        .get(`/api/v1/products?search=${encodeURIComponent(payload)}`);
+    it.each(sqlPayloads)(
+      'should prevent SQL injection in product search: %s',
+      async (payload) => {
+        const response = await request(TestSetup.app.getHttpServer()).get(
+          `/api/v1/products?search=${encodeURIComponent(payload)}`,
+        );
 
-      expect(response.status).toBeLessThan(500);
-    });
+        expect(response.status).toBeLessThan(500);
+      },
+    );
   });
 
   // IDOR (Insecure Direct Object Reference)

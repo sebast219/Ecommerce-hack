@@ -7,7 +7,7 @@ describe('Password Validation', () => {
       'StrongP@ssw0rd123!',
       'MyP@ss1234',
       'C0mpl3x!Pass',
-      'Ab1!xxxx',  // Mínimo: 8 chars, upper, lower, digit, special
+      'Ab1!xxxx', // Mínimo: 8 chars, upper, lower, digit, special
     ];
 
     it.each(validPasswords)('should accept: %s', (password) => {

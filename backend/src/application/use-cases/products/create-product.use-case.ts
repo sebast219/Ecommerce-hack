@@ -2,8 +2,15 @@
 // PURPOSE: Create a new product with inventory
 
 import { Injectable, Inject } from '@nestjs/common';
-import { Product, Money, ProductDifficulty } from '../../../domain/entities/product.entity';
-import { IProductRepository, PRODUCT_REPOSITORY } from '../../../domain/repositories/product.repository.interface';
+import {
+  Product,
+  Money,
+  ProductDifficulty,
+} from '../../../domain/entities/product.entity';
+import {
+  IProductRepository,
+  PRODUCT_REPOSITORY,
+} from '../../../domain/repositories/product.repository.interface';
 import { CreateProductDto } from '../../dto/product.dto';
 
 export interface CreateProductRequest {
@@ -81,7 +88,9 @@ export class CreateProductUseCase {
 
     // Create Money value object
     const priceMoney = new Money(price, 'USD');
-    const comparePriceMoney = comparePrice ? new Money(comparePrice, 'USD') : undefined;
+    const comparePriceMoney = comparePrice
+      ? new Money(comparePrice, 'USD')
+      : undefined;
 
     // Create product
     const product = await this.productRepository.create({

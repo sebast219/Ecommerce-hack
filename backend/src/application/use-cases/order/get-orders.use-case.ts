@@ -48,10 +48,10 @@ export class GetOrdersUseCase {
     ]);
 
     return {
-      data: orders.map(o => ({
+      data: orders.map((o) => ({
         ...o,
         total: Number(o.total),
-        items: o.items.map(i => ({ ...i, price: Number(i.price) })),
+        items: o.items.map((i) => ({ ...i, price: Number(i.price) })),
       })),
       meta: {
         total,

@@ -1,6 +1,9 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
-import { OrderStatus, canTransition } from '../../domain/enums/order-status.enum';
+import {
+  OrderStatus,
+  canTransition,
+} from '../../domain/enums/order-status.enum';
 
 export interface TransitionParams {
   orderId: string;
@@ -77,7 +80,8 @@ export class OrderStateMachineService {
           type: this.getEventType(fromStatus, toStatus),
           fromStatus,
           toStatus,
-          description: params.description || this.getDefaultDescription(toStatus),
+          description:
+            params.description || this.getDefaultDescription(toStatus),
           triggeredBy: params.triggeredBy || 'system',
           metadata: params.metadata ? JSON.stringify(params.metadata) : null,
         },
@@ -93,9 +97,12 @@ export class OrderStateMachineService {
 
   private getEventType(from: OrderStatus, to: OrderStatus): string {
     const transitionMap: Record<string, string> = {
-      [`${OrderStatus.PENDING}->${OrderStatus.AWAITING_PAYMENT}`]: 'PAYMENT_INITIATED',
-      [`${OrderStatus.AWAITING_PAYMENT}->${OrderStatus.PAID}`]: 'PAYMENT_RECEIVED',
-      [`${OrderStatus.AWAITING_PAYMENT}->${OrderStatus.PAYMENT_FAILED}`]: 'PAYMENT_FAILED',
+      [`${OrderStatus.PENDING}->${OrderStatus.AWAITING_PAYMENT}`]:
+        'PAYMENT_INITIATED',
+      [`${OrderStatus.AWAITING_PAYMENT}->${OrderStatus.PAID}`]:
+        'PAYMENT_RECEIVED',
+      [`${OrderStatus.AWAITING_PAYMENT}->${OrderStatus.PAYMENT_FAILED}`]:
+        'PAYMENT_FAILED',
       [`${OrderStatus.PAID}->${OrderStatus.PROCESSING}`]: 'ORDER_PROCESSING',
       [`${OrderStatus.PROCESSING}->${OrderStatus.SHIPPED}`]: 'ORDER_SHIPPED',
       [`${OrderStatus.SHIPPED}->${OrderStatus.DELIVERED}`]: 'ORDER_DELIVERED',

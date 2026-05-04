@@ -30,7 +30,8 @@ export class HealthController {
       memory: this.checkMemory(),
     };
 
-    const isHealthy = checks.database.status === 'up' && checks.memory.status === 'ok';
+    const isHealthy =
+      checks.database.status === 'up' && checks.memory.status === 'ok';
 
     return {
       status: isHealthy ? 'healthy' : 'degraded',
@@ -58,7 +59,10 @@ export class HealthController {
     return { alive: true };
   }
 
-  private async checkDatabase(): Promise<{ status: string; responseTime: number }> {
+  private async checkDatabase(): Promise<{
+    status: string;
+    responseTime: number;
+  }> {
     const start = Date.now();
     try {
       await this.prisma.$queryRaw`SELECT 1`;

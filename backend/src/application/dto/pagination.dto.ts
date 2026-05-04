@@ -68,6 +68,8 @@ export class ProductFilterDto extends PaginationQueryDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => value ? value.split(',').map((t: string) => t.trim()) : undefined)
+  @Transform(({ value }) =>
+    value ? value.split(',').map((t: string) => t.trim()) : undefined,
+  )
   tags?: string[];
 }

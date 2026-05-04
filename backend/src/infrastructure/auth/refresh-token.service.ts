@@ -16,7 +16,11 @@ export class RefreshTokenService {
   /**
    * Crea un nuevo token family para el usuario (login)
    */
-  async createTokenFamily(user: { id: string; email: string; role: string }): Promise<TokenPair> {
+  async createTokenFamily(user: {
+    id: string;
+    email: string;
+    role: string;
+  }): Promise<TokenPair> {
     const familyId = crypto.randomUUID();
     const tokenPair = await this.jwtTokenService.generateTokenPair(user);
 
@@ -56,7 +60,7 @@ export class RefreshTokenService {
     // DETECCIÓN DE REUSE ATTACK
     if (existingToken.isRevoked) {
       this.logger.error(
-        `REUSE ATTACK DETECTED for user ${existingToken.userId}, family ${existingToken.familyId}` 
+        `REUSE ATTACK DETECTED for user ${existingToken.userId}, family ${existingToken.familyId}`,
       );
 
       // Invalidar TODA la familia de tokens
@@ -65,7 +69,9 @@ export class RefreshTokenService {
         data: { isRevoked: true },
       });
 
-      throw new UnauthorizedException('Token reuse detected - all sessions invalidated');
+      throw new UnauthorizedException(
+        'Token reuse detected - all sessions invalidated',
+      );
     }
 
     // Verificar expiración
@@ -125,7 +131,10 @@ export class RefreshTokenService {
       where: {
         OR: [
           { expiresAt: { lt: new Date() } },
-          { isRevoked: true, updatedAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+          {
+            isRevoked: true,
+            updatedAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+          },
         ],
       },
     });

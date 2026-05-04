@@ -14,7 +14,7 @@ export class CustomValidationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     // EJEMPLO: Validar tipo de dato basado en el tipo de parámetro
     const metatype = metadata.metatype;
-    
+
     if (metatype === String && typeof value !== 'string') {
       throw new BadRequestException(`Expected string, got ${typeof value}`);
     }

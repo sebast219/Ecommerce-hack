@@ -22,7 +22,7 @@ export interface Product {
   dimensions?: ProductDimensions;
   seoTitle?: string;
   seoDescription?: string;
-  
+
   // Cybersecurity specific fields
   difficulty: ProductDifficulty;
   licenseType?: string;
@@ -31,11 +31,11 @@ export interface Product {
   tutorials: string[];
   isPhysical: boolean;
   downloadUrl?: string;
-  
+
   categoryId: string;
   category?: Category;
   inventory?: ProductInventory;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,7 +51,7 @@ export interface Category {
   parent?: Category;
   children?: Category[];
   products?: Product[];
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,7 +63,7 @@ export interface ProductInventory {
   track: boolean;
   productId: string;
   product?: Product;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,7 +79,7 @@ export enum ProductDifficulty {
   BEGINNER = 'BEGINNER',
   INTERMEDIATE = 'INTERMEDIATE',
   ADVANCED = 'ADVANCED',
-  EXPERT = 'EXPERT'
+  EXPERT = 'EXPERT',
 }
 
 // Value Objects
@@ -93,7 +93,9 @@ export class ProductSlug {
       throw new Error('Product slug must be at least 3 characters');
     }
     if (!/^[a-z0-9-]+$/.test(this.value)) {
-      throw new Error('Product slug can only contain lowercase letters, numbers, and hyphens');
+      throw new Error(
+        'Product slug can only contain lowercase letters, numbers, and hyphens',
+      );
     }
   }
 
@@ -104,7 +106,7 @@ export class ProductSlug {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^[---]+|[---]+$/g, '');
-    
+
     return new ProductSlug(slug);
   }
 }

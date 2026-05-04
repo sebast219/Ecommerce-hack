@@ -17,11 +17,14 @@ export class DashboardController {
 
   @Get('stats')
   @ApiOperation({ summary: 'Get dashboard statistics' })
-  @ApiResponse({ status: 200, description: 'Dashboard statistics retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dashboard statistics retrieved successfully',
+  })
   async getDashboardStats() {
     try {
       const stats = await this.dashboardService.getStats();
-      
+
       return {
         success: true,
         data: stats,
@@ -37,11 +40,14 @@ export class DashboardController {
 
   @Get('recent-orders')
   @ApiOperation({ summary: 'Get recent orders with customer details' })
-  @ApiResponse({ status: 200, description: 'Recent orders retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Recent orders retrieved successfully',
+  })
   async getRecentOrders() {
     try {
       const orders = await this.dashboardService.getRecentOrders();
-      
+
       return {
         success: true,
         data: orders,
@@ -57,11 +63,14 @@ export class DashboardController {
 
   @Get('top-products')
   @ApiOperation({ summary: 'Get top-selling products' })
-  @ApiResponse({ status: 200, description: 'Top products retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Top products retrieved successfully',
+  })
   async getTopProducts() {
     try {
       const products = await this.dashboardService.getTopProducts();
-      
+
       return {
         success: true,
         data: products,
@@ -77,11 +86,14 @@ export class DashboardController {
 
   @Get('sales-activity')
   @ApiOperation({ summary: 'Get sales activity for the last 30 days' })
-  @ApiResponse({ status: 200, description: 'Sales activity retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sales activity retrieved successfully',
+  })
   async getSalesActivity() {
     try {
       const activity = await this.dashboardService.getSalesActivity();
-      
+
       return {
         success: true,
         data: activity,
