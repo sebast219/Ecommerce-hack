@@ -6,7 +6,7 @@ process.env.JWT_REFRESH_SECRET =
   'test-super-secret-refresh-key-for-testing-only';
 process.env.JWT_EXPIRES_IN = '24h';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
-process.env.DATABASE_URL = 'file:./test.db';
+process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test_ecommerce';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';

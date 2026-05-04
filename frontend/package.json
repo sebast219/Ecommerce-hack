@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:unit": "echo 'No unit tests configured for frontend yet'",
+    "test:e2e": "echo 'No E2E tests configured for frontend yet'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
