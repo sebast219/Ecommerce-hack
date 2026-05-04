@@ -4,6 +4,7 @@
 import { Module } from '@nestjs/common';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { CreateUserUseCase, LoginUseCase } from './use-cases/auth/create-user.use-case';
+import { RefreshTokenUseCase } from './use-cases/auth/refresh-token.use-case';
 import { GetProductsUseCase, GetProductUseCase } from './use-cases/products/get-products.use-case';
 import {
   GetCartUseCase,
@@ -26,6 +27,7 @@ import {
     GetProductUseCase,
     CreateUserUseCase,
     LoginUseCase,
+    RefreshTokenUseCase,
     GetCartUseCase,
     AddToCartUseCase,
     UpdateCartItemUseCase,
@@ -39,6 +41,7 @@ import {
     GetProductUseCase,
     CreateUserUseCase,
     LoginUseCase,
+    RefreshTokenUseCase,
     GetCartUseCase,
     AddToCartUseCase,
     UpdateCartItemUseCase,

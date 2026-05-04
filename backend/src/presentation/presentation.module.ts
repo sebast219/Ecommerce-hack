@@ -7,6 +7,7 @@ import { InfrastructureModule } from '../infrastructure/infrastructure.module';
 import { AuthController } from './controllers/auth.controller';
 import { UsersController } from './controllers/users.controller';
 import { ProductsController, CategoriesController } from './controllers/products.controller';
+// import { AdminProductsController } from './controllers/admin-products-fixed.controller';
 import { CartController, WishlistController } from './controllers/cart.controller';
 import { OrderController } from './controllers/order.controller';
 import { PaymentsController } from './controllers/payments.controller';

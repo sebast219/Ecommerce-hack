@@ -1,12 +1,13 @@
 // 🏗️ PRESENTATION CONTROLLERS - Productos (CORREGIDO)
 // PROPÓSITO: Manejar requests HTTP de productos
 
-import { Controller, Get, Query, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Query, Param, Inject, Post, Body, UseGuards, Put, Delete, Req } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import {
   GetProductsUseCase,
@@ -14,6 +15,8 @@ import {
 } from '../../application/use-cases/products/get-products.use-case';
 import { GetProductsQueryDto, ProductDifficulty } from '../../application/dto/product.dto';
 import { ICategoryRepository, CATEGORY_REPOSITORY } from '../../domain/repositories/product.repository.interface';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
 
 @ApiTags('Products')
 @Controller('products')
@@ -21,6 +24,7 @@ export class ProductsController {
   constructor(
     private readonly getProductsUseCase: GetProductsUseCase,
     private readonly getProductUseCase: GetProductUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Get()

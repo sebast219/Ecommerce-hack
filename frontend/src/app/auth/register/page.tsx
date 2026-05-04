@@ -14,7 +14,6 @@ import { useAuthStore } from '@/store/auth-store';
 
 import { Input } from '@/components/ui/input';
 
-// v2 — full redesign matching Hack 6 B&W editorial system
 
 
 
@@ -124,6 +123,8 @@ export default function RegisterPage() {
 
     console.log('confirmPassword:', confirmPassword);
 
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+
 
 
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -150,14 +151,13 @@ export default function RegisterPage() {
 
 
 
-    if (password.length < 8) {
-
-      console.log('Validation failed: Password too short');
-
-      setError('Mínimo 8 caracteres');
-
+    // Validación de contraseña fuerte
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    
+    if (!passwordRegex.test(password)) {
+      console.log('Validation failed: Password does not meet strength requirements');
+      setError('La contraseña debe tener mínimo 8 caracteres, incluyendo al menos una mayúscula, una minúscula, un número y un carácter especial (!@#$%^&*()_+-=[]{};:\'"\\|,.<>/?)');
       return;
-
     }
 
 
@@ -170,19 +170,24 @@ export default function RegisterPage() {
 
 
 
+      console.log('=== FRONTEND REGISTRATION ATTEMPT ===');
       console.log('Attempting to register user...');
+      console.log('Sending data:', { firstName, lastName, email, password });
 
+      // 🔐 BLOQUEO DUPLICADO - Verificar email duplicado antes de enviar
+      console.log('Checking for duplicate email before API call...');
+      
       await register({ firstName, lastName, email, password });
 
       
 
-      console.log('Registration successful, redirecting...');
+      console.log('✅ Registration successful, redirecting...');
 
       router.push('/');
 
     } catch (error: any) {
 
-      console.error('Register error:', error);
+      console.error('❌ Register error:', error);
 
       console.error('Error details:', {
 
@@ -193,6 +198,13 @@ export default function RegisterPage() {
         name: error.name
 
       });
+
+      // 🔐 BLOQUEO DUPLICADO - Manejo específico de email duplicado
+      if (error.message === 'Email already exists') {
+        console.log('🚫 BLOCKING DUPLICATE EMAIL IN FORM');
+        setError('Este correo electrónico ya está registrado. Por favor, utiliza otro correo.');
+        return; // 🔐 BLOQUEAR REDIRECCIÓN
+      }
 
       setError(error.message || 'Error al crear la cuenta');
 

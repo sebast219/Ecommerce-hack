@@ -41,9 +41,27 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
+    console.log('=== REPOSITORY FIND BY EMAIL ===');
+    console.log('Searching for email:', email);
+    
+    // Buscar case insensitive - usar findUnique con email normalizado
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log('Normalized email for search:', normalizedEmail);
+    
     const prismaUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
+
+    console.log('Prisma user found:', !!prismaUser);
+    if (prismaUser) {
+      console.log('Found user ID:', prismaUser.id);
+      console.log('Found user email:', prismaUser.email);
+      console.log('Email comparison (stored vs search):');
+      console.log('- Stored email:', prismaUser.email);
+      console.log('- Search email:', email);
+      console.log('- Normalized search:', normalizedEmail);
+      console.log('- Case insensitive match:', prismaUser.email.toLowerCase() === normalizedEmail);
+    }
 
     return prismaUser ? this.mapPrismaUserToUser(prismaUser) : null;
   }

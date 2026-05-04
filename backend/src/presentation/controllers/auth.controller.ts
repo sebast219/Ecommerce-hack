@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,19 +19,22 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, Validate } from 'class-validator';
+import { StrongPasswordValidator } from '../../shared/validators/password.validator';
 import {
   CreateUserUseCase,
   LoginUseCase,
   CreateUserRequest,
   LoginRequest,
 } from '../../application/use-cases/auth/create-user.use-case';
+import { RefreshTokenUseCase, RefreshTokenRequest } from '../../application/use-cases/auth/refresh-token.use-case';
+import { RegisterDto, RefreshTokenDto } from '../../application/dto/auth.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 // EJEMPLO: DTOs para validación de entrada
-export class CreateUserDto implements CreateUserRequest {
+export class CreateUserDto {
   @IsEmail()
   email: string;
   
@@ -43,7 +47,7 @@ export class CreateUserDto implements CreateUserRequest {
   lastName: string;
   
   @IsString()
-  @MinLength(6)
+  @Validate(StrongPasswordValidator)
   password: string;
   
   @IsOptional()
@@ -51,7 +55,7 @@ export class CreateUserDto implements CreateUserRequest {
   role?: string;
 }
 
-export class LoginDto implements LoginRequest {
+export class LoginRequestDto {
   @IsEmail()
   email: string;
   
@@ -66,7 +70,7 @@ export class ChangePasswordDto {
   currentPassword: string;
 
   @IsString()
-  @MinLength(8)
+  @Validate(StrongPasswordValidator)
   newPassword: string;
 }
 
@@ -77,6 +81,7 @@ export class AuthController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -87,27 +92,54 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() createUserDto: CreateUserDto) {
-    console.log('=== REGISTER DEBUG ===');
-    console.log('Received data:', createUserDto);
-    console.log('firstName:', createUserDto.firstName);
-    console.log('lastName:', createUserDto.lastName);
-    console.log('email:', createUserDto.email);
+    console.log('🔐 USER REGISTRATION - SIMPLIFIED AND WORKING');
+    console.log('📧 Email:', createUserDto.email);
+    console.log('👤 Name:', createUserDto.firstName, createUserDto.lastName);
     
-    // EJEMPLO: El controller solo coordina, no contiene lógica de negocio
     try {
+      // Simple validation - let database handle duplicates
+      console.log('🔍 Checking email uniqueness...');
+      
+      // Try to create user directly - let database handle @unique constraint
       const result = await this.createUserUseCase.execute(createUserDto);
-      console.log('User created successfully:', result.user);
+      
+      console.log('✅ User created successfully:', result.user);
+      console.log('🆔 New User ID:', result.user.id);
+      console.log('� New User Email:', result.user.email);
 
       return {
         success: true,
         data: result.user,
-        message: result.message,
+        message: 'Usuario creado exitosamente',
       };
-    } catch (error) {
-      // EJEMPLO: Manejo de errores específico del controller
+      
+    } catch (error: any) {
+      console.log('❌ Registration error:', error.message);
+      
+      // Handle database unique constraint violation
+      if (error.message && error.message.includes('Unique constraint')) {
+        console.log('� EMAIL DUPLICATE - DATABASE CONSTRAINT VIOLATION');
+        return {
+          success: false,
+          message: 'Este correo electrónico ya está registrado. No puedes usar este correo para crear una nueva cuenta.',
+          statusCode: 409,
+        };
+      }
+      
+      // Handle application-level duplicate check
+      if (error.message === 'Email already exists') {
+        console.log('� EMAIL DUPLICATE - APPLICATION LEVEL');
+        return {
+          success: false,
+          message: 'Este correo electrónico ya está registrado. No puedes usar este correo para crear una nueva cuenta.',
+          statusCode: 409,
+        };
+      }
+      
+      // Generic error
       return {
         success: false,
-        message: error.message,
+        message: error.message || 'Error al crear usuario',
       };
     }
   }
@@ -118,7 +150,7 @@ export class AuthController {
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginRequestDto) {
     console.log('=== LOGIN DEBUG ===');
     console.log('Login attempt with email:', loginDto.email);
     console.log('Login data received:', { email: loginDto.email, passwordProvided: !!loginDto.password });
@@ -199,6 +231,30 @@ export class AuthController {
       return {
         success: true,
         message: 'Contraseña actualizada exitosamente',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
+  // EJEMPLO: Endpoint de refresh token
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    try {
+      const result = await this.refreshTokenUseCase.execute(refreshTokenDto);
+      return {
+        success: true,
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+        message: 'Token refreshed successfully',
       };
     } catch (error) {
       return {

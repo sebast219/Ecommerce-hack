@@ -51,9 +51,26 @@ export class CreateUserUseCase {
   private async validateBusinessRules(
     request: CreateUserRequest,
   ): Promise<void> {
-    // EJEMPLO: Verificar si email ya existe
-    const existingUser = await this.userRepository.findByEmail(request.email);
+    console.log('=== VALIDATING BUSINESS RULES ===');
+    console.log('Checking email:', request.email);
+    console.log('Email to lowercase:', request.email.toLowerCase());
+    
+    // EJEMPLO: Verificar si email ya existe (case insensitive)
+    const normalizedEmail = request.email.toLowerCase().trim();
+    console.log('Normalized email for search:', normalizedEmail);
+    
+    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
+    console.log('Existing user found:', !!existingUser);
+    
     if (existingUser) {
+      console.log('=== EMAIL DUPLICATE DETECTED ===');
+      console.log('Registered email:', existingUser.email);
+      console.log('New attempt email:', request.email);
+      console.log('Email comparison (case insensitive):');
+      console.log('- Registered (lower):', existingUser.email.toLowerCase());
+      console.log('- New attempt (lower):', request.email.toLowerCase());
+      console.log('- Are equal:', existingUser.email.toLowerCase() === request.email.toLowerCase());
+      
       throw new Error('Email already exists');
     }
 

@@ -297,9 +297,18 @@ export default function ProfilePage() {
 
   const handleSaveCard = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 🔴 SEMÁFORO DE RIESGOS - Validación de expiración antes de guardar
+    const { validateExpiry } = await import('@/lib/stripe');
+    if (!validateExpiry(expiryDate)) {
+      alert('❌ Tarjeta vencida - La fecha de expiración no es válida');
+      return;
+    }
+    
     setSavingCard(true);
     console.log('=== Saving Card ===');
     console.log('Token:', token ? 'Present' : 'Missing');
+    console.log('Expiry validation:', validateExpiry(expiryDate));
     
     try {
       const isEditing = !!editingCardId;
@@ -316,6 +325,7 @@ export default function ProfilePage() {
       };
       console.log(isEditing ? 'PUT to:' : 'POST to:', url);
       console.log('Payload:', payload);
+      console.log('🚦 SEMÁFORO DE RIESGOS - Tarjeta vencida detectada y bloqueada');
       
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',

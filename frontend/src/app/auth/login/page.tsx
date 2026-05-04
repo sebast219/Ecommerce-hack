@@ -22,46 +22,23 @@ export default function LoginPage() {
     document.getElementById('email')?.focus();
   }, []);
 
-  // Animación de contadores
-  useEffect(() => {
-    const finalValues = [10000, 500, 98];
-    const duration = 2000;
-    const steps = 100;
-    const stepDuration = duration / steps;
-    
-    let currentStep = 0;
-    
-    const timer = setInterval(() => {
-      currentStep++;
-      const progress = currentStep / steps;
-      
-      setAnimatedValues([
-        Math.floor(finalValues[0] * progress),
-        Math.floor(finalValues[1] * progress),
-        Math.floor(finalValues[2] * progress)
-      ]);
-      
-      if (currentStep >= steps) {
-        clearInterval(timer);
-      }
-    }, stepDuration);
-    
-    return () => clearInterval(timer);
-  }, []);
-
+  
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !password) {
-      setError('Completa todos los campos');
+      setError('Por favor completa todos los campos');
       return;
     }
     try {
       setLoading(true);
       setError('');
+      
       await login(email, password);
+      console.log('Login successful');
       router.push('/');
-    } catch {
-      setError('Correo o contraseña incorrectos');
+    } catch (error: any) {
+      console.log('Login error:', error.message);
+      setError(error.message || 'Correo o contraseña incorrectos');
     } finally {
       setLoading(false);
     }

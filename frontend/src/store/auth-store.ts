@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
 
             method: 'POST',
 
@@ -50,8 +50,25 @@ export const useAuthStore = create<AuthStore>()(
           });
 
           if (!response.ok) {
+            const errorData = await response.json();
+            console.log('🚫 LOGIN FAILED - Frontend Error Handling');
+            console.log('Response status:', response.status);
+            console.log('Error data:', errorData);
+            console.log('Error message:', errorData.message);
+            
+            // 🔐 VERIFICAR SI ES ERROR DE CORREO DUPLICADO
+            if (response.status === 409 || errorData.message === 'Email already exists') {
+              console.log('🚫 BLOCKING DUPLICATE EMAIL IN LOGIN');
+              throw new Error('Email already exists');
+            }
+            
+            // 🔐 VERIFICAR SI ES ERROR DE CREDENCIALES INVÁLIDAS
+            if (response.status === 401 || errorData.message === 'Invalid credentials') {
+              console.log('🚫 INVALID CREDENTIALS IN LOGIN');
+              throw new Error('Invalid credentials');
+            }
 
-            throw new Error('Login failed');
+            throw new Error(errorData.message || 'Login failed');
 
           }
 
@@ -98,7 +115,7 @@ export const useAuthStore = create<AuthStore>()(
         console.log('User data being sent:', userData);
         
         try {
-          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`;
+          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`;
           console.log('Full URL:', fullUrl);
           
           const response = await fetch(fullUrl, {
@@ -114,6 +131,17 @@ export const useAuthStore = create<AuthStore>()(
 
           if (!response.ok) {
             const errorData = await response.json();
+            console.log('🚫 REGISTRATION FAILED - Frontend Error Handling');
+            console.log('Response status:', response.status);
+            console.log('Error data:', errorData);
+            console.log('Error message:', errorData.message);
+            
+            // 🔐 BLOQUEAR REGISTRO DUPLICADO - Mostrar error específico
+            if (response.status === 409 || errorData.message === 'Email already exists') {
+              console.log('🚫 BLOCKING DUPLICATE EMAIL IN FRONTEND');
+              throw new Error('Email already exists');
+            }
+            
             throw new Error(errorData.message || 'Register failed');
           }
 

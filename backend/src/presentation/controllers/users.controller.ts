@@ -18,6 +18,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -577,7 +578,22 @@ export class UsersController {
 
   @Post('payment-methods')
   @ApiOperation({ summary: 'Create payment method' })
+  @ApiResponse({ status: 201, description: 'Payment method created successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async createPaymentMethod(@Req() req, @Body() dto: CreatePaymentMethodDto) {
+    console.log('=== CREATE PAYMENT METHOD DEBUG ===');
+    console.log('User from request:', req.user);
+    console.log('User ID:', req.user?.id);
+    console.log('User authenticated:', !!req.user);
+    
+    // 🔐 VERIFICAR AUTENTICACIÓN
+    if (!req.user || !req.user.id) {
+      console.log('❌ NO USER AUTHENTICATED - THROWING UNAUTHORIZED EXCEPTION');
+      throw new UnauthorizedException('Debes estar autenticado para guardar métodos de pago');
+    }
+    
+    console.log('✅ User authenticated - proceeding with payment method creation');
+
     // If setting as default, unset other defaults first
     if (dto.isDefault) {
       await this.prisma.paymentMethod.updateMany({
@@ -597,6 +613,8 @@ export class UsersController {
         userId: req.user.id,
       },
     });
+
+    console.log('✅ Payment method created successfully:', method.id);
 
     return {
       success: true,

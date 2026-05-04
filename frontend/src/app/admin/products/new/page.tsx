@@ -63,6 +63,12 @@ export default function NewProductPage() {
     isActive: true,
   });
 
+  // Add console log to track form data changes
+  useEffect(() => {
+    console.log('=== FORM DATA CHANGED ===');
+    console.log('Current form data:', formData);
+  }, [formData]);
+
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchCategories();
@@ -71,19 +77,35 @@ export default function NewProductPage() {
 
   const fetchCategories = async () => {
     try {
+      console.log('=== FETCHING CATEGORIES ===');
+      console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
+      console.log('Token:', token ? 'Present' : 'Missing');
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) throw new Error('Error al cargar categorías');
 
       const data = await response.json();
-      const categoriesData = data.data?.data || data.data || data;
+      console.log('Categories response data:', data);
+      
+      // Handle response structure: data.data.categories
+      const categoriesData = data.data?.categories || data.data?.data || data.categories || data;
+      console.log('Extracted categories data:', categoriesData);
       
       if (Array.isArray(categoriesData)) {
+        console.log('Setting categories:', categoriesData.length);
+        console.log('Categories list:', categoriesData);
         setCategories(categoriesData);
+      } else {
+        console.log('Categories data is not an array:', typeof categoriesData);
+        console.log('Full response structure:', JSON.stringify(data, null, 2));
+        setCategories([]);
       }
     } catch (error: any) {
       console.error('Error loading categories:', error);
@@ -101,6 +123,9 @@ export default function NewProductPage() {
   };
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
+    console.log(`=== INPUT CHANGE ===`);
+    console.log(`Field: ${field}, Value:`, value);
+    
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -110,6 +135,7 @@ export default function NewProductPage() {
     if (field === 'name') {
       const slug = generateSlug(value);
       setFormData(prev => ({ ...prev, slug }));
+      console.log(`Auto-generated slug: ${slug}`);
     }
   };
 
@@ -169,7 +195,15 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('=== CREATING PRODUCT ===');
+    console.log('Form data:', formData);
+    console.log('User:', user);
+    console.log('Token:', token ? 'Present' : 'Missing');
+    console.log('Is Authenticated:', isAuthenticated);
+    console.log('User Role:', user?.role);
+    
     if (!isAuthenticated || user?.role !== 'ADMIN') {
+      console.log('❌ Permission denied - User not admin');
       alert('No tienes permisos para crear productos');
       return;
     }
@@ -184,6 +218,9 @@ export default function NewProductPage() {
         stock: parseInt(formData.stock.toString()),
       };
 
+      console.log('Payload:', payload);
+      console.log('API URL:', `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products`);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/products`, {
         method: 'POST',
         headers: {
@@ -193,16 +230,26 @@ export default function NewProductPage() {
         body: JSON.stringify(payload),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ Error response:', errorData);
         throw new Error(errorData.message || `Error ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('✅ Success response:', data);
       alert('Producto creado exitosamente');
       router.push('/admin/products');
     } catch (error: any) {
-      console.error('Error creating product:', error);
+      console.error('❌ Error creating product:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       alert('Error al crear producto: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
