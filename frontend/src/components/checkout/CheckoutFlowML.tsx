@@ -825,7 +825,7 @@ export const CheckoutFlowML = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Truck className="w-4 h-4 text-blue-600" />
-                  <span>Envío gratis en compras > $50</span>
+                  <span>Envío gratis en compras &gt; $50</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <CheckCircle className="w-4 h-4 text-purple-600" />

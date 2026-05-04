@@ -82,7 +82,7 @@ const ProductCard = memo<ProductCardProps>(({
 
   // Memoizar si el producto ya está en el carrito
   const isInCart = useMemo(() => {
-    return items.some(item => item.productId === product.id);
+    return items.some(item => item.product.id === product.id);
   }, [items, product.id]);
 
   // Memoizar imagen principal
@@ -104,10 +104,7 @@ const ProductCard = memo<ProductCardProps>(({
 
     setIsLoading(true);
     try {
-      await addItem({
-        productId: product.id,
-        quantity: 1,
-      });
+      await addItem(product as any, 1);
     } catch (error) {
       console.error('Error adding to cart:', error);
     } finally {
