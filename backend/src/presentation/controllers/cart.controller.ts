@@ -1,250 +1,95 @@
-// 🏗️ PRESENTATION CONTROLLERS - Carrito
-// PROPÓSITO: Manejar requests HTTP de carrito
-
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  Query,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
+  Controller, Get, Post, Patch, Delete, Body, Param,
+  UseGuards, Req, HttpCode, HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional } from 'class-validator';
-import {
-  AddToCartUseCase,
-  UpdateCartItemUseCase,
-  RemoveFromCartUseCase,
-  GetCartUseCase,
-} from '../../application/use-cases/cart/manage-cart.use-case';
-import {
-  AddToCartRequest,
-  UpdateCartItemRequest,
-  RemoveFromCartRequest,
-  GetCartRequest,
-} from '../../application/use-cases/cart/manage-cart.use-case';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUser } from '../decorators/current-user.decorator';
-
-export class AddToCartDto implements AddToCartRequest {
-  @IsString()
-  productId: string;
-  
-  @IsNumber()
-  quantity: number;
-  
-  @IsOptional()
-  @IsString()
-  sessionId?: string;
-  
-  @IsOptional()
-  @IsString()
-  userId?: string;
-}
-
-export class UpdateCartItemDto implements UpdateCartItemRequest {
-  cartItemId: string;
-  quantity: number;
-}
-
-export class GetCartDto implements GetCartRequest {
-  sessionId?: string;
-  userId?: string;
-}
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AddToCartDto, UpdateCartItemDto } from '../../application/dto/cart.dto';
+import { AddToCartUseCase } from '../../application/use-cases/cart/add-to-cart.use-case';
+import { GetCartUseCase } from '../../application/use-cases/cart/get-cart.use-case';
+import { UpdateCartItemUseCase } from '../../application/use-cases/cart/update-cart-item.use-case';
+import { RemoveFromCartUseCase } from '../../application/use-cases/cart/remove-from-cart.use-case';
+import { ClearCartUseCase } from '../../application/use-cases/cart/clear-cart.use-case';
 
 @ApiTags('Cart')
-@Controller('cart')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@Controller('cart')
 export class CartController {
   constructor(
-    private readonly addToCartUseCase: AddToCartUseCase,
-    private readonly updateCartItemUseCase: UpdateCartItemUseCase,
-    private readonly removeFromCartUseCase: RemoveFromCartUseCase,
-    private readonly getCartUseCase: GetCartUseCase,
+    private readonly addToCart: AddToCartUseCase,
+    private readonly getCart: GetCartUseCase,
+    private readonly updateCartItem: UpdateCartItemUseCase,
+    private readonly removeFromCart: RemoveFromCartUseCase,
+    private readonly clearCart: ClearCartUseCase,
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get user cart' })
-  @ApiResponse({ status: 200, description: 'Cart retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Cart not found' })
-  async getCart(@CurrentUser() user: any) {
-    try {
-      const result = await this.getCartUseCase.execute({ userId: user.id });
-
-      return {
-        success: true,
-        data: result.cart,
-        message: result.cart ? 'Cart retrieved successfully' : 'Cart not found',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @ApiOperation({ summary: 'Get user cart with items and totals' })
+  async get(@Req() req: any) {
+    const result = await this.getCart.execute(req.user.id);
+    return { success: true, data: result };
   }
 
   @Post('items')
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Add item to cart' })
-  @ApiResponse({ status: 201, description: 'Item added to cart successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
-  @ApiResponse({ status: 404, description: 'Product not found' })
-  async addToCart(@CurrentUser() user: any, @Body() addToCartDto: AddToCartDto) {
-    try {
-      const result = await this.addToCartUseCase.execute({
-        userId: user.id,
-        productId: addToCartDto.productId,
-        quantity: addToCartDto.quantity,
-      });
-
-      return {
-        success: true,
-        data: result.cart,
-        message: result.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @HttpCode(HttpStatus.CREATED)
+  async add(@Req() req: any, @Body() dto: AddToCartDto) {
+    const item = await this.addToCart.execute({
+      userId: req.user.id,
+      productId: dto.productId,
+      quantity: dto.quantity,
+    });
+    return { success: true, data: item };
   }
 
-  @Put('items/:id')
+  @Patch('items/:id')
   @ApiOperation({ summary: 'Update cart item quantity' })
-  @ApiResponse({ status: 200, description: 'Cart item updated successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
-  @ApiResponse({ status: 404, description: 'Cart item not found' })
-  async updateCartItem(
+  async update(
+    @Req() req: any,
     @Param('id') id: string,
-    @Body() updateCartItemDto: UpdateCartItemDto,
+    @Body() dto: UpdateCartItemDto,
   ) {
-    try {
-      const result = await this.updateCartItemUseCase.execute({
-        cartItemId: id,
-        quantity: updateCartItemDto.quantity,
-      });
-
-      return {
-        success: true,
-        data: result.cart,
-        message: result.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+    const item = await this.updateCartItem.execute(req.user.id, id, dto.quantity);
+    return { success: true, data: item };
   }
 
   @Delete('items/:id')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove item from cart' })
-  @ApiResponse({ status: 200, description: 'Item removed from cart successfully' })
-  @ApiResponse({ status: 404, description: 'Cart item not found' })
-  async removeFromCart(@Param('id') id: string) {
-    try {
-      const result = await this.removeFromCartUseCase.execute({ cartItemId: id });
-
-      return {
-        success: true,
-        data: result.cart,
-        message: result.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Req() req: any, @Param('id') id: string) {
+    await this.removeFromCart.execute(req.user.id, id);
   }
 
-  @Delete('clear')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Clear cart' })
-  @ApiResponse({ status: 200, description: 'Cart cleared successfully' })
-  async clearCart(@Query() query: GetCartDto) {
-    try {
-      // This would need a ClearCartUseCase implementation
-      return {
-        success: true,
-        message: 'Cart cleared - Implement ClearCartUseCase',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
-  }
-
-  @Get('total')
-  @ApiOperation({ summary: 'Get cart total' })
-  @ApiResponse({ status: 200, description: 'Cart total calculated successfully' })
-  async getCartTotal(@Query() query: GetCartDto) {
-    try {
-      // This would need a GetCartTotalUseCase implementation
-      return {
-        success: true,
-        message: 'Cart total - Implement GetCartTotalUseCase',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @Delete()
+  @ApiOperation({ summary: 'Clear entire cart' })
+  async clear(@Req() req: any) {
+    const result = await this.clearCart.execute(req.user.id);
+    return { success: true, data: result };
   }
 }
 
 @ApiTags('Wishlist')
 @Controller('wishlist')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
 export class WishlistController {
-  // TODO: Implement wishlist controller with wishlist use cases
   @Get()
   @ApiOperation({ summary: 'Get user wishlist' })
-  @ApiResponse({ status: 200, description: 'Wishlist retrieved successfully' })
   async getWishlist() {
-    return {
-      success: true,
-      message: 'Wishlist - Implement GetWishlistUseCase',
-    };
+    return { success: true, message: 'Wishlist - TODO: Implement' };
   }
 
   @Post('items')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Add item to wishlist' })
-  @ApiResponse({ status: 201, description: 'Item added to wishlist successfully' })
   async addToWishlist(@Body() body: { productId: string }) {
-    return {
-      success: true,
-      message: 'Add to wishlist - Implement AddToWishlistUseCase',
-    };
+    return { success: true, message: 'Add to wishlist - TODO: Implement' };
   }
 
   @Delete('items/:productId')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove item from wishlist' })
-  @ApiResponse({ status: 200, description: 'Item removed from wishlist successfully' })
   async removeFromWishlist(@Param('productId') productId: string) {
-    return {
-      success: true,
-      message: 'Remove from wishlist - Implement RemoveFromWishlistUseCase',
-    };
+    return { success: true, message: 'Remove from wishlist - TODO: Implement' };
   }
 }

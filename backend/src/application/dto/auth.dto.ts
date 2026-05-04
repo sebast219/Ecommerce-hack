@@ -43,10 +43,11 @@ export class RegisterDto {
   @Matches(/^\+?[\d\s\-\(\)]+$/, { message: 'Please provide a valid phone number' })
   phone?: string;
 
-  @ApiPropertyOptional({ example: 'USER', enum: UserRole, description: 'User role' })
-  @IsOptional()
-  @IsEnum(UserRole, { message: 'Role must be a valid user role' })
-  role?: UserRole;
+  // @ApiPropertyOptional({ example: 'USER', enum: UserRole, description: 'User role' })
+  // @IsOptional()
+  // @IsEnum(UserRole, { message: 'Role must be a valid user role' })
+  // role?: UserRole;
+  // REMOVIDO: Prevenir Mass Assignment Attack - el rol no debe ser asignable en registro
 }
 
 export class LoginDto {

@@ -1,7 +1,8 @@
 // 🏗️ PRESENTATION CONTROLLERS - Productos (CORREGIDO)
 // PROPÓSITO: Manejar requests HTTP de productos
 
-import { Controller, Get, Query, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Query, Param, Body, Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { NotFoundExceptionFilter } from '../filters/not-found.filter';
 import {
   ApiTags,
   ApiOperation,
@@ -12,8 +13,14 @@ import {
   GetProductsUseCase,
   GetProductUseCase,
 } from '../../application/use-cases/products/get-products.use-case';
-import { GetProductsQueryDto, ProductDifficulty } from '../../application/dto/product.dto';
+import { CreateProductUseCase } from '../../application/use-cases/products/create-product.use-case';
+import { UpdateProductUseCase } from '../../application/use-cases/products/update-product.use-case';
+import { DeleteProductUseCase } from '../../application/use-cases/products/delete-product.use-case';
+import { GetProductsQueryDto, ProductDifficulty, CreateProductDto, UpdateProductDto } from '../../application/dto/product.dto';
 import { ICategoryRepository, CATEGORY_REPOSITORY } from '../../domain/repositories/product.repository.interface';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 
 @ApiTags('Products')
 @Controller('products')
@@ -21,6 +28,9 @@ export class ProductsController {
   constructor(
     private readonly getProductsUseCase: GetProductsUseCase,
     private readonly getProductUseCase: GetProductUseCase,
+    private readonly createProductUseCase: CreateProductUseCase,
+    private readonly updateProductUseCase: UpdateProductUseCase,
+    private readonly deleteProductUseCase: DeleteProductUseCase,
   ) {}
 
   @Get()
@@ -79,35 +89,29 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get product by ID, slug, or SKU' })
   @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
+  @UseFilters(NotFoundExceptionFilter)
   async getProduct(@Param('identifier') identifier: string) {
-    try {
-      // Try to determine if it's an ID, slug, or SKU
-      let request;
+    // Try to determine if it's an ID, slug, or SKU
+    let request;
 
-      if (identifier.length === 25 && identifier.startsWith('c')) {
-        // Likely a Prisma ID
-        request = { id: identifier };
-      } else if (identifier.includes('-')) {
-        // Likely a slug
-        request = { slug: identifier };
-      } else {
-        // Likely a SKU
-        request = { sku: identifier };
-      }
-
-      const result = await this.getProductUseCase.execute(request);
-
-      return {
-        success: true,
-        data: result.product,
-        message: 'Product retrieved successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
+    if (identifier.length === 25 && identifier.startsWith('c')) {
+      // Likely a Prisma ID
+      request = { id: identifier };
+    } else if (identifier.includes('-')) {
+      // Likely a slug
+      request = { slug: identifier };
+    } else {
+      // Likely a SKU
+      request = { sku: identifier };
     }
+
+    const result = await this.getProductUseCase.execute(request);
+
+    return {
+      success: true,
+      data: result.product,
+      message: 'Product retrieved successfully',
+    };
   }
 
   @Get('category/:categoryId')
@@ -132,6 +136,88 @@ export class ProductsController {
       return {
         success: false,
         message: error.message,
+      };
+    }
+  }
+
+  // Admin endpoints
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Create a new product (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Product created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async createProduct(@Body() createProductDto: CreateProductDto) {
+    try {
+      const result = await this.createProductUseCase.execute(createProductDto);
+      
+      return {
+        success: true,
+        data: result.product,
+        message: 'Product created successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to create product',
+      };
+    }
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Update a product (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Product updated successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async updateProduct(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    try {
+      const result = await this.updateProductUseCase.execute({
+        id,
+        ...updateProductDto,
+      });
+      
+      return {
+        success: true,
+        data: result.product,
+        message: 'Product updated successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to update product',
+      };
+    }
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Delete a product (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Product deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async deleteProduct(@Param('id') id: string) {
+    try {
+      await this.deleteProductUseCase.execute({ id });
+      
+      return {
+        success: true,
+        data: null,
+        message: 'Product deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to delete product',
       };
     }
   }

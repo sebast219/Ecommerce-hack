@@ -1,13 +1,14 @@
 // 🏗️ APPLICATION USE CASES - Login de Usuario
 // PROPÓSITO: Autenticar usuarios y generar tokens JWT
 
+import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../../../domain/entities/user.entity';
-import { IUserRepository, UserWithPassword } from '../../../domain/repositories/user.repository.interface';
-import { IRefreshTokenRepository } from '../../../domain/repositories/cart.repository.interface';
+import { IUserRepository, UserWithPassword, USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
+import { RefreshTokenRepositoryImpl } from '../../../infrastructure/database/repositories/cart.repository.impl';
 import { UserDomainService } from '../../../domain/services/user.domain.service';
-import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 
 export interface LoginRequest {
   email: string;
@@ -20,13 +21,22 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
+@Injectable()
 export class LoginUseCase {
+  private jwtService: JwtService;
+
   constructor(
+    @Inject(USER_REPOSITORY)
     private userRepository: IUserRepository,
-    private refreshTokenRepository: IRefreshTokenRepository,
-    private jwtService: JwtService,
-    private configService: ConfigService,
-  ) {}
+    private refreshTokenRepository: RefreshTokenRepositoryImpl,
+    private userDomainService: UserDomainService,
+  ) {
+    // Crear JwtService directamente con el secreto
+    this.jwtService = new JwtService({
+      secret: process.env.JWT_SECRET || 'test-secret-key-for-development',
+      signOptions: { expiresIn: '24h' },
+    });
+  }
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
     // Validar formato de email
@@ -59,11 +69,17 @@ export class LoginUseCase {
     // Limpiar tokens anteriores del usuario
     await this.refreshTokenRepository.deleteByUserId(userWithoutPassword.id);
 
-    // Guardar nuevo refresh token
+    // Guardar nuevo refresh token con hash
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const familyId = this.generateFamilyId();
+
     await this.refreshTokenRepository.create({
-      token: refreshToken,
+      tokenHash,
+      familyId,
       userId: userWithoutPassword.id,
+      isRevoked: false,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+      updatedAt: new Date(),
     });
 
     return {
@@ -81,7 +97,7 @@ export class LoginUseCase {
     };
 
     return this.jwtService.sign(payload, {
-      expiresIn: this.configService.get('JWT_EXPIRES_IN') || '24h',
+      expiresIn: process.env.JWT_EXPIRES_IN || '24h',
     });
   }
 
@@ -92,8 +108,13 @@ export class LoginUseCase {
     };
 
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN') || '7d',
+      secret: process.env.JWT_REFRESH_SECRET || 'test-super-secret-refresh-key-for-testing-only',
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     });
+  }
+
+  private generateFamilyId(): string {
+    // Generar un ID único para la familia de tokens
+    return crypto.randomUUID();
   }
 }

@@ -16,7 +16,7 @@ import {
   ValidateNested,
   Length
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ProductDifficulty {
@@ -151,6 +151,11 @@ export class CreateProductDto {
   })
   compatibility: string[];
 
+  @ApiProperty({ example: ['https://example.com/tutorial'], description: 'Product tutorials' })
+  @IsArray({ message: 'Product tutorials must be an array' })
+  @IsUrl({}, { each: true, message: 'Each tutorial must be a valid URL' })
+  tutorials: string[];
+
   @ApiProperty({ example: true, description: 'Product is physical' })
   @IsBoolean({ message: 'Product physical status must be a boolean' })
   isPhysical: boolean;
@@ -191,6 +196,29 @@ export class UpdateProductDto {
   @Min(0.01, { message: 'Price must be greater than 0' })
   price?: number;
 
+  @ApiPropertyOptional({ example: 399.99, description: 'Compare at price' })
+  @IsOptional()
+  @IsNumber({}, { message: 'Compare price must be a number' })
+  @Min(0.01, { message: 'Compare price must be greater than 0' })
+  comparePrice?: number;
+
+  @ApiPropertyOptional({ example: 'HAK5-WP007', description: 'Product SKU' })
+  @IsOptional()
+  @IsString({ message: 'Product SKU must be a string' })
+  @Length(3, 50, { message: 'Product SKU must be between 3 and 50 characters' })
+  sku?: string;
+
+  @ApiPropertyOptional({ example: '1234567890123', description: 'Product barcode' })
+  @IsOptional()
+  @IsString({ message: 'Product barcode must be a string' })
+  @Matches(/^\d+$/, { message: 'Barcode can only contain numbers' })
+  barcode?: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Track inventory' })
+  @IsOptional()
+  @IsBoolean({ message: 'Track inventory must be a boolean' })
+  trackInventory?: boolean;
+
   @ApiPropertyOptional({ example: true, description: 'Product is active' })
   @IsOptional()
   @IsBoolean({ message: 'Product active status must be a boolean' })
@@ -207,6 +235,22 @@ export class UpdateProductDto {
   @IsArray({ message: 'Product tags must be an array' })
   @IsString({ each: true, message: 'Each tag must be a string' })
   tags?: string[];
+
+  @ApiPropertyOptional({ example: 'INTERMEDIATE', enum: ProductDifficulty, description: 'Product difficulty level' })
+  @IsOptional()
+  @IsEnum(ProductDifficulty, { message: 'Product difficulty must be a valid difficulty level' })
+  difficulty?: ProductDifficulty;
+
+  @ApiPropertyOptional({ example: true, description: 'Product is physical' })
+  @IsOptional()
+  @IsBoolean({ message: 'Product physical status must be a boolean' })
+  isPhysical?: boolean;
+
+  @ApiPropertyOptional({ example: 'category-id-here', description: 'Category ID' })
+  @IsOptional()
+  @IsString({ message: 'Category ID must be a string' })
+  @Length(1, 100, { message: 'Category ID is required' })
+  categoryId?: string;
 }
 
 export class GetProductsQueryDto {
@@ -214,13 +258,15 @@ export class GetProductsQueryDto {
   @IsOptional()
   @IsNumber({}, { message: 'Page must be a number' })
   @Min(1, { message: 'Page must be greater than 0' })
+  @Type(() => Number)
   page?: number;
 
   @ApiPropertyOptional({ example: 20, description: 'Items per page' })
   @IsOptional()
   @IsNumber({}, { message: 'Limit must be a number' })
   @Min(1, { message: 'Limit must be greater than 0' })
-  @Max(100, { message: 'Limit cannot exceed 100' })
+  @Max(1000, { message: 'Limit cannot exceed 1000' })
+  @Type(() => Number)
   limit?: number;
 
   @ApiPropertyOptional({ example: 'category-id', description: 'Category ID filter' })
@@ -247,12 +293,14 @@ export class GetProductsQueryDto {
   @IsOptional()
   @IsNumber({}, { message: 'Minimum price must be a number' })
   @Min(0, { message: 'Minimum price cannot be negative' })
+  @Type(() => Number)
   minPrice?: number;
 
   @ApiPropertyOptional({ example: 500, description: 'Maximum price' })
   @IsOptional()
   @IsNumber({}, { message: 'Maximum price must be a number' })
   @Min(0, { message: 'Maximum price cannot be negative' })
+  @Type(() => Number)
   maxPrice?: number;
 
   @ApiPropertyOptional({ example: 'name', enum: ['name', 'price', 'createdAt'], description: 'Sort by field' })
@@ -264,4 +312,14 @@ export class GetProductsQueryDto {
   @IsOptional()
   @IsEnum(['asc', 'desc'], { message: 'Sort order must be asc or desc' })
   sortOrder?: 'asc' | 'desc';
+
+  @ApiPropertyOptional({ example: true, description: 'Filter by active status' })
+  @IsOptional()
+  @IsBoolean({ message: 'Active filter must be a boolean' })
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  active?: boolean;
 }

@@ -55,7 +55,7 @@ export default function AdminUsersPage() {
   // Cargar usuarios
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/all`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/all`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

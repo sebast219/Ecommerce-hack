@@ -49,12 +49,14 @@ export interface ProductReview {
 
 export interface RefreshToken {
   id: string;
-  token: string;
+  tokenHash: string;
+  familyId: string;
   userId: string;
   user?: User;
+  isRevoked: boolean;
   expiresAt: Date;
-  
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // Value Objects

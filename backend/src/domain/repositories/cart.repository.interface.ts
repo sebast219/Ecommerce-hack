@@ -97,3 +97,5 @@ export interface IRefreshTokenRepository {
 
 export const CART_REPOSITORY = 'CART_REPOSITORY';
 export const CART_ITEM_REPOSITORY = 'CART_ITEM_REPOSITORY';
+export const ORDER_REPOSITORY = 'ORDER_REPOSITORY';
+export const REFRESH_TOKEN_REPOSITORY = 'REFRESH_TOKEN_REPOSITORY';

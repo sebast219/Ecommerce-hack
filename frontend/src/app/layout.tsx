@@ -7,6 +7,7 @@ import { ScrollToTop } from '@/components/ui/scroll-to-top';
 import { Providers } from './providers';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WebVitals } from './web-vitals';
+import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
             <ScrollToTop />
             <SpeedInsights />
           </div>
+          <Toaster position="top-right" richColors />
         </Providers>
       </body>
     </html>

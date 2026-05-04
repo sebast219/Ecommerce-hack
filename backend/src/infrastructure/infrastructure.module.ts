@@ -6,15 +6,19 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserRepositoryImpl } from './database/repositories/user.repository.impl';
 import { ProductRepositoryImpl } from './database/repositories/product.repository.impl';
-import { CartRepositoryImpl, CartItemRepositoryImpl } from './database/repositories/cart.repository.impl';
+import { CartRepositoryImpl, CartItemRepositoryImpl, RefreshTokenRepositoryImpl } from './database/repositories/cart.repository.impl';
 import { OrderRepositoryImpl } from './database/repositories/order.repository.impl';
 import { PrismaService } from './database/prisma.service';
 import { UserDomainService } from '../domain/services/user.domain.service';
 import { JwtStrategy } from '../presentation/guards/jwt-auth.strategy';
 import { StripeService } from './services/stripe.service';
+import { StripeResilientService } from './payments/stripe-resilient.service';
+import { EmailService } from './email/email.service';
+import { OrderExpirationCron } from './cron/order-expiration.cron';
+import { OrderStateMachineService } from '../application/services/order-state-machine.service';
 import { PRODUCT_REPOSITORY, CATEGORY_REPOSITORY } from '../domain/repositories/product.repository.interface';
 import { USER_REPOSITORY } from '../domain/repositories/user.repository.interface';
-import { CART_REPOSITORY, CART_ITEM_REPOSITORY } from '../domain/repositories/cart.repository.interface';
+import { CART_REPOSITORY, CART_ITEM_REPOSITORY, REFRESH_TOKEN_REPOSITORY } from '../domain/repositories/cart.repository.interface';
 import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.interface';
 
 @Module({
@@ -38,13 +42,19 @@ import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.interf
     { provide: CART_REPOSITORY, useClass: CartRepositoryImpl },
     { provide: CART_ITEM_REPOSITORY, useClass: CartItemRepositoryImpl },
     { provide: ORDER_REPOSITORY, useClass: OrderRepositoryImpl },
+    { provide: REFRESH_TOKEN_REPOSITORY, useClass: RefreshTokenRepositoryImpl },
     CartRepositoryImpl,
     CartItemRepositoryImpl,
     OrderRepositoryImpl,
+    RefreshTokenRepositoryImpl,
     UserDomainService,
     JwtService,
     JwtStrategy,
     StripeService,
+    StripeResilientService,
+    EmailService,
+    OrderExpirationCron,
+    OrderStateMachineService,
     ConfigService,
   ],
   exports: [
@@ -56,13 +66,19 @@ import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.interf
     { provide: CART_REPOSITORY, useClass: CartRepositoryImpl },
     { provide: CART_ITEM_REPOSITORY, useClass: CartItemRepositoryImpl },
     { provide: ORDER_REPOSITORY, useClass: OrderRepositoryImpl },
+    { provide: REFRESH_TOKEN_REPOSITORY, useClass: RefreshTokenRepositoryImpl },
     CartRepositoryImpl,
     CartItemRepositoryImpl,
     OrderRepositoryImpl,
+    RefreshTokenRepositoryImpl,
     UserDomainService,
     JwtModule,
     JwtService,
     StripeService,
+    StripeResilientService,
+    EmailService,
+    OrderExpirationCron,
+    OrderStateMachineService,
     ConfigModule,
   ],
 })

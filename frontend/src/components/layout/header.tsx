@@ -163,7 +163,19 @@ export function Header() {
                   <span className="hidden sm:block text-sm text-black/70">
                     Hola, {user.firstName} {user.lastName?.charAt(0).toUpperCase()}
                   </span>
-                  <div className="h-8 w-8 rounded-full bg-black/90" />
+                  <div className="h-8 w-8 rounded-full bg-black/90 overflow-hidden">
+                    {user?.avatar ? (
+                      <img
+                        src={`http://localhost:3001${user.avatar}`}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-black/90 flex items-center justify-center text-white text-xs font-semibold">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      </div>
+                    )}
+                  </div>
                 </button>
                 
                 {/* User Dropdown Menu */}

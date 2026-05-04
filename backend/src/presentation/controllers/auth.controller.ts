@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,12 +20,18 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 import {
   CreateUserUseCase,
-  LoginUseCase,
   CreateUserRequest,
-  LoginRequest,
 } from '../../application/use-cases/auth/create-user.use-case';
+import {
+  LoginUseCase,
+  LoginRequest,
+} from '../../application/use-cases/auth/login.use-case';
+import {
+  RefreshTokenUseCase,
+} from '../../application/use-cases/auth/refresh-token.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -32,6 +39,7 @@ import * as bcrypt from 'bcrypt';
 // EJEMPLO: DTOs para validación de entrada
 export class CreateUserDto implements CreateUserRequest {
   @IsEmail()
+  @Transform(({ value }) => value?.trim().toLowerCase())
   email: string;
   
   @IsString()
@@ -45,14 +53,11 @@ export class CreateUserDto implements CreateUserRequest {
   @IsString()
   @MinLength(6)
   password: string;
-  
-  @IsOptional()
-  @IsString()
-  role?: string;
 }
 
 export class LoginDto implements LoginRequest {
   @IsEmail()
+  @Transform(({ value }) => value?.trim().toLowerCase())
   email: string;
   
   @IsString()
@@ -70,6 +75,11 @@ export class ChangePasswordDto {
   newPassword: string;
 }
 
+export class RefreshTokenDto {
+  @IsString()
+  refreshToken: string;
+}
+
 // EJEMPLO: Controller de autenticación
 @ApiTags('Auth')
 @Controller('auth')
@@ -77,6 +87,7 @@ export class AuthController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -87,29 +98,17 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() createUserDto: CreateUserDto) {
-    console.log('=== REGISTER DEBUG ===');
-    console.log('Received data:', createUserDto);
-    console.log('firstName:', createUserDto.firstName);
-    console.log('lastName:', createUserDto.lastName);
-    console.log('email:', createUserDto.email);
-    
-    // EJEMPLO: El controller solo coordina, no contiene lógica de negocio
-    try {
-      const result = await this.createUserUseCase.execute(createUserDto);
-      console.log('User created successfully:', result.user);
+    const result = await this.createUserUseCase.execute(createUserDto);
 
-      return {
-        success: true,
-        data: result.user,
-        message: result.message,
-      };
-    } catch (error) {
-      // EJEMPLO: Manejo de errores específico del controller
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+    return {
+      success: true,
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+      message: result.message,
+    };
   }
 
   // EJEMPLO: Endpoint de login
@@ -119,30 +118,46 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
-    console.log('=== LOGIN DEBUG ===');
-    console.log('Login attempt with email:', loginDto.email);
-    console.log('Login data received:', { email: loginDto.email, passwordProvided: !!loginDto.password });
-    
     try {
       const result = await this.loginUseCase.execute(loginDto);
-      console.log('Login successful for:', loginDto.email);
 
+      // Remover password del response por seguridad
+      const { password, ...userWithoutPassword } = result.user as any;
+      
       return {
         success: true,
         data: {
-          user: result.user,
+          user: userWithoutPassword,
           accessToken: result.accessToken,
           refreshToken: result.refreshToken,
         },
         message: 'Login successful',
       };
     } catch (error) {
-      console.log('Login failed for:', loginDto.email);
-      console.log('Error:', error.message);
+      throw new UnauthorizedException(error.message || 'Invalid credentials');
+    }
+  }
+
+  // Endpoint de refresh token
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    try {
+      const result = await this.refreshTokenUseCase.execute({ refreshToken: refreshTokenDto.refreshToken });
+
       return {
-        success: false,
-        message: error.message,
+        success: true,
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+        message: 'Token refreshed successfully',
       };
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Invalid refresh token');
     }
   }
 
@@ -161,7 +176,7 @@ export class AuthController {
     try {
       // Get user with password
       const user = await this.prisma.user.findUnique({
-        where: { id: req.user.userId },
+        where: { id: req.user.id },
       });
 
       if (!user) {
@@ -192,7 +207,7 @@ export class AuthController {
 
       // Update password
       await this.prisma.user.update({
-        where: { id: req.user.userId },
+        where: { id: req.user.id },
         data: { password: hashedPassword },
       });
 

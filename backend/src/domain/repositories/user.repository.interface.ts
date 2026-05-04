@@ -26,6 +26,7 @@ export interface IUserRepository {
   
   // Métodos de autenticación
   findByEmailForAuth(email: string): Promise<UserWithPassword | null>;
+  updatePassword(userId: string, hashedPassword: string): Promise<void>;
 }
 
 // EJEMPLO: Interfaz de repositorio de productos

@@ -80,8 +80,8 @@ export class Money {
 
   private validateAmount(): void {
     // EJEMPLO: Regla de negocio - Monto no puede ser negativo
-    if (this.amount < 0) {
-      throw new Error('Amount cannot be negative');
+    if (this.amount < 0 || isNaN(this.amount) || !isFinite(this.amount)) {
+      throw new Error('Amount must be a valid positive number');
     }
   }
 
@@ -91,5 +91,15 @@ export class Money {
       throw new Error('Cannot add different currencies');
     }
     return new Money(this.amount + other.amount, this.currency);
+  }
+
+  // Método de dominio - Multiplicar dinero
+  multiply(factor: number): Money {
+    return new Money(this.amount * factor, this.currency);
+  }
+
+  // Método de dominio - Comparar igualdad
+  equals(other: Money): boolean {
+    return this.amount === other.amount && this.currency === other.currency;
   }
 }

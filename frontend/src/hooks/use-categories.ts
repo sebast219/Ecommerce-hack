@@ -24,7 +24,7 @@ export function useCategories(): UseCategoriesReturn {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`);
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);

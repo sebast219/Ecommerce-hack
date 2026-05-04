@@ -71,7 +71,7 @@ export default function NewProductPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -184,7 +184,7 @@ export default function NewProductPage() {
         stock: parseInt(formData.stock.toString()),
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/products`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

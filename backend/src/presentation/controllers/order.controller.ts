@@ -7,175 +7,67 @@ import {
   Post,
   Param,
   Body,
+  Query,
   UseGuards,
+  Req,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import {
-  IsString,
-  IsEmail,
-  IsOptional,
-  IsNumber,
-  IsObject,
-} from 'class-validator';
-import {
-  CreateOrderUseCase,
-  GetUserOrdersUseCase,
-  GetOrderUseCase,
-} from '../../application/use-cases/orders/manage-orders.use-case';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUser } from '../decorators/current-user.decorator';
-
-class AddressDto {
-  @IsString()
-  street: string;
-
-  @IsString()
-  city: string;
-
-  @IsString()
-  state: string;
-
-  @IsString()
-  postalCode: string;
-
-  @IsString()
-  country: string;
-
-  @IsOptional()
-  @IsString()
-  apartment?: string;
-}
-
-class CreateOrderDto {
-  @IsString()
-  shippingName: string;
-
-  @IsEmail()
-  shippingEmail: string;
-
-  @IsOptional()
-  @IsString()
-  shippingPhone?: string;
-
-  @IsObject()
-  shippingAddress: AddressDto;
-
-  @IsOptional()
-  @IsObject()
-  billingAddress?: AddressDto;
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @IsString()
-  paymentMethod: string;
-}
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { CreateOrderDto, GetOrdersQueryDto } from '../../application/dto/order.dto';
+import { CreateOrderUseCase } from '../../application/use-cases/order/create-order.use-case';
+import { GetOrdersUseCase } from '../../application/use-cases/order/get-orders.use-case';
+import { GetOrderByIdUseCase } from '../../application/use-cases/order/get-order-by-id.use-case';
+import { CancelOrderUseCase } from '../../application/use-cases/order/cancel-order.use-case';
 
 @ApiTags('Orders')
-@Controller('orders')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
+@Controller('orders')
 export class OrderController {
   constructor(
-    private readonly createOrderUseCase: CreateOrderUseCase,
-    private readonly getUserOrdersUseCase: GetUserOrdersUseCase,
-    private readonly getOrderUseCase: GetOrderUseCase,
+    private readonly createOrder: CreateOrderUseCase,
+    private readonly getOrders: GetOrdersUseCase,
+    private readonly getOrderById: GetOrderByIdUseCase,
+    private readonly cancelOrder: CancelOrderUseCase,
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create order from cart (checkout step 1)' })
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new order from cart' })
-  @ApiResponse({ status: 201, description: 'Order created successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data or empty cart' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createOrder(
-    @CurrentUser() user: any,
-    @Body() createOrderDto: CreateOrderDto,
-  ) {
-    try {
-      const result = await this.createOrderUseCase.execute({
-        userId: user.id,
-        shippingName: createOrderDto.shippingName,
-        shippingEmail: createOrderDto.shippingEmail,
-        shippingPhone: createOrderDto.shippingPhone,
-        shippingAddress: createOrderDto.shippingAddress,
-        billingAddress: createOrderDto.billingAddress,
-        notes: createOrderDto.notes,
-        paymentMethod: createOrderDto.paymentMethod,
-      });
-
-      return {
-        success: true,
-        data: result.order,
-        message: result.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  async create(@Req() req: any, @Body() dto: CreateOrderDto) {
+    const order = await this.createOrder.execute({
+      userId: req.user.id,
+      shippingAddressId: dto.shippingAddressId,
+      notes: dto.notes,
+    });
+    return { success: true, data: order };
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get user orders' })
-  @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getUserOrders(@CurrentUser() user: any) {
-    try {
-      const result = await this.getUserOrdersUseCase.execute({
-        userId: user.id,
-      });
-
-      return {
-        success: true,
-        data: result.orders,
-        total: result.total,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @ApiOperation({ summary: 'Get user orders (paginated)' })
+  async list(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+    const result = await this.getOrders.execute({
+      userId: req.user.id,
+      page: query.page,
+      limit: query.limit,
+      status: query.status,
+    });
+    return { success: true, ...result };
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get order by ID' })
-  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Order not found' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getOrder(@CurrentUser() user: any, @Param('id') id: string) {
-    try {
-      const result = await this.getOrderUseCase.execute({
-        orderId: id,
-        userId: user.id,
-      });
+  @ApiOperation({ summary: 'Get order details by ID' })
+  async getById(@Req() req: any, @Param('id') id: string) {
+    const order = await this.getOrderById.execute(id, req.user.id, req.user.role);
+    return { success: true, data: order };
+  }
 
-      if (!result.order) {
-        return {
-          success: false,
-          message: 'Order not found',
-        };
-      }
-
-      return {
-        success: true,
-        data: result.order,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+  @Post(':id/cancel')
+  @ApiOperation({ summary: 'Cancel an order' })
+  async cancel(@Req() req: any, @Param('id') id: string) {
+    const order = await this.cancelOrder.execute(id, req.user.id, req.user.role);
+    return { success: true, data: order };
   }
 }

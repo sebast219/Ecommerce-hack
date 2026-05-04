@@ -17,6 +17,7 @@ export interface GetProductsRequest {
   maxPrice?: number;
   sortBy?: 'name' | 'price' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
+  active?: boolean;
 }
 
 export interface GetProductsResponse {
@@ -48,12 +49,11 @@ export class GetProductsUseCase {
       maxPrice,
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      active,
     } = request;
 
     // Validar límites
-    if (limit > 100) {
-      throw new Error('Limit cannot exceed 100');
-    }
+    const adjustedLimit = Math.min(limit, 50); // Limitar automáticamente a 50
     if (page < 1) {
       throw new Error('Page must be greater than 0');
     }
@@ -70,7 +70,12 @@ export class GetProductsUseCase {
     } else if (tags && tags.length > 0) {
       products = await this.productRepository.findByTags(tags);
     } else {
-      products = await this.productRepository.findActive();
+      products = await this.productRepository.findActive(); // Por defecto, solo activos
+    }
+
+    // Aplicar filtro active si se especificó
+    if (active !== undefined) {
+      products = products.filter(product => product.isActive === active);
     }
 
     // Filtrar por precio si se especifica
@@ -88,16 +93,16 @@ export class GetProductsUseCase {
 
     // Calcular paginación
     const total = products.length;
-    const totalPages = Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
+    const totalPages = Math.ceil(total / adjustedLimit);
+    const startIndex = (page - 1) * adjustedLimit;
+    const endIndex = startIndex + adjustedLimit;
     const paginatedProducts = products.slice(startIndex, endIndex);
 
     return {
       products: paginatedProducts,
       total,
       page,
-      limit,
+      limit: adjustedLimit,
       totalPages,
     };
   }

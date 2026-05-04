@@ -38,6 +38,63 @@ interface Order {
   items: number;
 }
 
+// Helper function to format dates
+const formatDate = (date: any): string => {
+  // Handle empty objects and other invalid cases
+  if (!date || 
+      date === null || 
+      (typeof date === 'object' && Object.keys(date).length === 0)) {
+    return 'Sin fecha';
+  }
+  
+  try {
+    // If it's already a string, return as is
+    if (typeof date === 'string') {
+      return date;
+    }
+    
+    // If it's a Date object, use it directly
+    if (date instanceof Date) {
+      if (isNaN(date.getTime())) {
+        return 'Sin fecha';
+      }
+      return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+    
+    // If it's a string that looks like a date, try to parse it
+    if (typeof date === 'string') {
+      const parsed = new Date(date);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+      return date; // Return as-is if it's not parseable
+    }
+    
+    // Try to convert to Date object
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return 'Sin fecha';
+    }
+    
+    // Format as readable date
+    return dateObj.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (error) {
+    return 'Sin fecha';
+  }
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, isAuthenticated, token, setUser, isHydrated } = useAuthStore();
@@ -46,7 +103,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
 
   // Avatar states
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar || null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    user?.avatar ? `http://localhost:3001${user.avatar}` : null
+  );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,7 +132,7 @@ export default function ProfilePage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  // Notifications state
+  // Notifications state - will be updated with user data
   const [notifications, setNotifications] = useState([
     { id: 'orders', label: 'Pedidos y envíos', desc: 'Actualizaciones sobre tus compras', enabled: true },
     { id: 'promos', label: 'Promociones', desc: 'Ofertas especiales y nuevos productos', enabled: false },
@@ -101,7 +160,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isAuthenticated && token) {
       // Load addresses
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/addresses`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses`, {
         headers: { 'Authorization': `Bearer ${token}` },
       })
         .then(res => {
@@ -110,9 +169,13 @@ export default function ProfilePage() {
         })
         .then(data => {
           console.log('Addresses response data:', data);
-          // Handle double-wrapped response: data.data?.data contains the actual array
+          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
           const addressesData = data.data?.data || data.data || data;
+          console.log('Processed addressesData:', addressesData);
+          console.log('Is array:', Array.isArray(addressesData));
+          
           if (Array.isArray(addressesData)) {
+            console.log('Setting addresses from array:', addressesData.length);
             setSavedAddresses(addressesData.map((addr: any) => ({
               id: addr.id,
               label: addr.label,
@@ -124,6 +187,7 @@ export default function ProfilePage() {
             })));
           } else if (addressesData && typeof addressesData === 'object' && addressesData.id) {
             // Single object case
+            console.log('Setting addresses from single object');
             setSavedAddresses([{
               id: addressesData.id,
               label: addressesData.label,
@@ -133,6 +197,9 @@ export default function ProfilePage() {
               zip: addressesData.zipCode,
               phone: addressesData.phone,
             }]);
+          } else {
+            console.log('No addresses found or invalid format');
+            setSavedAddresses([]);
           }
         })
         .catch(err => {
@@ -140,7 +207,7 @@ export default function ProfilePage() {
         });
 
       // Load payment methods
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/payment-methods`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`, {
         headers: { 'Authorization': `Bearer ${token}` },
       })
         .then(res => {
@@ -149,9 +216,13 @@ export default function ProfilePage() {
         })
         .then(data => {
           console.log('Payment methods response data:', data);
-          // Handle double-wrapped response: data.data?.data contains the actual array
+          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
           const cardsData = data.data?.data || data.data || data;
+          console.log('Processed cardsData:', cardsData);
+          console.log('Is array:', Array.isArray(cardsData));
+          
           if (Array.isArray(cardsData)) {
+            console.log('Setting cards from array:', cardsData.length);
             setSavedCards(cardsData.map((pm: any) => ({
               id: pm.id,
               last4: pm.last4,
@@ -161,6 +232,7 @@ export default function ProfilePage() {
             })));
           } else if (cardsData && typeof cardsData === 'object' && cardsData.id) {
             // Single object case
+            console.log('Setting cards from single object');
             setSavedCards([{
               id: cardsData.id,
               last4: cardsData.last4,
@@ -168,6 +240,9 @@ export default function ProfilePage() {
               expiry: `${cardsData.expiryMonth}/${cardsData.expiryYear}`,
               bank: cardsData.bank || 'generic',
             }]);
+          } else {
+            console.log('No payment methods found or invalid format');
+            setSavedCards([]);
           }
         })
         .catch(err => {
@@ -175,16 +250,90 @@ export default function ProfilePage() {
         });
     }
   }, [isAuthenticated, token]);
+
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [email, setEmail] = useState(user?.email || '');
 
-  // Mock orders data
-  const orders: Order[] = [
-    { id: 'ORD-2024-001', date: '2024-03-15', status: 'completed', total: 1299.00, items: 2 },
-    { id: 'ORD-2024-002', date: '2024-03-20', status: 'shipped', total: 599.50, items: 1 },
-    { id: 'ORD-2024-003', date: '2024-03-25', status: 'processing', total: 2499.00, items: 3 },
-  ];
+  // Orders state
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  // Debug logs para verificar estado
+  useEffect(() => {
+    console.log('Current savedAddresses:', savedAddresses);
+    console.log('Current savedCards:', savedCards);
+    console.log('Current orders:', orders);
+  }, [savedAddresses, savedCards, orders]);
+
+  // Load orders
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      setOrdersLoading(true);
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders?limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then(res => {
+          console.log('Orders response status:', res.status);
+          return res.json();
+        })
+        .then(data => {
+          console.log('Orders response data:', data);
+          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
+          const ordersData = data.data?.data || data.data || data;
+          if (Array.isArray(ordersData)) {
+            setOrders(ordersData.map((order: any) => ({
+              id: order.id || `ORD-${order.id}`,
+              date: formatDate(order.createdAt || order.date),
+              status: order.status || 'processing',
+              total: Number(order.total) || 0,
+              items: order.items?.length || order.itemCount || 1,
+            })));
+          }
+        })
+        .catch(err => {
+          console.error('Error loading orders:', err);
+        })
+        .finally(() => {
+          setOrdersLoading(false);
+        });
+    }
+  }, [isAuthenticated, token]);
+
+  // Update notifications when user data or orders change
+  useEffect(() => {
+    if (user && orders) {
+      setNotifications([
+        { 
+          id: 'orders', 
+          label: 'Pedidos y envíos', 
+          desc: `Actualizaciones sobre tus ${orders.length} pedido${orders.length !== 1 ? 's' : ''}`, 
+          enabled: notifications.find(n => n.id === 'orders')?.enabled ?? true 
+        },
+        { 
+          id: 'promos', 
+          label: 'Promociones', 
+          desc: 'Ofertas especiales basadas en tus intereses', 
+          enabled: notifications.find(n => n.id === 'promos')?.enabled ?? false 
+        },
+        { 
+          id: 'security', 
+          label: 'Seguridad', 
+          desc: `Alertas para ${user.firstName || 'tu cuenta'}`, 
+          enabled: notifications.find(n => n.id === 'security')?.enabled ?? true 
+        },
+      ]);
+    }
+  }, [user, orders.length, user?.firstName]);
+
+  // Update avatar URL when user data changes
+  useEffect(() => {
+    if (user?.avatar) {
+      setAvatarUrl(`http://localhost:3001${user.avatar}`);
+    } else {
+      setAvatarUrl(null);
+    }
+  }, [user?.avatar]);
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
@@ -304,8 +453,8 @@ export default function ProfilePage() {
     try {
       const isEditing = !!editingCardId;
       const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/payment-methods/${editingCardId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/payment-methods`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods/${editingCardId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`;
       const payload = {
         brand: cardType || 'card',
         last4: cardNumber.slice(-4),
@@ -344,7 +493,7 @@ export default function ProfilePage() {
 
       console.log('Response data:', data);
       
-      // Handle double-wrapped response from backend
+      // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: paymentMethod } }
       const newCard = data.data?.data || data.data || data;
       if (!newCard.id) {
         console.error('No ID in response:', newCard);
@@ -428,7 +577,7 @@ export default function ProfilePage() {
     setSavingPassword(true);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -475,8 +624,8 @@ export default function ProfilePage() {
     try {
       const isEditing = !!editingAddressId;
       const url = isEditing 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/addresses/${editingAddressId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/addresses`;
+        ? `${process.env.NEXT_PUBLIC_API_URL}/users/addresses/${editingAddressId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/users/addresses`;
       
       console.log(isEditing ? 'PUT to:' : 'POST to:', url);
       console.log('Payload:', { label: addressLabel, street: addressStreet, city: addressCity, state: addressState, zipCode: addressZip, phone: addressPhone });
@@ -515,7 +664,7 @@ export default function ProfilePage() {
 
       console.log('Response data:', data);
       
-      // Handle double-wrapped response from backend
+      // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: address } }
       const newAddress = data.data?.data || data.data || data;
       if (!newAddress.id) {
         console.error('No ID in response:', newAddress);
@@ -583,7 +732,7 @@ export default function ProfilePage() {
     if (!confirm('¿Estás seguro de que deseas eliminar esta dirección?')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/addresses/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -615,7 +764,7 @@ export default function ProfilePage() {
     if (!confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/payment-methods/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -674,6 +823,7 @@ export default function ProfilePage() {
       case 'completed': return 'bg-black text-white';
       case 'shipped': return 'bg-black/10 text-black';
       case 'processing': return 'bg-black/5 text-black/60';
+      default: return 'bg-black/5 text-black/60';
     }
   };
 
@@ -682,6 +832,7 @@ export default function ProfilePage() {
       case 'completed': return 'Completado';
       case 'shipped': return 'Enviado';
       case 'processing': return 'Procesando';
+      default: return 'Procesando';
     }
   };
 
@@ -705,41 +856,52 @@ export default function ProfilePage() {
     setIsUploadingAvatar(true);
 
     try {
-      // Convertir a base64 para preview y envío
+      // Crear FormData para subir el archivo
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      // Mostrar preview inmediato
       const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64String = reader.result as string;
-        setAvatarUrl(base64String);
-
-        // Enviar al servidor
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            firstName: user?.firstName,
-            lastName: user?.lastName,
-            email: user?.email,
-            avatar: base64String,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Error al subir la imagen');
-        }
-
-        const data = await response.json();
-        setUser(data.data || data);
-        setShowAvatarMenu(false);
-        alert('Foto de perfil actualizada exitosamente');
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Enviar al servidor usando el endpoint dedicado para avatar
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/avatar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al subir la imagen');
+      }
+
+      const data = await response.json();
+      
+      // Actualizar el usuario con la nueva URL del avatar
+      if (data.success && data.data?.user) {
+        // Usar el usuario actualizado que devuelve el backend
+        const updatedUser = data.data.user;
+        setUser(updatedUser);
+        // Construir URL completa para el avatar
+        const fullAvatarUrl = updatedUser?.avatar 
+          ? `http://localhost:3001${updatedUser.avatar}`
+          : null;
+        setAvatarUrl(fullAvatarUrl);
+      }
+
+      setShowAvatarMenu(false);
+      alert('Foto de perfil actualizada exitosamente');
     } catch (error: any) {
+      console.error('Error uploading avatar:', error);
       alert(error.message || 'Error al subir la imagen');
       // Restaurar avatar anterior
-      setAvatarUrl(user?.avatar || null);
+      setAvatarUrl(user?.avatar ? `http://localhost:3001${user.avatar}` : null);
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -751,7 +913,7 @@ export default function ProfilePage() {
 
     setIsUploadingAvatar(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -786,7 +948,7 @@ export default function ProfilePage() {
     setLoading(true);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -966,7 +1128,7 @@ export default function ProfilePage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <>{user.firstName?.[0]}{user.lastName?.[0]}</>
+                            <>{String(user.firstName?.[0] || '')}{String(user.lastName?.[0] || '')}</>
                           )}
                         </div>
 
@@ -1108,10 +1270,30 @@ export default function ProfilePage() {
                     /* Quick Stats */
                     <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-black/10">
                       {[
-                        { value: orders.length.toString(), label: 'Pedidos totales' },
-                        { value: '2', label: 'En proceso' },
-                        { value: '$4,397', label: 'Gasto total' },
-                        { value: '12', label: 'Días miembro' },
+                        { 
+                          value: orders.length.toString(), 
+                          label: 'Pedidos totales' 
+                        },
+                        { 
+                          value: orders.filter(order => order.status === 'processing' || order.status === 'shipped').length.toString(), 
+                          label: 'En proceso' 
+                        },
+                        { 
+                          value: `$${orders.reduce((total, order) => total + Number(order.total), 0).toFixed(2)}`, 
+                          label: 'Gasto total' 
+                        },
+                        { 
+                          value: user?.createdAt ? (() => {
+                            try {
+                              const createdDate = new Date(user.createdAt);
+                              if (isNaN(createdDate.getTime())) return '0';
+                              return Math.ceil((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)).toString();
+                            } catch {
+                              return '0';
+                            }
+                          })() : '0', 
+                          label: 'Días miembro' 
+                        },
                       ].map((stat, i) => (
                         <div key={i} className="p-6 lg:p-8 text-center lg:text-left hover:bg-black/[0.02] transition-colors">
                           <div className="text-2xl lg:text-3xl font-semibold tracking-tight">{stat.value}</div>
@@ -1153,7 +1335,7 @@ export default function ProfilePage() {
                           <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                             {getStatusLabel(order.status)}
                           </span>
-                          <p className="font-semibold mt-1">${order.total.toFixed(2)}</p>
+                          <p className="font-semibold mt-1">${Number(order.total).toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
@@ -1175,11 +1357,19 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="group border border-black/10 rounded-3xl overflow-hidden hover:border-black/25 transition-all duration-300"
-                    >
+                  {ordersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="flex flex-col items-center gap-4 text-black/50">
+                        <div className="h-8 w-8 border-4 border-black/10 border-t-black rounded-full animate-spin" />
+                        <span className="text-sm font-medium">Cargando pedidos...</span>
+                      </div>
+                    </div>
+                  ) : (
+                    orders.map((order) => (
+                      <div
+                        key={order.id}
+                        className="group border border-black/10 rounded-3xl overflow-hidden hover:border-black/25 transition-all duration-300"
+                      >
                       {/* Order Header */}
                       <div className="flex items-center justify-between px-6 py-4 bg-black/[0.02] border-b border-black/10">
                         <div className="flex items-center gap-4">
@@ -1207,7 +1397,7 @@ export default function ProfilePage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-semibold tracking-tight">${order.total.toFixed(2)}</p>
+                            <p className="text-2xl font-semibold tracking-tight">${Number(order.total).toFixed(2)}</p>
                             <button className="text-sm text-black/50 hover:text-black flex items-center gap-1 mt-1 transition-colors">
                               Ver detalles
                               <ChevronRight className="h-4 w-4" />
@@ -1216,7 +1406,8 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  )}
                 </div>
 
                 {/* Empty State */}

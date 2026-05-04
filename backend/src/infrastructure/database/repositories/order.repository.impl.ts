@@ -60,18 +60,14 @@ export class OrderRepositoryImpl implements IOrderRepository {
       data: {
         orderNumber: orderData.orderNumber,
         status: orderData.status,
-        currency: orderData.currency,
         subtotal: orderData.subtotal.amount,
         tax: orderData.tax.amount,
         shipping: orderData.shipping.amount,
-        discount: orderData.discount.amount,
         total: orderData.total.amount,
         notes: orderData.notes,
-        shippingName: orderData.shippingName,
-        shippingEmail: orderData.shippingEmail,
-        shippingPhone: orderData.shippingPhone,
-        shippingAddress: orderData.shippingAddress as any,
-        billingAddress: orderData.billingAddress as any,
+        customerEmail: orderData.shippingEmail, // Mapear a customerEmail
+        customerName: orderData.shippingName, // Mapear a customerName
+        shippingAddressId: typeof orderData.shippingAddress === 'string' ? orderData.shippingAddress : null,
         userId: orderData.userId,
       },
       include: {

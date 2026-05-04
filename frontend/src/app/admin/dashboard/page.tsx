@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
@@ -17,19 +17,46 @@ import {
   Settings,
   LogOut,
   Shield,
-  Menu
+  Menu,
+  Loader2
 } from 'lucide-react';
 
 // ==========================================
-// 1. DATOS ESTÁTICOS (Fuera del render)
+// 1. TIPOS DE DATOS
 // ==========================================
-const DASHBOARD_STATS = [
-  { label: 'Ventas Totales', value: '$48,295', change: '+12.5%', trend: 'up', icon: DollarSign },
-  { label: 'Pedidos Hoy', value: '156', change: '+8.2%', trend: 'up', icon: ShoppingCart },
-  { label: 'Productos Activos', value: '1,247', change: '+3.1%', trend: 'up', icon: Package },
-  { label: 'Usuarios Nuevos', value: '89', change: '-2.4%', trend: 'down', icon: Users },
-];
 
+interface DashboardStats {
+  label: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+  icon: string;
+}
+
+interface RecentOrder {
+  id: string;
+  customer: string;
+  product: string;
+  amount: string;
+  status: string;
+  date: string;
+}
+
+interface TopProduct {
+  name: string;
+  sales: number;
+  revenue: string;
+  growth: string;
+}
+
+interface SalesActivity {
+  value: number;
+  label: string;
+}
+
+// ==========================================
+// 2. ACCIONES RÁPIDAS (Estáticas)
+// ==========================================
 const QUICK_ACTIONS = [
   { label: 'Nuevo Producto', icon: Plus, href: '/admin/products/new' },
   { label: 'Ver Pedidos', icon: ShoppingCart, href: '/admin/orders' },
@@ -37,88 +64,112 @@ const QUICK_ACTIONS = [
   { label: 'Configuración', icon: Settings, href: '/admin/settings' },
 ];
 
-const RECENT_ORDERS = [
-  { id: '#ORD-7523', customer: 'Alex Chen', product: 'WiFi Pineapple', amount: '$199.00', status: 'Completado', date: 'Hace 2 min' },
-  { id: '#ORD-7522', customer: 'Maria Silva', product: 'Flipper Zero', amount: '$169.00', status: 'En proceso', date: 'Hace 15 min' },
-  { id: '#ORD-7521', customer: 'John Doe', product: 'USB Rubber Ducky', amount: '$59.99', status: 'Completado', date: 'Hace 1 hora' },
-  { id: '#ORD-7520', customer: 'Sarah Kim', product: 'LAN Turtle', amount: '$79.99', status: 'Pendiente', date: 'Hace 2 horas' },
-  { id: '#ORD-7519', customer: 'Mike Ross', product: 'Bash Bunny', amount: '$119.99', status: 'Completado', date: 'Hace 3 horas' },
-];
-
-const TOP_PRODUCTS = [
-  { name: 'WiFi Pineapple', sales: 342, revenue: '$68,058', growth: '+24%' },
-  { name: 'Flipper Zero', sales: 298, revenue: '$50,362', growth: '+18%' },
-  { name: 'USB Rubber Ducky', sales: 256, revenue: '$15,357', growth: '+12%' },
-  { name: 'Bash Bunny', sales: 189, revenue: '$22,678', growth: '+9%' },
-];
-
 // ==========================================
 // 2. SUBCOMPONENTES (UI Modular)
 // ==========================================
 
-const Sidebar = ({ user, onLogout }: { user: any, onLogout: () => void }) => (
-  <aside className="fixed left-0 top-16 bottom-0 w-64 border-r border-gray-200 bg-white z-40 hidden lg:flex flex-col">
-    <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-6">
-      <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menú Principal</p>
-      {[
-        { name: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard', active: true },
-        { name: 'Productos', icon: Package, href: '/admin/products' },
-        { name: 'Pedidos', icon: ShoppingCart, href: '/admin/orders' },
-        { name: 'Usuarios', icon: Users, href: '/admin/users' },
-        { name: 'Análisis', icon: TrendingUp, href: '/admin/analytics' },
-        { name: 'Configuración', icon: Settings, href: '/admin/settings' },
-      ].map((item) => (
-        <Link
-          key={item.name}
-          href={item.href}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-            item.active 
-              ? 'bg-zinc-900 text-white shadow-md' 
-              : 'text-gray-600 hover:bg-gray-50 hover:text-zinc-900'
-          }`}
+const Sidebar = ({ user, onLogout, activeRoute = '/admin/dashboard' }: { 
+  user: any, 
+  onLogout: () => void,
+  activeRoute?: string 
+}) => {
+  // Configuración del menú - preparada para futuras funcionalidades
+  const menuItems = [
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard', active: activeRoute === '/admin/dashboard' },
+    { name: 'Productos', icon: Package, href: '/admin/products', active: activeRoute === '/admin/products' },
+    { name: 'Pedidos', icon: ShoppingCart, href: '/admin/orders', active: activeRoute === '/admin/orders' },
+    { name: 'Usuarios', icon: Users, href: '/admin/users', active: activeRoute === '/admin/users' },
+    { name: 'Análisis', icon: TrendingUp, href: '/admin/analytics', active: activeRoute === '/admin/analytics' },
+    { name: 'Configuración', icon: Settings, href: '/admin/settings', active: activeRoute === '/admin/settings' },
+    // Futuras funcionalidades (comentadas para habilitar cuando estén listas)
+    // { name: 'Inventario', icon: Package, href: '/admin/inventory', active: activeRoute === '/admin/inventory' },
+    // { name: 'Marketing', icon: TrendingUp, href: '/admin/marketing', active: activeRoute === '/admin/marketing' },
+    // { name: 'Reportes', icon: LayoutDashboard, href: '/admin/reports', active: activeRoute === '/admin/reports' },
+  ];
+
+  // Función para manejar clics en el menú (preparada para futuras funcionalidades)
+  const handleMenuClick = (item: any) => {
+    // Lógica futura para tracking, analytics, etc.
+    console.log(`Navigating to: ${item.href}`);
+  };
+
+  return (
+    <aside className="fixed left-0 top-16 bottom-0 w-64 border-r border-gray-200 bg-white z-40 hidden lg:flex flex-col">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-6">
+        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menú Principal</p>
+        {menuItems.map((item) => (
+          <Link
+            key={item.name}
+            href={item.href}
+            onClick={() => handleMenuClick(item)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              item.active 
+                ? 'bg-zinc-900 text-white shadow-md' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-zinc-900'
+            }`}
+          >
+            <item.icon className="h-4 w-4" />
+            {item.name}
+            {/* Indicador para futuras notificaciones */}
+            {/* {item.notification && (
+              <span className="ml-auto h-2 w-2 bg-red-500 rounded-full animate-pulse"></span>
+            )} */}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-white border border-gray-100 shadow-sm">
+          <div className="h-9 w-9 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-gray-200">
+            {user?.firstName?.[0] || 'A'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-zinc-900 truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+          </div>
+        </div>
+        <button 
+          onClick={onLogout}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-red-600 hover:bg-red-50 text-sm font-medium transition-all w-full"
         >
-          <item.icon className="h-4 w-4" />
-          {item.name}
-        </Link>
-      ))}
-    </nav>
-
-    <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-      <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-white border border-gray-100 shadow-sm">
-        <div className="h-9 w-9 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-gray-200">
-          {user?.firstName?.[0] || 'A'}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-zinc-900 truncate">{user?.firstName} {user?.lastName}</p>
-          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-        </div>
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </button>
       </div>
-      <button 
-        onClick={onLogout}
-        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-red-600 hover:bg-red-50 text-sm font-medium transition-all w-full"
-      >
-        <LogOut className="h-4 w-4" />
-        Cerrar sesión
-      </button>
-    </div>
-  </aside>
-);
+    </aside>
+  );
+};
 
-const StatCard = ({ stat }: { stat: any }) => (
+const StatCard = ({ stat, isLoading }: { stat: DashboardStats | null, isLoading: boolean }) => (
   <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-    <div className="flex items-start justify-between mb-4">
-      <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center">
-        <stat.icon className="h-5 w-5 text-gray-500" />
+    {isLoading ? (
+      <div className="flex items-center justify-center h-24">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
       </div>
-      <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
-        stat.trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-      }`}>
-        {stat.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-        {stat.change}
+    ) : stat ? (
+      <>
+        <div className="flex items-start justify-between mb-4">
+          <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center">
+            {stat.icon === 'DollarSign' && <DollarSign className="h-5 w-5 text-gray-500" />}
+            {stat.icon === 'ShoppingCart' && <ShoppingCart className="h-5 w-5 text-gray-500" />}
+            {stat.icon === 'Package' && <Package className="h-5 w-5 text-gray-500" />}
+            {stat.icon === 'Users' && <Users className="h-5 w-5 text-gray-500" />}
+          </div>
+          <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
+            stat.trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          }`}>
+            {stat.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {stat.change}
+          </div>
+        </div>
+        <div className="text-3xl font-bold tracking-tight text-zinc-900 mb-1">{stat.value}</div>
+        <div className="text-sm font-medium text-gray-500">{stat.label}</div>
+      </>
+    ) : (
+      <div className="flex items-center justify-center h-24 text-gray-400">
+        Error loading data
       </div>
-    </div>
-    <div className="text-3xl font-bold tracking-tight text-zinc-900 mb-1">{stat.value}</div>
-    <div className="text-sm font-medium text-gray-500">{stat.label}</div>
+    )}
   </div>
 );
 
@@ -129,12 +180,111 @@ const StatCard = ({ stat }: { stat: any }) => (
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { user, logout, isAuthenticated } = useAuthStore();
+  
+  // Estados para datos del dashboard
+  const [stats, setStats] = useState<DashboardStats[]>([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const [salesActivity, setSalesActivity] = useState<SalesActivity[]>([]);
+  
+  // Estados de carga
+  const [loading, setLoading] = useState({
+    stats: true,
+    orders: true,
+    products: true,
+    activity: true
+  });
+  
+  // Estado de error
+  const [error, setError] = useState<string | null>(null);
 
+  // Función para obtener token de autenticación
+  const getAuthToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
+  };
+
+  // Función para hacer peticiones a la API
+  const apiRequest = async (endpoint: string) => {
+    const token = getAuthToken();
+    // Si NEXT_PUBLIC_API_URL ya incluye /api/v1, no lo añadimos de nuevo
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const fullUrl = baseUrl.includes('/api/v1') 
+      ? `${baseUrl}${endpoint}`
+      : `${baseUrl}/api/v1${endpoint}`;
+    
+    const response = await fetch(fullUrl, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.message || 'API request failed');
+    }
+    
+    // Manejar la estructura anidada del backend: {success: true, data: {success: true, data: [...]}}
+    const innerData = data.data?.data || data.data || data;
+    return innerData;
+  };
+
+  // Cargar datos del dashboard
   useEffect(() => {
-    if (!isAuthenticated) router.push('/auth/login');
-    else if (user?.role !== 'ADMIN') router.push('/');
-  }, [isAuthenticated, user, router]);
+    if (!isAuthenticated || user?.role !== 'ADMIN') return;
 
+    const loadDashboardData = async () => {
+      try {
+        setError(null);
+        
+        // Cargar estadísticas
+        setLoading(prev => ({ ...prev, stats: true }));
+        const statsData = await apiRequest('/admin/dashboard/stats');
+        // Asegurar que statsData sea un array
+        setStats(Array.isArray(statsData) ? statsData : []);
+        setLoading(prev => ({ ...prev, stats: false }));
+        
+        // Cargar pedidos recientes
+        setLoading(prev => ({ ...prev, orders: true }));
+        const ordersData = await apiRequest('/admin/dashboard/recent-orders');
+        setRecentOrders(Array.isArray(ordersData) ? ordersData : []);
+        setLoading(prev => ({ ...prev, orders: false }));
+        
+        // Cargar productos más vendidos
+        setLoading(prev => ({ ...prev, products: true }));
+        const productsData = await apiRequest('/admin/dashboard/top-products');
+        setTopProducts(Array.isArray(productsData) ? productsData : []);
+        setLoading(prev => ({ ...prev, products: false }));
+        
+        // Cargar actividad de ventas
+        setLoading(prev => ({ ...prev, activity: true }));
+        const activityData = await apiRequest('/admin/dashboard/sales-activity');
+        setSalesActivity(Array.isArray(activityData) ? activityData : []);
+        setLoading(prev => ({ ...prev, activity: false }));
+        
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError('Error loading dashboard data');
+        setLoading({ stats: false, orders: false, products: false, activity: false });
+      }
+    };
+
+    loadDashboardData();
+  }, [isAuthenticated, user]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
+
+  // Renderizado de carga
   if (!isAuthenticated || user?.role !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
@@ -146,15 +296,26 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-  };
+  if (error && !loading.stats && !loading.orders && !loading.products && !loading.activity) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="flex flex-col items-center gap-4 text-zinc-500">
+          <div className="text-red-500">Error: {error}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
-      {/* Sidebar Modularizado */}
-      <Sidebar user={user} onLogout={handleLogout} />
+      {/* Sidebar Modularizado con soporte para rutas activas */}
+      <Sidebar user={user} onLogout={handleLogout} activeRoute="/admin/dashboard" />
 
       {/* Contenido Principal */}
       <main className="lg:ml-64 lg:mt-16 min-h-screen">
@@ -189,9 +350,23 @@ export default function AdminDashboardPage() {
 
           {/* Grid de Estadísticas */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {DASHBOARD_STATS.map((stat, i) => (
-              <StatCard key={i} stat={stat} />
-            ))}
+            {loading.stats ? (
+              // Skeleton loaders para estadísticas
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div className="h-6 w-12 rounded-full bg-gray-200 animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-24 bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))
+            ) : (
+              stats.map((stat, i) => (
+                <StatCard key={i} stat={stat} isLoading={false} />
+              ))
+            )}
           </section>
 
           {/* Acciones Rápidas */}
@@ -220,35 +395,65 @@ export default function AdminDashboardPage() {
                 </Link>
               </div>
               <div className="divide-y divide-gray-100">
-                {RECENT_ORDERS.map((order, i) => (
-                  <div key={i} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50 transition-colors gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
-                        <Package className="h-5 w-5 text-indigo-600" />
+                {loading.orders ? (
+                  // Skeleton loaders para pedidos
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-2xl bg-gray-200 animate-pulse"></div>
+                        <div>
+                          <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-1"></div>
+                          <div className="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-sm text-zinc-900">{order.id}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{order.customer}</div>
+                      <div className="flex-1 sm:px-8">
+                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
                       </div>
-                    </div>
-                    <div className="flex-1 sm:px-8">
-                      <div className="text-sm font-medium text-gray-700">{order.product}</div>
-                    </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        order.status === 'Completado' ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : order.status === 'En proceso' ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                      }`}>
-                        {order.status}
-                      </span>
-                      <div className="text-right">
-                        <div className="font-bold text-sm text-zinc-900">{order.amount}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">{order.date}</div>
+                      <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                        <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="text-right">
+                          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse mb-1"></div>
+                          <div className="h-3 w-12 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : recentOrders.length > 0 ? (
+                  recentOrders.map((order, i) => (
+                    <div key={i} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50 transition-colors gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
+                          <Package className="h-5 w-5 text-indigo-600" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm text-zinc-900">{order.id}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{order.customer}</div>
+                        </div>
+                      </div>
+                      <div className="flex-1 sm:px-8">
+                        <div className="text-sm font-medium text-gray-700">{order.product}</div>
+                      </div>
+                      <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          order.status === 'Completado' ? 'bg-green-100 text-green-700 border border-green-200' 
+                          : order.status === 'En proceso' ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                          : order.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                          : 'bg-gray-100 text-gray-700 border border-gray-200'
+                        }`}>
+                          {order.status}
+                        </span>
+                        <div className="text-right">
+                          <div className="font-bold text-sm text-zinc-900">{order.amount}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">{order.date}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-gray-500">
+                    No hay pedidos recientes
                   </div>
-                ))}
+                )}
               </div>
             </section>
 
@@ -258,25 +463,48 @@ export default function AdminDashboardPage() {
                 <h2 className="text-lg font-bold text-zinc-900">Más Vendidos</h2>
               </div>
               <div className="divide-y divide-gray-100 p-2">
-                {TOP_PRODUCTS.map((product, i) => (
-                  <div key={i} className="p-4 hover:bg-gray-50 rounded-xl transition-colors">
-                    <div className="flex items-start justify-between mb-1">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center justify-center h-6 w-6 rounded-md bg-gray-100 text-xs font-bold text-gray-500">
-                          {i + 1}
-                        </span>
-                        <h3 className="font-bold text-sm text-zinc-900">{product.name}</h3>
+                {loading.products ? (
+                  // Skeleton loaders para productos
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="p-4 hover:bg-gray-50 rounded-xl transition-colors">
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-3">
+                          <div className="h-6 w-6 rounded-md bg-gray-200 animate-pulse"></div>
+                          <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                        <div className="h-5 w-12 rounded-md bg-gray-200 animate-pulse"></div>
                       </div>
-                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
-                        {product.growth}
-                      </span>
+                      <div className="flex items-center justify-between text-sm text-gray-500 pl-9">
+                        <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500 pl-9">
-                      <span>{product.sales} ventas</span>
-                      <span className="font-semibold text-zinc-700">{product.revenue}</span>
+                  ))
+                ) : topProducts.length > 0 ? (
+                  topProducts.map((product, i) => (
+                    <div key={i} className="p-4 hover:bg-gray-50 rounded-xl transition-colors">
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center justify-center h-6 w-6 rounded-md bg-gray-100 text-xs font-bold text-gray-500">
+                            {i + 1}
+                          </span>
+                          <h3 className="font-bold text-sm text-zinc-900">{product.name}</h3>
+                        </div>
+                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                          {product.growth}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-500 pl-9">
+                        <span>{product.sales} ventas</span>
+                        <span className="font-semibold text-zinc-700">{product.revenue}</span>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-gray-500">
+                    No hay productos vendidos
                   </div>
-                ))}
+                )}
               </div>
             </section>
           </div>
@@ -297,13 +525,24 @@ export default function AdminDashboardPage() {
               </div>
               
               <div className="h-64 flex items-end justify-between gap-1 sm:gap-2">
-                {[65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95, 70, 80, 60, 75, 85, 70, 90, 65, 80, 75, 85, 60, 95, 70, 80, 75, 90, 85, 70].map((height, i) => (
-                  <div key={i} className="flex-1 bg-indigo-100 hover:bg-indigo-500 transition-colors rounded-t-md relative group" style={{ height: `${height}%` }}>
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-bold px-2 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                      ${(height * 500).toLocaleString()}
+                {loading.activity ? (
+                  // Skeleton loader para gráfico
+                  Array.from({ length: 30 }).map((_, i) => (
+                    <div key={i} className="flex-1 bg-gray-200 rounded-t-md animate-pulse" style={{ height: `${Math.random() * 60 + 20}%` }}></div>
+                  ))
+                ) : salesActivity.length > 0 ? (
+                  salesActivity.map((day, i) => (
+                    <div key={i} className="flex-1 bg-indigo-100 hover:bg-indigo-500 transition-colors rounded-t-md relative group" style={{ height: `${(day.value / Math.max(...salesActivity.map(d => d.value))) * 100}%` }}>
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-xs font-bold px-2 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                        {day.label}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-gray-500">
+                    No hay datos de ventas disponibles
                   </div>
-                ))}
+                )}
               </div>
               <div className="flex justify-between mt-4 text-xs font-medium text-gray-400 border-t border-gray-100 pt-4">
                 <span>1 Dic</span>

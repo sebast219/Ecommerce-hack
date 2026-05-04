@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
 
             method: 'POST',
 
@@ -63,6 +63,12 @@ export const useAuthStore = create<AuthStore>()(
           const userData = innerData?.user || innerData;
           const accessToken = innerData?.accessToken || data.data?.accessToken;
           const refreshToken = innerData?.refreshToken || data.data?.refreshToken;
+
+          // Save to localStorage for apiClient
+          if (typeof window !== 'undefined' && accessToken && refreshToken) {
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+          }
 
           set({
 
@@ -98,7 +104,7 @@ export const useAuthStore = create<AuthStore>()(
         console.log('User data being sent:', userData);
         
         try {
-          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`;
+          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`;
           console.log('Full URL:', fullUrl);
           
           const response = await fetch(fullUrl, {
@@ -120,10 +126,19 @@ export const useAuthStore = create<AuthStore>()(
           const data = await response.json();
           
           // Auto-login after successful registration
+          const accessToken = data.access_token || data.data?.accessToken;
+          const refreshToken = data.refresh_token || data.data?.refreshToken;
+          
+          // Save to localStorage for apiClient
+          if (typeof window !== 'undefined' && accessToken && refreshToken) {
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+          }
+          
           set({
             user: data.data || data.user,
-            token: data.access_token || data.data?.accessToken,
-            refreshToken: data.refresh_token || data.data?.refreshToken,
+            token: accessToken,
+            refreshToken: refreshToken,
             isAuthenticated: true,
           });
           
@@ -141,6 +156,13 @@ export const useAuthStore = create<AuthStore>()(
       
 
       logout: () => {
+
+        // Clear tokens from localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
+
         // Sincronizar carrito antes de cerrar sesión (cambiar a guest)
         const { syncWithUser } = require('./cart-store').useCartStore.getState();
         syncWithUser(null);
@@ -170,6 +192,12 @@ export const useAuthStore = create<AuthStore>()(
       
 
       setTokens: (accessToken: string, refreshToken: string) => {
+
+        // Save to localStorage for apiClient
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
+        }
 
         set({
 

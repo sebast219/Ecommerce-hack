@@ -25,15 +25,17 @@ async function bootstrap() {
   // EJEMPLO: Filtros globales
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // EJEMPLO: Pipes globales
+  // EJEMPLO: Pipes globales - VALIDACIÓN BLINDADA
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
+      whitelist: true,              // Elimina campos no decorados
+      forbidNonWhitelisted: true,   // Error si envían campos extra
+      transform: true,              // Auto-transform tipos
       transformOptions: {
-        enableImplicitConversion: true,
+        enableImplicitConversion: false, // NO conversión implícita
       },
+      disableErrorMessages: configService.get('NODE_ENV') === 'production', // Oculta detalles en prod
+      stopAtFirstError: false,
     }),
   );
 
@@ -44,20 +46,24 @@ async function bootstrap() {
     new SecurityInterceptor(),
   );
 
-  // EJEMPLO: Configuración CORS
+  // EJEMPLO: Configuración CORS SEGURO
+  const nodeEnv = configService.get('NODE_ENV', 'development');
+  const isProduction = nodeEnv === 'production';
+  
+  const allowedOrigins = configService.get('CORS_ORIGINS', '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: [
-      configService.get('cors.origin'),
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:3002',
-      'http://127.0.0.1:3002',
-      'http://localhost:62699',
-      'http://127.0.0.1:62699',
-    ],
+    origin: isProduction
+      ? allowedOrigins
+      : [/localhost:\d+/, /127\.0\.0\.1:\d+/],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+    exposedHeaders: ['X-Request-ID', 'X-RateLimit-Remaining'],
+    maxAge: 86400, // 24h preflight cache
   });
 
   // EJEMPLO: Prefijo global de API

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Product } from '@/types/cart';
+import { apiClient } from '@/lib/api-client';
 
 // Interfaces
 interface UseProductsReturn {
@@ -29,16 +30,6 @@ interface Filters {
   limit?: number;
 }
 
-interface ProductResponse {
-  products: Product[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-}
-
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,28 +41,24 @@ export function useProducts() {
       setIsLoading(true);
       setError(null);
 
-      // Construir query params
-      const params = new URLSearchParams();
-      if (filters.search) params.append('search', filters.search);
-      if (filters.category) params.append('categoryId', filters.category);
-      if (filters.minPrice !== undefined) params.append('minPrice', filters.minPrice.toString());
-      if (filters.maxPrice !== undefined) params.append('maxPrice', filters.maxPrice.toString());
-      if (filters.sortBy) params.append('sortBy', filters.sortBy);
-      if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-      if (filters.page) params.append('page', filters.page.toString());
-      if (filters.limit) params.append('limit', filters.limit.toString());
-
-      // Llamar al backend
-      const response = await fetch(`/api/products?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Llamar al backend con apiClient
+      const response = await apiClient.get('/products', filters);
       
       // Handle double-nested response: { success: true, data: { success: true, data: { products... } } }
-      const innerData = result.data?.data || result.data || result;
+      const innerData = (response.data as any)?.data?.data || (response.data as any)?.data || response.data;
+
+      // Transform backend data to frontend format
+      const productsList = (innerData.products || []).map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        price: product.price,
+        images: Array.isArray(product.images) ? product.images : [product.images],
+        sku: product.sku,
+        category: product.category,
+        inventory: product.inventory
+      }));
 
       // Map backend pagination to frontend format
       const backendPagination = innerData.pagination || {
@@ -80,8 +67,6 @@ export function useProducts() {
         total: innerData.total || 0,
         totalPages: innerData.totalPages || 1
       };
-
-      const productsList = innerData.products || [];
       
       setProducts(productsList);
       setPagination({

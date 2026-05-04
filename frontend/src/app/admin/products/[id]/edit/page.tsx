@@ -76,7 +76,7 @@ export default function EditProductPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -99,7 +99,7 @@ export default function EditProductPage() {
   const fetchProduct = async () => {
     setFetchLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -235,7 +235,7 @@ export default function EditProductPage() {
         stock: parseInt(formData.stock.toString()),
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

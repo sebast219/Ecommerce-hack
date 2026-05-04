@@ -140,7 +140,7 @@ export function CartPage() {
         </div>
         <div className="flex items-center gap-4 mb-1">
           <Link
-            href="/cart"
+            href="/products"
             className="text-xs uppercase tracking-[0.2em] text-black/40 hover:text-black transition-colors border-b border-black/20 hover:border-black pb-0.5"
           >
             expandir carrito

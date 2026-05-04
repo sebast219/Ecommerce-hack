@@ -134,6 +134,13 @@ export class UserRepositoryImpl implements IUserRepository {
     };
   }
 
+  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+  }
+
   // EJEMPLO: Método privado de mapeo
   private mapPrismaUserToUser(prismaUser: any): User {
     return {

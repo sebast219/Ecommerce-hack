@@ -357,7 +357,7 @@ export class UsersController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        if (!file.mimetype.match(/image\/(jpg|jpeg|png|gif)$/)) {
           return cb(new Error('Solo se permiten archivos de imagen (jpg, jpeg, png, gif)'), false);
         }
         cb(null, true);
@@ -376,7 +376,6 @@ export class UsersController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-          new FileTypeValidator({ fileType: /(jpg|jpeg|png|gif)$/ }),
         ],
       }),
     )
