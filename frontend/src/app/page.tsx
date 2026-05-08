@@ -1,3 +1,4 @@
+// Deploy fix: forcing clean redeploy with rootDirectory configuration
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-black p-8">
@@ -10,6 +11,7 @@ export default function HomePage() {
           <p>✅ Next.js funcionando</p>
           <p>✅ Build exitoso</p>
           <p>✅ Despliegue en Vercel activo</p>
+          <p>✅ Root directory configurado</p>
         </div>
       </div>
     </div>
