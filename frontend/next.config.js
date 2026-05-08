@@ -1,23 +1,11 @@
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
-
 const nextConfig = {
+  trailingSlash: true,
   images: {
-    domains: ['localhost', 'ecommerce-hack-ltzy.vercel.app', 'images.unsplash.com'],
-    formats: ['image/webp', 'image/avif'],
+    unoptimized: true,
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/:path*`,
-      },
-    ];
   },
   // Optimizations for faster development
   swcMinify: true,
@@ -26,28 +14,6 @@ const nextConfig = {
   },
   // Faster module resolution
   transpilePackages: [],
-  // Experimental features for performance analysis
-  experimental: {
-    webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'INP', 'TTFB'],
-  },
-  webpack: (config, { dev, isServer }) => {
-    if (dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+module.exports = nextConfig;

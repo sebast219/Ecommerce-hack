@@ -1,71 +1,16 @@
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
-import { Hero } from '@/components/layout/hero';
-import { FeaturedProducts } from '@/components/product/featured-products';
-import { Categories } from '@/components/product/categories';
-
 export default function HomePage() {
-  const [scrollY, setScrollY] = useState(0);
-  const [visibleSections, setVisibleSections] = useState<{ [key: string]: boolean }>({});
-  
-  const categoriesRef = useRef<HTMLDivElement>(null);
-  const productsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const observers = new Map();
-    
-    const setupObserver = (ref: React.RefObject<HTMLDivElement>, key: string) => {
-      if (!ref.current) return;
-      
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setVisibleSections(prev => ({ ...prev, [key]: true }));
-          }
-        },
-        { threshold: 0.1, rootMargin: '50px' }
-      );
-      
-      observer.observe(ref.current);
-      observers.set(key, observer);
-    };
-    
-    setupObserver(categoriesRef, 'categories');
-    setupObserver(productsRef, 'products');
-    
-    return () => {
-      observers.forEach(observer => observer.disconnect());
-    };
-  }, []);
-
   return (
-    <div className="space-y-0">
-      <Hero />
-      <div 
-        ref={categoriesRef}
-        className={`transition-all duration-700 ease-in-out ${
-          visibleSections.categories ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
-      >
-        <Categories />
-      </div>
-      <div 
-        ref={productsRef}
-        className={`transition-all duration-700 ease-in-out ${
-          visibleSections.products ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
-      >
-        <FeaturedProducts />
+    <div className="min-h-screen bg-white text-black p-8">
+      <h1 className="text-4xl font-bold mb-4">Ecommerce Hack 6</h1>
+      <p className="text-lg mb-8">Plataforma especializada en herramientas de ciberseguridad</p>
+      <div className="bg-gray-100 p-6 rounded-lg">
+        <h2 className="text-2xl font-semibold mb-4">Página de Prueba</h2>
+        <p>Esta es una página simple para verificar que el despliegue funciona.</p>
+        <div className="mt-4 space-y-2">
+          <p>✅ Next.js funcionando</p>
+          <p>✅ Build exitoso</p>
+          <p>✅ Despliegue en Vercel activo</p>
+        </div>
       </div>
     </div>
   );
