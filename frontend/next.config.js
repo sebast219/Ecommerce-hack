@@ -14,6 +14,12 @@ const nextConfig = {
   },
   // Faster module resolution
   transpilePackages: [],
+  // Configuración para Vercel
+  output: undefined, // Asegura que no esté en modo export
+  // Configuración para manejar rutas dinámicas
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
 };
 
 module.exports = nextConfig;
