@@ -1,4 +1,4 @@
-// Deploy fix: forcing clean redeploy with rootDirectory configuration
+// Deploy fix: ULTIMO INTENTO - vercel.json simplificado
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-black p-8">
@@ -12,7 +12,8 @@ export default function HomePage() {
           <p>✅ Build exitoso</p>
           <p>✅ Despliegue en Vercel activo</p>
           <p>✅ Root directory configurado</p>
-          <p>✅ Corrigiendo 404 NOT_FOUND</p>
+          <p>✅ vercel.json simplificado</p>
+          <p>🚀 ÚLTIMO INTENTO 404</p>
         </div>
       </div>
     </div>
