@@ -12,6 +12,7 @@ export default function HomePage() {
           <p>✅ Build exitoso</p>
           <p>✅ Despliegue en Vercel activo</p>
           <p>✅ Root directory configurado</p>
+          <p>✅ Corrigiendo 404 NOT_FOUND</p>
         </div>
       </div>
     </div>

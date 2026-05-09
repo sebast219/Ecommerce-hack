@@ -1,5 +1,11 @@
 {
   "framework": "nextjs",
   "rootDirectory": "frontend",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
 }
