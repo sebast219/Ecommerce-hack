@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import Link from 'next/link';
@@ -63,13 +63,8 @@ export default function NewProductPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchCategories();
-    }
-  }, [isAuthenticated, token]);
-
-  const fetchCategories = async () => {
+  
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
         headers: {
@@ -89,7 +84,7 @@ export default function NewProductPage() {
       console.error('Error loading categories:', error);
       alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
-  };
+  }, [token]);
 
   const generateSlug = (name: string) => {
     return name
@@ -99,6 +94,12 @@ export default function NewProductPage() {
       .replace(/-+/g, '-')
       .trim();
   };
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchCategories();
+    }
+  }, [isAuthenticated, token, fetchCategories]);
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
     setFormData(prev => ({

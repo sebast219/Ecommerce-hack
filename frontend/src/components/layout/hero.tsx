@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -28,7 +29,7 @@ export function Hero() {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 4500);
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -135,9 +136,11 @@ export function Hero() {
                     }
                   `}
                 >
-                  <img
+                  <Image
                     src={image.url}
                     alt={image.alt}
+                    width={700}
+                    height={700}
                     className="w-full h-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.10)]"
                   />
                 </div>

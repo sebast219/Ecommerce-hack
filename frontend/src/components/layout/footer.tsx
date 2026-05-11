@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 export function Footer() {
   const pathname = usePathname();
@@ -23,9 +24,11 @@ export function Footer() {
           <div className="space-y-5">
             
             <h3 className="text-xl font-medium tracking-tight flex items-center gap-2">
-            <img 
+            <Image 
               src="/favicon.ico" 
               alt="Hack 6 Logo" 
+              width={40}
+              height={40}
               className="h-10 w-10 rounded-full"
             />
               Hack 6
@@ -68,8 +71,7 @@ export function Footer() {
               {[
                 { name: 'Catálogo', href: '/products' },
                 { name: 'Categorías', href: '/categories' },
-                { name: 'Laboratorios', href: '/labs' },
-                { name: 'Nosotros', href: '/about' },
+                { name: 'Nosotros', href: '/nosotros' },
               ].map((item) => (
                 <li key={item.name}>
                   <Link
@@ -88,38 +90,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
-          <div className="space-y-5">
-
-            <h4 className="text-sm font-medium uppercase tracking-widest text-black/80">
-              Soporte
-            </h4>
-
-            <ul className="space-y-3 text-sm">
-
-              {[
-                { name: 'Documentación', href: '/docs' },
-                { name: 'Envíos', href: '/shipping' },
-                { name: 'Devoluciones', href: '/returns' },
-                { name: 'Centro de ayuda', href: '/support' },
-              ].map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className="
-                      text-black/60
-                      transition-colors duration-300
-                      hover:text-black
-                    "
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-
-            </ul>
-          </div>
-
+          
           {/* Newsletter */}
           <div className="space-y-5 max-w-sm mx-auto md:mx-0">
 
@@ -181,26 +152,6 @@ export function Footer() {
               © {new Date().getFullYear()} Hack 6 — Ethical Hacking Only
             </p>
 
-            <div className="flex gap-6">
-
-              {[
-                { name: 'Privacidad', href: '/privacy' },
-                { name: 'Términos', href: '/terms' },
-                { name: 'Compliance', href: '/compliance' },
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="
-                    transition-colors duration-300
-                    hover:text-black
-                  "
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-            </div>
           </div>
         </div>
 

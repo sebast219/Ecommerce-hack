@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ShoppingCart, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
 import { CartDrawer } from '@/components/cart/cart-drawer';
@@ -50,9 +51,11 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 text-black font-medium tracking-tight"
           >
-            <img 
+            <Image 
               src="/favicon.ico" 
               alt="Hack 6 Logo" 
+              width={40}
+              height={40}
               className="h-10 w-10 rounded-full"
             />
             <span className="text-lg">Hack 6</span>
@@ -165,9 +168,11 @@ export function Header() {
                   </span>
                   <div className="h-8 w-8 rounded-full bg-black/90 overflow-hidden">
                     {user?.avatar ? (
-                      <img
+                      <Image
                         src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}`}
                         alt={`${user.firstName} ${user.lastName}`}
+                        width={32}
+                        height={32}
                         className="w-full h-full object-cover"
                       />
                     ) : (

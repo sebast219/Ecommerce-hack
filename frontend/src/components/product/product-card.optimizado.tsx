@@ -110,7 +110,7 @@ const ProductCard = memo<ProductCardProps>(({
     } finally {
       setIsLoading(false);
     }
-  }, [product.id, stockStatus.status, isAuthenticated, addItem]);
+  }, [product, product.id, stockStatus.status, isAuthenticated, addItem]);
 
   const handleToggleWishlist = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

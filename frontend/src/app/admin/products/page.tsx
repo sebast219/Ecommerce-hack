@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
@@ -59,13 +59,8 @@ export default function AdminProductsPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [filterActive, setFilterActive] = useState(true);
 
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchProducts();
-    }
-  }, [isAuthenticated, token]);
-
-  const fetchProducts = async () => {
+  
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -88,7 +83,7 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filterCategory, sortBy, filterActive]);
 
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
@@ -112,6 +107,12 @@ export default function AdminProductsPage() {
       alert(error.message || 'Error al actualizar el producto');
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchProducts();
+    }
+  }, [isAuthenticated, token, fetchProducts]);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

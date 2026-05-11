@@ -3,6 +3,7 @@
 import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/types/cart';
 import { useCartStore } from '@/store/cart-store';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: Product;
@@ -41,9 +42,11 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
     >
       {/* Image Container */}
       <div className="aspect-square bg-black/[0.02] overflow-hidden">
-        <img
+        <Image
           src={product.images?.[0] || '/placeholder.jpg'}
           alt={product.name}
+          width={300}
+          height={300}
           className="
             w-full h-full object-contain p-6
             transition-transform duration-700

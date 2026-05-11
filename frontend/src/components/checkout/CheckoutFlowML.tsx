@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ChevronRight, 
@@ -126,15 +126,8 @@ export const CheckoutFlowML = () => {
     }
   }, [user, items, router]);
 
-  // Load saved addresses and payment methods
-  useEffect(() => {
-    if (user && token) {
-      loadSavedAddresses();
-      loadSavedPaymentMethods();
-    }
-  }, [user, token]);
-
-  const loadSavedAddresses = async () => {
+  
+  const loadSavedAddresses = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses`, {
         headers: { 'Authorization': `Bearer ${token}` },
@@ -160,9 +153,9 @@ export const CheckoutFlowML = () => {
     } catch (error) {
       console.error('Error loading addresses:', error);
     }
-  };
+  }, [token]);
 
-  const loadSavedPaymentMethods = async () => {
+  const loadSavedPaymentMethods = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`, {
         headers: { 'Authorization': `Bearer ${token}` },
@@ -187,7 +180,7 @@ export const CheckoutFlowML = () => {
     } catch (error) {
       console.error('Error loading payment methods:', error);
     }
-  };
+  }, [token]);
 
   const handleNextStep = async () => {
     setError(null);
@@ -211,6 +204,14 @@ export const CheckoutFlowML = () => {
       await handlePayment();
     }
   };
+
+  // Load saved addresses and payment methods
+  useEffect(() => {
+    if (user && token) {
+      loadSavedAddresses();
+      loadSavedPaymentMethods();
+    }
+  }, [user, token, loadSavedAddresses, loadSavedPaymentMethods]);
 
   const handlePrevStep = () => {
     if (currentStep > 1) {

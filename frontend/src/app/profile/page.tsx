@@ -324,7 +324,7 @@ export default function ProfilePage() {
         },
       ]);
     }
-  }, [user, orders.length, user?.firstName]);
+  }, [user, orders, notifications, user?.firstName]);
 
   // Update avatar URL when user data changes
   useEffect(() => {

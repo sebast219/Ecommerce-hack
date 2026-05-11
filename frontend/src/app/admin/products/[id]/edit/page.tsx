@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import Link from 'next/link';
@@ -67,14 +67,8 @@ export default function EditProductPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      fetchCategories();
-      fetchProduct();
-    }
-  }, [isAuthenticated, token, productId]);
-
-  const fetchCategories = async () => {
+  
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
         headers: {
@@ -94,9 +88,9 @@ export default function EditProductPage() {
       console.error('Error loading categories:', error);
       alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
-  };
+  }, [token]);
 
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     setFetchLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
@@ -140,7 +134,7 @@ export default function EditProductPage() {
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [productId, token]);
 
   const generateSlug = (name: string) => {
     return name
@@ -150,6 +144,13 @@ export default function EditProductPage() {
       .replace(/-+/g, '-')
       .trim();
   };
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchCategories();
+      fetchProduct();
+    }
+  }, [isAuthenticated, token, productId, fetchCategories, fetchProduct]);
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
     setFormData(prev => ({
