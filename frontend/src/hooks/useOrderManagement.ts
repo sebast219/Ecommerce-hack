@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { Order, OrderEvent, OrderSummary, TrackingInfo } from '@/types/order.types';
+import { Order, OrderEvent, OrderSummary, TrackingInfo } from '@/lib/order-service';
 
 export const useOrderManagement = () => {
   const [orders, setOrders] = useState<Order[]>([]);
