@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { adminService, DashboardStats, RecentOrder, TopProduct, SalesActivity } from '@/lib/admin-service';
 import {
   LayoutDashboard,
   Package,
@@ -25,34 +26,7 @@ import {
 // 1. TIPOS DE DATOS
 // ==========================================
 
-interface DashboardStats {
-  label: string;
-  value: string;
-  change: string;
-  trend: 'up' | 'down';
-  icon: string;
-}
-
-interface RecentOrder {
-  id: string;
-  customer: string;
-  product: string;
-  amount: string;
-  status: string;
-  date: string;
-}
-
-interface TopProduct {
-  name: string;
-  sales: number;
-  revenue: string;
-  growth: string;
-}
-
-interface SalesActivity {
-  value: number;
-  label: string;
-}
+// Use types from admin-service to avoid conflicts
 
 // ==========================================
 // 2. ACCIONES RÁPIDAS (Estáticas)
@@ -140,7 +114,7 @@ const Sidebar = ({ user, onLogout, activeRoute = '/admin/dashboard' }: {
   );
 };
 
-const StatCard = ({ stat, isLoading }: { stat: DashboardStats | null, isLoading: boolean }) => (
+const StatCard = ({ stat, isLoading }: { stat: any, isLoading: boolean }) => (
   <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
     {isLoading ? (
       <div className="flex items-center justify-center h-24">
@@ -182,10 +156,10 @@ export default function AdminDashboardPage() {
   const { user, logout, isAuthenticated } = useAuthStore();
   
   // Estados para datos del dashboard
-  const [stats, setStats] = useState<DashboardStats[]>([]);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
-  const [salesActivity, setSalesActivity] = useState<SalesActivity[]>([]);
+  const [stats, setStats] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [salesActivity, setSalesActivity] = useState<any[]>([]);
   
   // Estados de carga
   const [loading, setLoading] = useState({
@@ -198,44 +172,7 @@ export default function AdminDashboardPage() {
   // Estado de error
   const [error, setError] = useState<string | null>(null);
 
-  // Función para obtener token de autenticación
-  const getAuthToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('accessToken');
-    }
-    return null;
-  };
-
-  // Función para hacer peticiones a la API
-  const apiRequest = async (endpoint: string) => {
-    const token = getAuthToken();
-    // Si NEXT_PUBLIC_API_URL ya incluye /api/v1, no lo añadimos de nuevo
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const fullUrl = baseUrl.includes('/api/v1') 
-      ? `${baseUrl}${endpoint}`
-      : `${baseUrl}/api/v1${endpoint}`;
-    
-    const response = await fetch(fullUrl, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    if (!data.success) {
-      throw new Error(data.message || 'API request failed');
-    }
-    
-    // Manejar la estructura anidada del backend: {success: true, data: {success: true, data: [...]}}
-    const innerData = data.data?.data || data.data || data;
-    return innerData;
-  };
-
+  
   // Cargar datos del dashboard
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'ADMIN') return;
@@ -244,30 +181,17 @@ export default function AdminDashboardPage() {
       try {
         setError(null);
         
-        // Cargar estadísticas
-        setLoading(prev => ({ ...prev, stats: true }));
-        const statsData = await apiRequest('/admin/dashboard/stats');
-        // Asegurar que statsData sea un array
-        setStats(Array.isArray(statsData) ? statsData : []);
-        setLoading(prev => ({ ...prev, stats: false }));
+        // Cargar todos los datos del dashboard en una sola llamada
+        setLoading({ stats: true, orders: true, products: true, activity: true });
         
-        // Cargar pedidos recientes
-        setLoading(prev => ({ ...prev, orders: true }));
-        const ordersData = await apiRequest('/admin/dashboard/recent-orders');
-        setRecentOrders(Array.isArray(ordersData) ? ordersData : []);
-        setLoading(prev => ({ ...prev, orders: false }));
+        const dashboardData = await adminService.getDashboardSummary();
         
-        // Cargar productos más vendidos
-        setLoading(prev => ({ ...prev, products: true }));
-        const productsData = await apiRequest('/admin/dashboard/top-products');
-        setTopProducts(Array.isArray(productsData) ? productsData : []);
-        setLoading(prev => ({ ...prev, products: false }));
+        setStats(Array.isArray(dashboardData.stats) ? dashboardData.stats : []);
+        setRecentOrders(dashboardData.recentOrders || []);
+        setTopProducts(dashboardData.topProducts || []);
+        setSalesActivity(dashboardData.salesActivity || []);
         
-        // Cargar actividad de ventas
-        setLoading(prev => ({ ...prev, activity: true }));
-        const activityData = await apiRequest('/admin/dashboard/sales-activity');
-        setSalesActivity(Array.isArray(activityData) ? activityData : []);
-        setLoading(prev => ({ ...prev, activity: false }));
+        setLoading({ stats: false, orders: false, products: false, activity: false });
         
       } catch (err) {
         console.error('Error loading dashboard data:', err);

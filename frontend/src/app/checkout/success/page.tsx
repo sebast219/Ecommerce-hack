@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Package, ArrowRight, ShoppingBag, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ordersApi, Order } from '@/lib/orders-api';
+import { orderService, Order } from '@/lib/order-service';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -23,7 +23,7 @@ function SuccessContent() {
       }
 
       try {
-        const response = await ordersApi.getOrder(orderId);
+        const response = await orderService.getOrder(orderId);
         if (response.success) {
           setOrder(response.data);
         } else {

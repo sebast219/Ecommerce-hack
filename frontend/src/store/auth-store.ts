@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
 
             method: 'POST',
 
@@ -104,7 +104,7 @@ export const useAuthStore = create<AuthStore>()(
         console.log('User data being sent:', userData);
         
         try {
-          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`;
+          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`;
           console.log('Full URL:', fullUrl);
           
           const response = await fetch(fullUrl, {

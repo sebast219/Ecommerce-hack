@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { adminProductService } from '@/lib/admin-product-service';
 import {
   Plus,
   Edit3,
@@ -67,32 +68,18 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (searchTerm) params.set('search', searchTerm);
-      if (filterCategory) params.set('categoryId', filterCategory);
-      params.set('sortBy', sortBy);
-      if (filterActive !== null) params.set('active', filterActive.toString());
+      const params = {
+        search: searchTerm || undefined,
+        categoryId: filterCategory || undefined,
+        sortBy: sortBy as any,
+        isActive: filterActive
+      };
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const fullUrl = baseUrl.includes('/api/v1') 
-        ? `${baseUrl}/products?${params}`
-        : `${baseUrl}/api/v1/products?${params}`;
-
-      const response = await fetch(fullUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Error al cargar productos');
-
-      const data = await response.json();
-      const productsData = data.data?.data?.products || data.data?.products || data.products || [];
+      const response = await adminProductService.getAll(params);
       
-      if (Array.isArray(productsData)) {
-        setProducts(productsData);
+      if (response.success && Array.isArray(response.data)) {
+        setProducts(response.data as any);
       } else {
-        console.error('Products data is not an array:', productsData);
         setProducts([]);
       }
     } catch (error: any) {
@@ -107,15 +94,7 @@ export default function AdminProductsPage() {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar producto');
-
+      await adminProductService.delete(productId);
       setProducts(products.filter(p => p.id !== productId));
       alert('Producto eliminado exitosamente');
     } catch (error: any) {
@@ -125,17 +104,7 @@ export default function AdminProductsPage() {
 
   const handleToggleActive = async (productId: string, isActive: boolean) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ isActive: !isActive }),
-      });
-
-      if (!response.ok) throw new Error('Error al actualizar producto');
-
+      await adminProductService.toggleActive(productId);
       setProducts(products.map(p => 
         p.id === productId ? { ...p, isActive: !isActive } : p
       ));

@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { useCategories } from '@/hooks/use-categories';
 
 import {
   X,
@@ -16,6 +15,60 @@ import {
   PackageCheck,
   Loader2,
 } from 'lucide-react';
+
+// Category interface (moved from use-categories hook)
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+}
+
+// Direct categories implementation (moved from use-categories hook)
+function useCategories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      // Handle double-nested response structure: { data: { success: true, data: { categories: [...] } } }
+      const innerData = result.data || result;
+      
+      // Extract categories from inner data.data or innerData directly
+      const categoriesArray = innerData.data?.categories || innerData.categories || [];
+
+      setCategories(categoriesArray);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar categorías');
+      setCategories([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  return {
+    categories,
+    isLoading,
+    error,
+  };
+}
 
 
 /* ========================

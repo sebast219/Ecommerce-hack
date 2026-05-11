@@ -166,7 +166,7 @@ export function Header() {
                   <div className="h-8 w-8 rounded-full bg-black/90 overflow-hidden">
                     {user?.avatar ? (
                       <img
-                        src={`http://localhost:3001${user.avatar}`}
+                        src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}`}
                         alt={`${user.firstName} ${user.lastName}`}
                         className="w-full h-full object-cover"
                       />

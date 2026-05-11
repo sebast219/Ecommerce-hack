@@ -114,7 +114,7 @@ Thumbs.db
 *.db
 
 # Prisma
-/backend/prisma/migrations/
+# Note: migrations should be tracked for deployment
 !backend/prisma/migrations/.gitkeep
 
 # Test results

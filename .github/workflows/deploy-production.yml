@@ -193,11 +193,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # DISABLED: conflicts with Railway/Vercel deployment
+  # if: false
   # Deploy to Production
   deploy-production:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: false # github.ref == 'refs/heads/main'
     environment: production
 
     steps:
@@ -250,11 +252,13 @@ jobs:
             Commit: ${{ github.sha }}
             Branch: ${{ github.ref_name }}
 
+  # DISABLED: conflicts with Railway/Vercel deployment
+  # if: false
   # Performance Tests
   performance-tests:
     needs: deploy-production
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: false # github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code

@@ -46,25 +46,20 @@ async function bootstrap() {
     new SecurityInterceptor(),
   );
 
-  // EJEMPLO: Configuración CORS SEGURO
-  const nodeEnv = configService.get('NODE_ENV', 'development');
-  const isProduction = nodeEnv === 'production';
-
-  const allowedOrigins = configService
-    .get('CORS_ORIGINS', '')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean);
-
   app.enableCors({
-    origin: isProduction
-      ? allowedOrigins
-      : [/localhost:\d+/, /127\.0\.0\.1:\d+/],
+    origin: (origin, callback) => {
+      const allowed = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+        .split(',')
+        .map(o => o.trim());
+      if (!origin || allowed.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
-    exposedHeaders: ['X-Request-ID', 'X-RateLimit-Remaining'],
-    maxAge: 86400, // 24h preflight cache
   });
 
   // EJEMPLO: Prefijo global de API
@@ -126,8 +121,8 @@ async function bootstrap() {
     process.exit(0);
   });
 
-  const port = configService.get('app.port');
-  await app.listen(port);
+  const port = process.env.PORT || configService.get('app.port') || 3001;
+  await app.listen(port, '0.0.0.0');
 
   console.log(`🎯 Application ready on port ${port}`);
 }

@@ -12,7 +12,7 @@ interface RequestConfig extends RequestInit {
   skipAuth?: boolean;
 }
 
-class ApiClient {
+class HttpClient {
   private baseUrl: string;
   private isRefreshing = false;
   private refreshPromise: Promise<string | null> | null = null;
@@ -176,4 +176,7 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient();
+export const httpClient = new HttpClient();
+
+// Keep backward compatibility
+export const apiClient = httpClient;

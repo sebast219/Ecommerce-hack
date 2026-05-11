@@ -104,7 +104,7 @@ export default function ProfilePage() {
 
   // Avatar states
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    user?.avatar ? `http://localhost:3001${user.avatar}` : null
+    user?.avatar ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}` : null
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -329,7 +329,7 @@ export default function ProfilePage() {
   // Update avatar URL when user data changes
   useEffect(() => {
     if (user?.avatar) {
-      setAvatarUrl(`http://localhost:3001${user.avatar}`);
+      setAvatarUrl(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}`);
     } else {
       setAvatarUrl(null);
     }
@@ -890,7 +890,7 @@ export default function ProfilePage() {
         setUser(updatedUser);
         // Construir URL completa para el avatar
         const fullAvatarUrl = updatedUser?.avatar 
-          ? `http://localhost:3001${updatedUser.avatar}`
+          ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${updatedUser.avatar}`
           : null;
         setAvatarUrl(fullAvatarUrl);
       }
@@ -901,7 +901,7 @@ export default function ProfilePage() {
       console.error('Error uploading avatar:', error);
       alert(error.message || 'Error al subir la imagen');
       // Restaurar avatar anterior
-      setAvatarUrl(user?.avatar ? `http://localhost:3001${user.avatar}` : null);
+      setAvatarUrl(user?.avatar ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}` : null);
     } finally {
       setIsUploadingAvatar(false);
     }

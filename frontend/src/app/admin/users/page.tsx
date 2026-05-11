@@ -19,6 +19,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
+import { adminUserService } from '@/lib/admin-user-service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -55,20 +56,9 @@ export default function AdminUsersPage() {
   // Cargar usuarios
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/all`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al cargar usuarios');
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setUsers(data.data);
+      const response = await adminUserService.getAll();
+      if (response.success) {
+        setUsers(response.data as any);
       }
     } catch (error) {
       console.error('Error fetching users:', error);

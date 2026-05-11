@@ -15,10 +15,7 @@ export class OrderEmailService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {
-    this.frontendUrl = configService.get(
-      'FRONTEND_URL',
-      'http://localhost:3000',
-    );
+    this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     this.supportEmail = configService.get(
       'SUPPORT_EMAIL',
       'support@cybershield.com',

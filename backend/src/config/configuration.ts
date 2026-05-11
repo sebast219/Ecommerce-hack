@@ -51,7 +51,7 @@ export default () => ({
 
   // EJEMPLO: Configuración de Redis
   redis: {
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    url: process.env.REDIS_URL,
   },
 
   // EJEMPLO: Configuración de Stripe
