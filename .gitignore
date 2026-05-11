@@ -112,6 +112,7 @@ Thumbs.db
 # Database
 *.sqlite
 *.db
+*.db-journal
 
 # Prisma
 # Note: migrations should be tracked for deployment
