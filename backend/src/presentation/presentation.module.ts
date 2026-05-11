@@ -19,6 +19,7 @@ import { OrderController } from './controllers/order.controller';
 import { PaymentController } from './controllers/payment.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { DashboardController } from './controllers/dashboard.controller';
+import { HealthController } from './controllers/health.controller';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -88,6 +89,7 @@ export {
     PaymentController,
     PaymentsController,
     DashboardController,
+    HealthController,
   ],
   providers: [
     // JwtAuthGuard,
