@@ -20,6 +20,7 @@ import { PaymentController } from './controllers/payment.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { HealthController } from './controllers/health.controller';
+import { UploadController } from './controllers/upload.controller';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -90,6 +91,7 @@ export {
     PaymentsController,
     DashboardController,
     HealthController,
+    UploadController,
   ],
   providers: [
     // JwtAuthGuard,
