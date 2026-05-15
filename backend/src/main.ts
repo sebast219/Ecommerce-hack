@@ -64,7 +64,8 @@ async function bootstrap() {
 
   // EJEMPLO: Prefijo global de API
   const apiPrefix = configService.get('app.apiPrefix');
-  app.setGlobalPrefix(apiPrefix);
+  // Excluir la ruta 'products' del prefijo global para que quede disponible en '/products'
+  app.setGlobalPrefix(apiPrefix, { exclude: ['products'] });
 
   // EJEMPLO: Configuración Swagger
   const config = new DocumentBuilder()
