@@ -17,7 +17,6 @@ import { UserDomainService } from '../domain/services/user.domain.service';
 import { JwtStrategy } from '../presentation/guards/jwt-auth.strategy';
 import { StripeService } from './services/stripe.service';
 import { StripeResilientService } from './payments/stripe-resilient.service';
-import { UploadService } from './services/upload.service';
 import { EmailService } from './email/email.service';
 import { OrderExpirationCron } from './cron/order-expiration.cron';
 import { OrderStateMachineService } from '../application/services/order-state-machine.service';
@@ -64,7 +63,6 @@ import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.interf
     JwtStrategy,
     StripeService,
     StripeResilientService,
-    UploadService,
     EmailService,
     OrderExpirationCron,
     OrderStateMachineService,
@@ -73,7 +71,6 @@ import { ORDER_REPOSITORY } from '../domain/repositories/order.repository.interf
   exports: [
     PrismaService,
     UserRepositoryImpl,
-    UploadService,
     { provide: USER_REPOSITORY, useClass: UserRepositoryImpl },
     { provide: PRODUCT_REPOSITORY, useClass: ProductRepositoryImpl },
     { provide: CATEGORY_REPOSITORY, useClass: ProductRepositoryImpl },
