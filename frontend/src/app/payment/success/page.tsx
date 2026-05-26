@@ -6,6 +6,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api-client';
 
 function PaymentSuccessContent() {
   const [loading, setLoading] = useState(true);
@@ -24,11 +25,8 @@ function PaymentSuccessContent() {
 
   const verifyPayment = async (sessionId: string) => {
     try {
-      const response = await fetch(`/api/v1/payments/verify-session/${sessionId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setOrderData(data.data);
-      }
+      const response = await apiClient.get(`/payments/verify-session/${sessionId}`);
+      setOrderData((response.data as any)?.data || response.data);
     } catch (error) {
       console.error('Error verifying payment:', error);
     } finally {

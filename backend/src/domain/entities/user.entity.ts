@@ -21,7 +21,7 @@ export interface User {
   firstName: string;
   lastName: string;
   password: string;
-  role: string; // Cambiado de UserRole enum a string para compatibilidad con SQLite
+  role: UserRole;
   isVerified: boolean;
   experienceLevel: string;
   certifications: string; // JSON string para compatibilidad con SQLite

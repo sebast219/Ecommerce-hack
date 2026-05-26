@@ -6,7 +6,7 @@ process.env.JWT_REFRESH_SECRET =
   'test-super-secret-refresh-key-for-testing-only';
 process.env.JWT_EXPIRES_IN = '24h';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
-process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test_ecommerce';
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ecommerce_test';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -48,37 +48,23 @@ export class TestSetup {
 
   static async cleanup(): Promise<void> {
     try {
-      // Orden de limpieza respetando foreign keys
-      // Solo eliminar modelos que existen en Prisma
-      if ('orderItem' in this.prisma) {
-        await this.prisma.orderItem.deleteMany();
-      }
-      if ('order' in this.prisma) {
-        await this.prisma.order.deleteMany();
-      }
-      if ('cartItem' in this.prisma) {
-        await this.prisma.cartItem.deleteMany();
-      }
-      if ('productInventory' in this.prisma) {
-        await this.prisma.productInventory.deleteMany();
-      }
-      if ('product' in this.prisma) {
-        await this.prisma.product.deleteMany();
-      }
-      if ('category' in this.prisma) {
-        await this.prisma.category.deleteMany();
-      }
-      if ('refreshToken' in this.prisma) {
-        await this.prisma.refreshToken.deleteMany();
-      }
-      if ('address' in this.prisma) {
-        await this.prisma.address.deleteMany();
-      }
-      if ('user' in this.prisma) {
-        await this.prisma.user.deleteMany();
-      }
+      // Usar deleteMany en orden correcto de dependencias
+      // Primero borrar tablas dependientes
+      await this.prisma.orderItem.deleteMany();
+      await this.prisma.order.deleteMany();
+      await this.prisma.cartItem.deleteMany();
+      await this.prisma.cart.deleteMany();
+      await this.prisma.productInventory.deleteMany();
+      // Productos ANTES de categorías (onDelete: Cascade en schema)
+      await this.prisma.product.deleteMany();
+      // NO borrar categorías en cleanup para evitar foreign key issues
+      // Las categorías se acumulan pero usan timestamps únicos
+      await this.prisma.refreshToken.deleteMany();
+      await this.prisma.address.deleteMany();
+      // Users al final
+      await this.prisma.user.deleteMany();
     } catch (error) {
-      // Ignorar errores de cleanup (modelos que no existen)
+      // Ignorar errores de cleanup
       console.warn(
         'Cleanup warning:',
         error instanceof Error ? error.message : String(error),
@@ -88,6 +74,8 @@ export class TestSetup {
 
   static async teardown(): Promise<void> {
     await this.cleanup();
+    // NO borrar categorías en teardown para evitar que otros test suites fallen
+    // Las categorías se acumulan pero usan timestamps únicos
     await this.app.close();
   }
 }

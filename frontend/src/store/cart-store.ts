@@ -45,7 +45,6 @@ export const useCartStore = create<CartStore>()(
         
         // If user changed
         if (newUserId !== currentUserId) {
-          console.log(`[CART] User changed from ${currentUserId || 'guest'} to ${newUserId || 'guest'}`);
           
           // Save current cart to old user key before switching
           if (currentUserId) {
@@ -66,8 +65,6 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (product: Product, quantity = 1) => {
         const { items, userId } = get();
-        
-        console.log(`[CART] Adding item for user ${userId || 'guest'}:`, product.name);
         
         const existingItem = items.find((item) => item.product.id === product.id);
 
@@ -110,7 +107,6 @@ export const useCartStore = create<CartStore>()(
 
       clearCart: () => {
         const { userId } = get();
-        console.log(`[CART] Clearing cart for user ${userId || 'guest'}`);
         set({ items: [] });
       },
 

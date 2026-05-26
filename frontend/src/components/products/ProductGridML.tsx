@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { Search, Filter, ShoppingCart, Heart, Star, Truck, Shield } from 'lucide-react';
 import { Product } from '@/types/cart';
 import { useCartStore } from '@/store/cart-store';
@@ -220,9 +221,11 @@ export const ProductGridML = ({ products, loading }: ProductGridMLProps) => {
             <div key={product.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
               {/* Product Image */}
               <div className="relative">
-                <img
-                  src={Array.isArray(product.images) ? product.images[0] : product.images}
+                <Image
+                  src={Array.isArray(product.images) ? product.images[0] : (product.images as string)}
                   alt={product.name}
+                  width={400}
+                  height={192}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />
                 

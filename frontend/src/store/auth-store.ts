@@ -2,9 +2,9 @@ import { create } from 'zustand';
 
 import { persist } from 'zustand/middleware';
 
-import { User } from '@/types/auth';
-
-
+import { User, UserRole } from '@/types/auth';
+import { tokenManager } from '@/lib/token-manager';
+import { apiClient } from '@/lib/api-client';
 
 interface AuthStore {
   user: User | null;
@@ -12,11 +12,14 @@ interface AuthStore {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
+  isLoading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: { firstName: string; lastName: string; email: string; password: string }) => Promise<void>;
   logout: () => void;
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
+  fetchProfile: () => Promise<User | null>;
 }
 
 
@@ -31,55 +34,31 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       isAuthenticated: false,
       isHydrated: false,
+      isLoading: false,
+      isAdmin: false,
       login: async (email: string, password: string) => {
 
         try {
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
+          const response = await apiClient.post<any>('/auth/login', { email, password });
 
-            method: 'POST',
-
-            headers: {
-
-              'Content-Type': 'application/json',
-
-            },
-
-            body: JSON.stringify({ email, password }),
-
-          });
-
-          if (!response.ok) {
-
-            throw new Error('Login failed');
-
-          }
-
-          const data = await response.json();
-          
           // Handle deeply nested backend response
-          // Response structure: { success: true, data: { success: true, data: { user, accessToken, refreshToken }, message }, message }
-          const innerData = data.data?.data || data.data;
+          const innerData = response.data?.data || response.data;
           const userData = innerData?.user || innerData;
-          const accessToken = innerData?.accessToken || data.data?.accessToken;
-          const refreshToken = innerData?.refreshToken || data.data?.refreshToken;
+          const accessToken = innerData?.accessToken || response.data?.accessToken;
+          const refreshToken = innerData?.refreshToken || response.data?.refreshToken;
 
-          // Save to localStorage for apiClient
+          // Save to localStorage for apiClient via TokenManager
           if (typeof window !== 'undefined' && accessToken && refreshToken) {
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
+            tokenManager.setTokens(accessToken, refreshToken);
           }
 
           set({
-
             user: userData,
-
             token: accessToken,
-
             refreshToken: refreshToken,
-
             isAuthenticated: true,
-
+            isAdmin: userData?.role === UserRole.ADMIN,
           });
 
           // Sincronizar carrito con el nuevo usuario
@@ -99,52 +78,30 @@ export const useAuthStore = create<AuthStore>()(
       
 
       register: async (userData: { firstName: string; lastName: string; email: string; password: string }) => {
-        console.log('=== FRONTEND REGISTER DEBUG ===');
-        console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
-        console.log('User data being sent:', userData);
-        
         try {
-          const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`;
-          console.log('Full URL:', fullUrl);
-          
-          const response = await fetch(fullUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-          });
-          
-          console.log('Response status:', response.status);
-          console.log('Response ok:', response.ok);
+          const response = await apiClient.post<any>('/auth/register', userData);
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Register failed');
-          }
-
-          const data = await response.json();
-          
           // Auto-login after successful registration
-          const accessToken = data.access_token || data.data?.accessToken;
-          const refreshToken = data.refresh_token || data.data?.refreshToken;
+          const accessToken = response.data?.access_token || response.data?.accessToken;
+          const refreshToken = response.data?.refresh_token || response.data?.refreshToken;
           
-          // Save to localStorage for apiClient
+          // Save to localStorage for apiClient via TokenManager
           if (typeof window !== 'undefined' && accessToken && refreshToken) {
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
+            tokenManager.setTokens(accessToken, refreshToken);
           }
           
+          const registeredUser = response.data?.data?.user || response.data?.data || response.data?.user;
           set({
-            user: data.data || data.user,
+            user: registeredUser,
             token: accessToken,
             refreshToken: refreshToken,
             isAuthenticated: true,
+            isAdmin: registeredUser?.role === UserRole.ADMIN,
           });
           
           // Sincronizar carrito con el nuevo usuario
           setTimeout(() => {
-            const userId = (data.data || data.user)?.id;
+            const userId = (response.data?.data || response.data?.user)?.id;
             const { syncWithUser } = require('./cart-store').useCartStore.getState();
             syncWithUser(userId || null);
           }, 0);
@@ -157,10 +114,9 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => {
 
-        // Clear tokens from localStorage
+        // Clear tokens from localStorage via TokenManager
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          tokenManager.clearTokens();
         }
 
         // Sincronizar carrito antes de cerrar sesión (cambiar a guest)
@@ -183,20 +139,29 @@ export const useAuthStore = create<AuthStore>()(
 
       
 
-      setUser: (user: User) => {
+      setUser: (user: User | null) => {
+        set({ user, isAuthenticated: !!user, isAdmin: user?.role === UserRole.ADMIN });
+      },
 
-        set({ user });
-
+      fetchProfile: async () => {
+        try {
+          const response = await apiClient.get<User>('/users/me');
+          const user = response.data;
+          set({ user, isAuthenticated: true, isAdmin: user?.role === UserRole.ADMIN });
+          return user;
+        } catch {
+          set({ user: null, isAuthenticated: false, isAdmin: false });
+          return null;
+        }
       },
 
       
 
       setTokens: (accessToken: string, refreshToken: string) => {
 
-        // Save to localStorage for apiClient
+        // Save to localStorage for apiClient via TokenManager
         if (typeof window !== 'undefined') {
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
+          tokenManager.setTokens(accessToken, refreshToken);
         }
 
         set({
@@ -223,6 +188,10 @@ export const useAuthStore = create<AuthStore>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.isHydrated = true;
+          // Sync persisted tokens to tokenManager for apiClient
+          if (state.token && state.refreshToken) {
+            tokenManager.setTokens(state.token, state.refreshToken);
+          }
         }
       },
     }

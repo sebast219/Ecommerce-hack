@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
 import { getStripe } from '@/lib/stripe';
 import { validateCard, validateExpiry, validateCVC, formatCurrency } from '@/lib/stripe';
 
@@ -89,33 +90,21 @@ export default function PaymentForm({
 
     try {
       // Crear Checkout Session directamente
-      const response = await fetch('/api/v1/payments/checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: [{
-            name: 'Order Payment',
-            amount: amount,
-            quantity: 1,
-            description: orderId ? `Order #${orderId}` : 'Purchase from Ecommerce Hak 6'
-          }],
-          successUrl: `${window.location.origin}/payment/success`,
-          cancelUrl: `${window.location.origin}/payment/cancel`,
-          orderId,
-          customerId,
-        }),
+      const sessionData = await apiClient.post('/payments/checkout-session', {
+        items: [{
+          name: 'Order Payment',
+          amount: amount,
+          quantity: 1,
+          description: orderId ? `Order #${orderId}` : 'Purchase from Ecommerce Hak 6'
+        }],
+        successUrl: `${window.location.origin}/payment/success`,
+        cancelUrl: `${window.location.origin}/payment/cancel`,
+        orderId,
+        customerId,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const sessionData = await response.json();
       
       // Redirigir a Stripe Checkout
-      window.location.href = sessionData.data.url;
+      window.location.href = (sessionData.data as any).url;
     } catch (error) {
       onError(error as Error);
     } finally {

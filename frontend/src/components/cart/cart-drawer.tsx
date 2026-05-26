@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCartStore } from '@/store/cart-store';
 import {
   Sheet,
@@ -116,9 +117,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 {/* Image */}
                 <div className="w-16 h-16 rounded-xl border border-black/8 bg-black/[0.02] flex items-center justify-center shrink-0 overflow-hidden">
                   {item.product.image ? (
-                    <img
+                    <Image
                       src={item.product.image}
                       alt={item.product.name}
+                      width={64}
+                      height={64}
                       className="w-full h-full object-contain p-1.5"
                     />
                   ) : (

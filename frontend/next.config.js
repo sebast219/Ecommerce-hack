@@ -9,7 +9,7 @@ const nextConfig = {
   },
   swcMinify: true,
   compiler: {
-    removeConsole: false,
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
   },
 };
 

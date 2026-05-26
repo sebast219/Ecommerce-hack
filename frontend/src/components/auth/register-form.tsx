@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/store/auth-store';
 
 export function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -17,8 +18,10 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const router = useRouter();
+  const { register } = useAuthStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -26,10 +29,29 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Carga instantánea sin delay
-    setIsLoading(false);
-    router.push('/auth/login');
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener mínimo 6 caracteres');
+      return;
+    }
+    try {
+      setIsLoading(true);
+      setError('');
+      await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Error al crear la cuenta');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputClass = `
@@ -67,6 +89,13 @@ export function RegisterForm() {
 
         {/* Thin divider */}
         <div className="h-px bg-black/10" />
+
+        {/* Error */}
+        {error && (
+          <div className="px-4 py-3 rounded-xl border border-black/10 bg-black/[0.03] text-sm text-black/70">
+            {error}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">

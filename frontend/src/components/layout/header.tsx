@@ -7,6 +7,8 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
+import { isAdmin } from '@/types/auth';
+import { getAvatarUrl } from '@/lib/utils';
 import { CartDrawer } from '@/components/cart/cart-drawer';
 
 export function Header() {
@@ -111,7 +113,7 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-4">
             {/* Admin Dashboard Icon */}
-            {user?.role === 'ADMIN' && (
+            {isAdmin(user) && (
               <Link
                 href="/admin/dashboard"
                 className="
@@ -169,7 +171,7 @@ export function Header() {
                   <div className="h-8 w-8 rounded-full bg-black/90 overflow-hidden">
                     {user?.avatar ? (
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}`}
+                        src={getAvatarUrl(user.avatar)!}
                         alt={`${user.firstName} ${user.lastName}`}
                         width={32}
                         height={32}
@@ -186,7 +188,7 @@ export function Header() {
                 {/* User Dropdown Menu */}
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    {user.role === 'ADMIN' && (
+                    {isAdmin(user) && (
                       <Link
                         href="/admin/dashboard"
                         className="block px-4 py-2 text-sm text-black/70 hover:bg-gray-50 transition-colors"

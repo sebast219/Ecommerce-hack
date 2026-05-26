@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCartStore } from '@/store/cart-store';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -162,9 +163,11 @@ export function CartPage() {
                 {/* Image */}
                 <div className="w-20 h-20 rounded-xl border border-black/8 bg-black/[0.02] flex items-center justify-center shrink-0 overflow-hidden">
                   {item.product.image ? (
-                    <img
+                    <Image
                       src={item.product.image}
                       alt={item.product.name}
+                      width={80}
+                      height={80}
                       className="w-full h-full object-contain p-2"
                     />
                   ) : (

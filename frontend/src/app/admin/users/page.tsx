@@ -18,23 +18,12 @@ import {
   Edit,
   Trash2,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
 import { adminUserService } from '@/lib/admin-user-service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-  phone?: string;
-  avatar?: string;
-}
+import { User, UserRole, isAdmin } from '@/types/auth';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -47,10 +36,11 @@ export default function AdminUsersPage() {
 
   // Verificar si es administrador
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'ADMIN') {
+    if (!isAuthenticated || !isAdmin(user)) {
       router.push('/');
       return;
     }
+    fetchUsers();
   }, [isAuthenticated, user, router]);
 
   // Cargar usuarios
@@ -67,12 +57,6 @@ export default function AdminUsersPage() {
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    if (isAuthenticated && user?.role === 'ADMIN') {
-      fetchUsers();
-    }
-  }, [isAuthenticated, user]);
 
   // Refrescar usuarios
   const handleRefresh = () => {
@@ -153,7 +137,7 @@ export default function AdminUsersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-black/60 text-sm">Administradores</p>
-                <p className="text-2xl font-bold">{users.filter(u => u.role === 'ADMIN').length}</p>
+                <p className="text-2xl font-bold">{users.filter(u => isAdmin(u)).length}</p>
               </div>
               <Shield className="w-8 h-8 text-black/20" />
             </div>
@@ -162,7 +146,7 @@ export default function AdminUsersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-black/60 text-sm">Clientes</p>
-                <p className="text-2xl font-bold">{users.filter(u => u.role === 'USER').length}</p>
+                <p className="text-2xl font-bold">{users.filter(u => u.role === UserRole.USER).length}</p>
               </div>
               <UserCheck className="w-8 h-8 text-black/20" />
             </div>
@@ -244,9 +228,11 @@ export default function AdminUsersPage() {
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-sm font-semibold">
                             {user.avatar ? (
-                              <img
+                              <Image
                                 src={user.avatar}
                                 alt={`${user.firstName} ${user.lastName}`}
+                                width={40}
+                                height={40}
                                 className="w-full h-full rounded-full object-cover"
                               />
                             ) : (
@@ -271,11 +257,11 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.role === 'ADMIN' 
+                          isAdmin(user) 
                             ? 'bg-black text-white' 
                             : 'bg-black/10 text-black'
                         }`}>
-                          {user.role === 'ADMIN' ? 'Admin' : 'Cliente'}
+                          {isAdmin(user) ? 'Admin' : 'Cliente'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

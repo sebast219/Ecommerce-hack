@@ -17,6 +17,7 @@ import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useOrderManagement } from '@/hooks/useOrderManagement';
 import { useCart } from '@/hooks/use-cart';
+import { apiClient } from '@/lib/api-client';
 
 interface CheckoutStep {
   id: string;
@@ -30,7 +31,7 @@ export const CheckoutFlowML = () => {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
   const { addToCart, refetch: refetchApiCart } = useCart();
-  const { user, token } = useAuthStore();
+  const { user } = useAuthStore();
   const { createOrder, createPaymentIntent } = useOrderManagement();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -129,58 +130,46 @@ export const CheckoutFlowML = () => {
   
   const loadSavedAddresses = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await apiClient.get('/users/addresses');
+      const addressesData = (response.data as any)?.data || response.data;
       
-      if (response.ok) {
-        const data = await response.json();
-        const addressesData = data.data?.data || data.data || data;
-        
-        if (Array.isArray(addressesData)) {
-          setSavedAddresses(addressesData.map((addr: any) => ({
-            id: addr.id,
-            label: addr.label,
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            zipCode: addr.zipCode,
-            phone: addr.phone,
-            isDefault: addr.isDefault || false,
-          })));
-        }
+      if (Array.isArray(addressesData)) {
+        setSavedAddresses(addressesData.map((addr: any) => ({
+          id: addr.id,
+          label: addr.label,
+          street: addr.street,
+          city: addr.city,
+          state: addr.state,
+          zipCode: addr.zipCode,
+          phone: addr.phone,
+          isDefault: addr.isDefault || false,
+        })));
       }
     } catch (error) {
       console.error('Error loading addresses:', error);
     }
-  }, [token]);
+  }, []);
 
   const loadSavedPaymentMethods = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const response = await apiClient.get('/users/payment-methods');
+      const cardsData = (response.data as any)?.data || response.data;
       
-      if (response.ok) {
-        const data = await response.json();
-        const cardsData = data.data?.data || data.data || data;
-        
-        if (Array.isArray(cardsData)) {
-          setSavedPaymentMethods(cardsData.map((pm: any) => ({
-            id: pm.id,
-            last4: pm.last4,
-            brand: pm.brand,
-            expiryMonth: pm.expiryMonth,
-            expiryYear: pm.expiryYear,
-            bank: pm.bank || 'generic',
-            isDefault: pm.isDefault || false,
-          })));
-        }
+      if (Array.isArray(cardsData)) {
+        setSavedPaymentMethods(cardsData.map((pm: any) => ({
+          id: pm.id,
+          last4: pm.last4,
+          brand: pm.brand,
+          expiryMonth: pm.expiryMonth,
+          expiryYear: pm.expiryYear,
+          bank: pm.bank || 'generic',
+          isDefault: pm.isDefault || false,
+        })));
       }
     } catch (error) {
       console.error('Error loading payment methods:', error);
     }
-  }, [token]);
+  }, []);
 
   const handleNextStep = async () => {
     setError(null);
@@ -207,11 +196,11 @@ export const CheckoutFlowML = () => {
 
   // Load saved addresses and payment methods
   useEffect(() => {
-    if (user && token) {
+    if (user) {
       loadSavedAddresses();
       loadSavedPaymentMethods();
     }
-  }, [user, token, loadSavedAddresses, loadSavedPaymentMethods]);
+  }, [user, loadSavedAddresses, loadSavedPaymentMethods]);
 
   const handlePrevStep = () => {
     if (currentStep > 1) {

@@ -20,23 +20,15 @@ import { PaymentController } from './controllers/payment.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { HealthController } from './controllers/health.controller';
-import {
-  JwtAuthGuard,
-  RolesGuard,
-  PermissionsGuard,
-  ThrottlingGuard,
-} from './guards/jwt-auth.guard';
+import { JwtAuthGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 // Categories controller - verificar si está en products.controller
 // import { CategoriesController } from './controllers/categories.controller';
 
-// EJEMPLO: Exportar guards
-export {
-  JwtAuthGuard,
-  RolesGuard,
-  PermissionsGuard,
-  ThrottlingGuard,
-} from './guards/jwt-auth.guard';
+// Exportar guards
+export { JwtAuthGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
+export { RolesGuard } from './guards/roles.guard';
 
 // EJEMPLO: Exportar decoradores
 export {

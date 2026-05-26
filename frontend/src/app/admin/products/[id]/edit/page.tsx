@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { apiClient } from '@/lib/api-client';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -70,16 +71,8 @@ export default function EditProductPage() {
   
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Error al cargar categorías');
-
-      const data = await response.json();
-      const categoriesData = data.data?.data || data.data || data;
+      const response = await apiClient.get('/categories');
+      const categoriesData = (response.data as any)?.data || response.data;
       
       if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
@@ -88,27 +81,13 @@ export default function EditProductPage() {
       console.error('Error loading categories:', error);
       alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
-  }, [token]);
+  }, []);
 
   const fetchProduct = useCallback(async () => {
     setFetchLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setNotFound(true);
-          return;
-        }
-        throw new Error('Error al cargar producto');
-      }
-
-      const data = await response.json();
-      const productData = data.data?.data || data.data || data;
+      const response = await apiClient.get(`/products/${productId}`);
+      const productData = (response.data as any)?.data || response.data;
       
       if (productData) {
         setFormData({
@@ -134,7 +113,7 @@ export default function EditProductPage() {
     } finally {
       setFetchLoading(false);
     }
-  }, [productId, token]);
+  }, [productId]);
 
   const generateSlug = (name: string) => {
     return name
@@ -146,11 +125,11 @@ export default function EditProductPage() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       fetchCategories();
       fetchProduct();
     }
-  }, [isAuthenticated, token, productId, fetchCategories, fetchProduct]);
+  }, [isAuthenticated, productId, fetchCategories, fetchProduct]);
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
     setFormData(prev => ({
@@ -236,21 +215,7 @@ export default function EditProductPage() {
         stock: parseInt(formData.stock.toString()),
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Error ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await apiClient.put(`/products/${productId}`, payload);
       alert('Producto actualizado exitosamente');
       router.push('/admin/products');
     } catch (error: any) {

@@ -155,10 +155,10 @@ export class ProductRepositoryImpl
     const prismaProducts = await this.prisma.product.findMany({
       where: {
         OR: [
-          { name: { contains: query } },
-          { description: { contains: query } },
-          { sku: { contains: query } },
-          { tags: { contains: query } },
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+          { sku: { contains: query, mode: 'insensitive' } },
+          { tags: { contains: query, mode: 'insensitive' } },
         ],
       },
       include: {
@@ -277,12 +277,32 @@ export class ProductRepositoryImpl
       id: prismaProduct.id,
       name: prismaProduct.name,
       slug: prismaProduct.slug,
+      description: prismaProduct.description || '',
       price: new Money(Number(prismaProduct.price), 'USD'),
+      comparePrice: prismaProduct.comparePrice ? new Money(Number(prismaProduct.comparePrice), 'USD') : undefined,
       sku: prismaProduct.sku,
+      barcode: prismaProduct.barcode,
+      trackInventory: prismaProduct.trackInventory,
       isActive: prismaProduct.isActive,
+      images: prismaProduct.images ? JSON.parse(prismaProduct.images) : [],
+      tags: prismaProduct.tags ? JSON.parse(prismaProduct.tags) : [],
+      weight: prismaProduct.weight,
+      dimensions: prismaProduct.dimensions,
+      seoTitle: prismaProduct.seoTitle,
+      seoDescription: prismaProduct.seoDescription,
+      difficulty: prismaProduct.difficulty,
+      licenseType: prismaProduct.licenseType,
+      compatibility: prismaProduct.compatibility ? JSON.parse(prismaProduct.compatibility) : [],
+      requirements: prismaProduct.requirements,
+      tutorials: prismaProduct.tutorials ? JSON.parse(prismaProduct.tutorials) : [],
+      isPhysical: prismaProduct.isPhysical,
+      downloadUrl: prismaProduct.downloadUrl,
+      categoryId: prismaProduct.categoryId,
+      category: prismaProduct.category ? this.mapPrismaCategoryToCategory(prismaProduct.category) : undefined,
+      inventory: prismaProduct.inventory ? this.mapPrismaInventoryToInventory(prismaProduct.inventory) : undefined,
       createdAt: prismaProduct.createdAt,
       updatedAt: prismaProduct.updatedAt,
-    } as Product; // Simplified mapping to avoid type issues
+    } as Product;
   }
 
   private mapPrismaCategoryToCategory(prismaCategory: any): Category {

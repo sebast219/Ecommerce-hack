@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { apiClient } from '@/lib/api-client';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -66,16 +67,8 @@ export default function NewProductPage() {
   
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Error al cargar categorías');
-
-      const data = await response.json();
-      const categoriesData = data.data?.data || data.data || data;
+      const response = await apiClient.get('/categories');
+      const categoriesData = (response.data as any)?.data || response.data;
       
       if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
@@ -84,7 +77,7 @@ export default function NewProductPage() {
       console.error('Error loading categories:', error);
       alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
-  }, [token]);
+  }, []);
 
   const generateSlug = (name: string) => {
     return name
@@ -96,10 +89,10 @@ export default function NewProductPage() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       fetchCategories();
     }
-  }, [isAuthenticated, token, fetchCategories]);
+  }, [isAuthenticated, fetchCategories]);
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
     setFormData(prev => ({
@@ -185,21 +178,7 @@ export default function NewProductPage() {
         stock: parseInt(formData.stock.toString()),
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Error ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await apiClient.post('/products', payload);
       alert('Producto creado exitosamente');
       router.push('/admin/products');
     } catch (error: any) {

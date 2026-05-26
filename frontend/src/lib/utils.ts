@@ -1,5 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? '';
+
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
@@ -26,4 +28,10 @@ export function slugify(text: string): string {
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+export function getAvatarUrl(avatarPath: string | null | undefined): string | null {
+  if (!avatarPath) return null;
+  if (avatarPath.startsWith('http')) return avatarPath;
+  return `${API_BASE}${avatarPath}`;
 }

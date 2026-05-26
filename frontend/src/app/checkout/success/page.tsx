@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { CheckCircle, Package, ArrowRight, ShoppingBag, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { orderService, Order } from '@/lib/order-service';
@@ -122,9 +123,11 @@ function SuccessContent() {
                 <div key={item.id} className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden">
                     {item.product?.images?.[0] ? (
-                      <img
+                      <Image
                         src={item.product.images[0]}
                         alt={item.product.name}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-cover"
                       />
                     ) : (

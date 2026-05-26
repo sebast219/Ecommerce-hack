@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { adminProductService } from '@/lib/admin-product-service';
@@ -339,10 +340,11 @@ export default function AdminProductsPage() {
                 {/* Product Image */}
                 <div className="aspect-square bg-gray-100 relative">
                   {product.images && product.images.length > 0 ? (
-                    <img
+                    <Image
                       src={product.images[0]}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

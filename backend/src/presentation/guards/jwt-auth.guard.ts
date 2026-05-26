@@ -2,70 +2,11 @@
 // PROPÓSITO: Implementar middleware de seguridad para proteger endpoints
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
-// EJEMPLO: Guard de autenticación JWT
+// Guard de autenticación JWT
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
-
-// EJEMPLO: Guard de roles
-@Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    // EJEMPLO: Obtener roles requeridos del decorador
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
-    if (!requiredRoles) {
-      return true;
-    }
-
-    // EJEMPLO: Obtener usuario del request (seteado por JwtAuthGuard)
-    const { user } = context.switchToHttp().getRequest();
-
-    if (!user || !user.role) {
-      return false;
-    }
-
-    // EJEMPLO: Verificar si el usuario tiene los roles requeridos
-    return requiredRoles.some((role) => user.role === role);
-  }
-}
-
-// EJEMPLO: Guard de permisos granulares
-@Injectable()
-export class PermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
-
-  canActivate(context: ExecutionContext): boolean {
-    // EJEMPLO: Obtener permisos requeridos
-    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
-      'permissions',
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (!requiredPermissions) {
-      return true;
-    }
-
-    // EJEMPLO: Obtener usuario y sus permisos
-    const { user } = context.switchToHttp().getRequest();
-
-    if (!user || !user.permissions) {
-      return false;
-    }
-
-    // EJEMPLO: Verificar permisos específicos
-    return requiredPermissions.every((permission) =>
-      user.permissions.includes(permission),
-    );
-  }
-}
 
 // EJEMPLO: Guard de throttling (rate limiting)
 @Injectable()

@@ -1,4 +1,5 @@
 import { httpClient } from './http-client';
+import { UserRole } from '@/types/auth';
 
 // User interfaces for admin operations
 export interface AdminUser {
@@ -6,7 +7,7 @@ export interface AdminUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'USER' | 'ADMIN';
+  role: UserRole;
   isActive: boolean;
   emailVerified: boolean;
   createdAt: string;
@@ -21,14 +22,14 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   password: string;
-  role?: 'USER' | 'ADMIN';
+  role?: UserRole;
 }
 
 export interface UpdateUserRequest {
   email?: string;
   firstName?: string;
   lastName?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: UserRole;
   isActive?: boolean;
   emailVerified?: boolean;
 }
@@ -37,7 +38,7 @@ export interface UserQueryParams {
   page?: number;
   limit?: number;
   search?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: UserRole;
   isActive?: boolean;
   emailVerified?: boolean;
   sortBy?: 'email' | 'firstName' | 'lastName' | 'createdAt' | 'lastLoginAt';

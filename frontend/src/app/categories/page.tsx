@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Wifi,
@@ -128,9 +129,10 @@ export default function CategoriesPage() {
               {/* Image */}
               <div className={`relative h-[400px] lg:h-[600px] overflow-hidden rounded-3xl ${isEven ? 'lg:order-first' : 'lg:order-last'}`}>
 
-                <img
+                <Image
                   src={cat.image}
                   alt={cat.name}
+                  fill
                   className="
                     w-full h-full
                     object-cover

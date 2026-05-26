@@ -7,7 +7,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { Input } from '@/components/ui/input';
 
-export default function RegisterPage() {
+export default function LoginForm() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');

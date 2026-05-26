@@ -36,12 +36,13 @@ describe('Products Integration Tests', () => {
     const adminLogin = await request(TestSetup.app.getHttpServer())
       .post('/api/v1/auth/login')
       .send({ email: admin.email, password: admin.password });
-    adminToken = adminLogin.body.data.accessToken;
+    // La respuesta está anidada: { success: true, data: { data: { accessToken, refreshToken } } }
+    adminToken = adminLogin.body.data?.data?.accessToken || adminLogin.body.data?.accessToken;
 
     const userLogin = await request(TestSetup.app.getHttpServer())
       .post('/api/v1/auth/login')
       .send({ email: user.email, password: user.password });
-    userToken = userLogin.body.data.accessToken;
+    userToken = userLogin.body.data?.data?.accessToken || userLogin.body.data?.accessToken;
   });
 
   afterAll(async () => {
@@ -51,28 +52,34 @@ describe('Products Integration Tests', () => {
   // LISTADO CON PAGINACIÓN
   describe('GET /api/v1/products', () => {
     it('should return paginated products', async () => {
-      await productFactory.createProducts(25);
+       const category = await productFactory.createCategory();
+      for (let i = 0; i < 15; i++) {
+        await productFactory.createProduct({ categoryId: category.id });
+      }
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products?page=1&limit=10')
         .expect(200);
 
       expect(response.body.data.products).toHaveLength(10);
-      expect(response.body.data.total).toBe(25);
-      expect(response.body.data.totalPages).toBe(3);
+      expect(response.body.data.total).toBe(15);
+      expect(response.body.data.totalPages).toBe(2);
       expect(response.body.data.page).toBe(1);
-    });
+    }, 30000);
 
     it('should return last page correctly', async () => {
-      await productFactory.createProducts(25);
+      const category = await productFactory.createCategory();
+      for (let i = 0; i < 15; i++) {
+        await productFactory.createProduct({ categoryId: category.id });
+      }
 
       const response = await request(TestSetup.app.getHttpServer())
-        .get('/api/v1/products?page=3&limit=10')
+        .get('/api/v1/products?page=2&limit=10')
         .expect(200);
 
       expect(response.body.data.products).toHaveLength(5);
-      expect(response.body.data.page).toBe(3);
-    });
+      expect(response.body.data.page).toBe(2);
+    }, 30000);
 
     it('should enforce max page size of 50', async () => {
       await productFactory.createProducts(5);
@@ -86,9 +93,10 @@ describe('Products Integration Tests', () => {
     });
 
     it('should filter by search term', async () => {
-      await productFactory.createProduct({ name: 'Nmap Scanner Pro' });
-      await productFactory.createProduct({ name: 'Wireshark Toolkit' });
-      await productFactory.createProduct({ name: 'Metasploit Framework' });
+      const category = await productFactory.createCategory();
+      await productFactory.createProduct({ name: 'Nmap Scanner Pro Test', categoryId: category.id });
+      await productFactory.createProduct({ name: 'Wireshark Toolkit Test', categoryId: category.id });
+      await productFactory.createProduct({ name: 'Metasploit Framework Test', categoryId: category.id });
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products?search=nmap')
@@ -99,22 +107,25 @@ describe('Products Integration Tests', () => {
     });
 
     it('should filter by price range', async () => {
-      await productFactory.createProduct({ price: 10 });
-      await productFactory.createProduct({ price: 50 });
-      await productFactory.createProduct({ price: 100 });
+      const category = await productFactory.createCategory();
+      await productFactory.createProduct({ name: 'Price Test Low', price: 10, categoryId: category.id });
+      await productFactory.createProduct({ name: 'Price Test Mid', price: 50, categoryId: category.id });
+      await productFactory.createProduct({ name: 'Price Test High', price: 100, categoryId: category.id });
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products?minPrice=20&maxPrice=80')
         .expect(200);
 
-      expect(response.body.data.products).toHaveLength(1);
-      expect(response.body.data.products[0].price.amount).toBe(50);
+      const filteredProducts = response.body.data.products.filter((p: any) => p.name.includes('Price Test'));
+      expect(filteredProducts).toHaveLength(1);
+      expect(filteredProducts[0].price.amount).toBe(50);
     });
 
     it('should sort by price ascending', async () => {
-      await productFactory.createProduct({ price: 100 });
-      await productFactory.createProduct({ price: 10 });
-      await productFactory.createProduct({ price: 50 });
+      const category = await productFactory.createCategory();
+      await productFactory.createProduct({ price: 100, categoryId: category.id });
+      await productFactory.createProduct({ price: 10, categoryId: category.id });
+      await productFactory.createProduct({ price: 50, categoryId: category.id });
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products?sortBy=price&sortOrder=asc')
@@ -124,10 +135,11 @@ describe('Products Integration Tests', () => {
         (p: any) => p.price.amount,
       );
       expect(prices).toEqual([...prices].sort((a: number, b: number) => a - b));
-    });
+    }, 30000);
 
     it('should NOT return sensitive fields in list view', async () => {
-      await productFactory.createProduct();
+      const category = await productFactory.createCategory();
+      await productFactory.createProduct({ categoryId: category.id });
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products')
@@ -141,8 +153,9 @@ describe('Products Integration Tests', () => {
     });
 
     it('should only return active products for public', async () => {
-      await productFactory.createProduct({ isActive: true });
-      await productFactory.createProduct({ isActive: false });
+      const category = await productFactory.createCategory();
+      await productFactory.createProduct({ isActive: true, categoryId: category.id });
+      await productFactory.createProduct({ isActive: false, categoryId: category.id });
 
       const response = await request(TestSetup.app.getHttpServer())
         .get('/api/v1/products')

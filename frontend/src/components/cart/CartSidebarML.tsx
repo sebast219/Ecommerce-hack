@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, ShoppingCart, Plus, Minus, Trash2, ChevronRight, Package, CreditCard, Truck } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useAuthStore } from '@/store/auth-store';
@@ -134,9 +135,11 @@ export const CartSidebarML = ({ isOpen, onClose }: CartSidebarMLProps) => {
                     <div className="flex gap-4">
                       {/* Product Image */}
                       <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={item.product.images[0] || '/placeholder-product.jpg'}
                           alt={item.product.name}
+                          width={80}
+                          height={80}
                           className="w-full h-full object-cover"
                         />
                       </div>

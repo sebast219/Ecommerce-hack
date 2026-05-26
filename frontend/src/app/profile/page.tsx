@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -27,6 +28,9 @@ import {
   FileImage,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
+import { apiClient } from '@/lib/api-client';
+import { isAdmin } from '@/types/auth';
+import { getAvatarUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -104,7 +108,7 @@ export default function ProfilePage() {
 
   // Avatar states
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    user?.avatar ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}` : null
+    getAvatarUrl(user?.avatar)
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
@@ -158,24 +162,13 @@ export default function ProfilePage() {
 
   // Load saved addresses and cards on mount
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       // Load addresses
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      })
-        .then(res => {
-          console.log('Addresses response status:', res.status);
-          return res.json();
-        })
-        .then(data => {
-          console.log('Addresses response data:', data);
-          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
-          const addressesData = data.data?.data || data.data || data;
-          console.log('Processed addressesData:', addressesData);
-          console.log('Is array:', Array.isArray(addressesData));
+      apiClient.get('/users/addresses')
+        .then(response => {
+          const addressesData = (response.data as any)?.data || response.data;
           
           if (Array.isArray(addressesData)) {
-            console.log('Setting addresses from array:', addressesData.length);
             setSavedAddresses(addressesData.map((addr: any) => ({
               id: addr.id,
               label: addr.label,
@@ -186,8 +179,6 @@ export default function ProfilePage() {
               phone: addr.phone,
             })));
           } else if (addressesData && typeof addressesData === 'object' && addressesData.id) {
-            // Single object case
-            console.log('Setting addresses from single object');
             setSavedAddresses([{
               id: addressesData.id,
               label: addressesData.label,
@@ -197,9 +188,6 @@ export default function ProfilePage() {
               zip: addressesData.zipCode,
               phone: addressesData.phone,
             }]);
-          } else {
-            console.log('No addresses found or invalid format');
-            setSavedAddresses([]);
           }
         })
         .catch(err => {
@@ -207,22 +195,11 @@ export default function ProfilePage() {
         });
 
       // Load payment methods
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      })
-        .then(res => {
-          console.log('Payment methods response status:', res.status);
-          return res.json();
-        })
-        .then(data => {
-          console.log('Payment methods response data:', data);
-          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
-          const cardsData = data.data?.data || data.data || data;
-          console.log('Processed cardsData:', cardsData);
-          console.log('Is array:', Array.isArray(cardsData));
+      apiClient.get('/users/payment-methods')
+        .then(response => {
+          const cardsData = (response.data as any)?.data || response.data;
           
           if (Array.isArray(cardsData)) {
-            console.log('Setting cards from array:', cardsData.length);
             setSavedCards(cardsData.map((pm: any) => ({
               id: pm.id,
               last4: pm.last4,
@@ -231,8 +208,6 @@ export default function ProfilePage() {
               bank: pm.bank || 'generic',
             })));
           } else if (cardsData && typeof cardsData === 'object' && cardsData.id) {
-            // Single object case
-            console.log('Setting cards from single object');
             setSavedCards([{
               id: cardsData.id,
               last4: cardsData.last4,
@@ -240,16 +215,13 @@ export default function ProfilePage() {
               expiry: `${cardsData.expiryMonth}/${cardsData.expiryYear}`,
               bank: cardsData.bank || 'generic',
             }]);
-          } else {
-            console.log('No payment methods found or invalid format');
-            setSavedCards([]);
           }
         })
         .catch(err => {
           console.error('Error loading payment methods:', err);
         });
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
@@ -259,28 +231,13 @@ export default function ProfilePage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
-  // Debug logs para verificar estado
-  useEffect(() => {
-    console.log('Current savedAddresses:', savedAddresses);
-    console.log('Current savedCards:', savedCards);
-    console.log('Current orders:', orders);
-  }, [savedAddresses, savedCards, orders]);
-
   // Load orders
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       setOrdersLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders?limit=50`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      })
-        .then(res => {
-          console.log('Orders response status:', res.status);
-          return res.json();
-        })
-        .then(data => {
-          console.log('Orders response data:', data);
-          // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: Array } }
-          const ordersData = data.data?.data || data.data || data;
+      apiClient.get('/orders?limit=50')
+        .then(response => {
+          const ordersData = (response.data as any)?.data || response.data;
           if (Array.isArray(ordersData)) {
             setOrders(ordersData.map((order: any) => ({
               id: order.id || `ORD-${order.id}`,
@@ -298,7 +255,7 @@ export default function ProfilePage() {
           setOrdersLoading(false);
         });
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   // Update notifications when user data or orders change
   useEffect(() => {
@@ -329,7 +286,7 @@ export default function ProfilePage() {
   // Update avatar URL when user data changes
   useEffect(() => {
     if (user?.avatar) {
-      setAvatarUrl(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}`);
+      setAvatarUrl(getAvatarUrl(user.avatar));
     } else {
       setAvatarUrl(null);
     }
@@ -447,14 +404,9 @@ export default function ProfilePage() {
   const handleSaveCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingCard(true);
-    console.log('=== Saving Card ===');
-    console.log('Token:', token ? 'Present' : 'Missing');
     
     try {
       const isEditing = !!editingCardId;
-      const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods/${editingCardId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods`;
       const payload = {
         brand: cardType || 'card',
         last4: cardNumber.slice(-4),
@@ -463,38 +415,12 @@ export default function ProfilePage() {
         bank: bank || 'generic',
         isDefault: false,
       };
-      console.log(isEditing ? 'PUT to:' : 'POST to:', url);
-      console.log('Payload:', payload);
       
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = isEditing
+        ? await apiClient.put(`/users/payment-methods/${editingCardId}`, payload)
+        : await apiClient.post('/users/payment-methods', payload);
 
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        throw new Error('Invalid server response');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || `Error ${response.status}: ${responseText}`);
-      }
-
-      console.log('Response data:', data);
-      
-      // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: paymentMethod } }
-      const newCard = data.data?.data || data.data || data;
+      const newCard = (response.data as any)?.data || response.data;
       if (!newCard.id) {
         console.error('No ID in response:', newCard);
         throw new Error('Server returned invalid data');
@@ -577,22 +503,10 @@ export default function ProfilePage() {
     setSavingPassword(true);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/password`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword,
-        }),
+      await apiClient.put('/auth/password', {
+        currentPassword,
+        newPassword,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al cambiar contraseña');
-      }
 
       setShowPasswordModal(false);
       setCurrentPassword('');
@@ -610,9 +524,6 @@ export default function ProfilePage() {
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddressError('');
-    console.log('=== Saving Address ===');
-    console.log('Token:', token ? 'Present' : 'Missing');
-    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
 
     if (!addressStreet || !addressCity || !addressState) {
       setAddressError('Completa la dirección, ciudad y departamento/estado');
@@ -623,49 +534,20 @@ export default function ProfilePage() {
     
     try {
       const isEditing = !!editingAddressId;
-      const url = isEditing 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/users/addresses/${editingAddressId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/users/addresses`;
-      
-      console.log(isEditing ? 'PUT to:' : 'POST to:', url);
-      console.log('Payload:', { label: addressLabel, street: addressStreet, city: addressCity, state: addressState, zipCode: addressZip, phone: addressPhone });
-      
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          label: addressLabel || 'Mi dirección',
-          street: addressStreet,
-          city: addressCity,
-          state: addressState,
-          zipCode: addressZip,
-          phone: addressPhone,
-        }),
-      });
+      const addressPayload = {
+        label: addressLabel || 'Mi dirección',
+        street: addressStreet,
+        city: addressCity,
+        state: addressState,
+        zipCode: addressZip,
+        phone: addressPhone,
+      };
 
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        throw new Error('Invalid server response');
-      }
+      const response = isEditing
+        ? await apiClient.put(`/users/addresses/${editingAddressId}`, addressPayload)
+        : await apiClient.post('/users/addresses', addressPayload);
 
-      if (!response.ok) {
-        throw new Error(data.message || `Error ${response.status}: ${responseText}`);
-      }
-
-      console.log('Response data:', data);
-      
-      // Backend devuelve estructura doblemente anidada: { success: true, data: { success: true, data: address } }
-      const newAddress = data.data?.data || data.data || data;
+      const newAddress = (response.data as any)?.data || response.data;
       if (!newAddress.id) {
         console.error('No ID in response:', newAddress);
         throw new Error('Server returned invalid data');
@@ -732,13 +614,7 @@ export default function ProfilePage() {
     if (!confirm('¿Estás seguro de que deseas eliminar esta dirección?')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/addresses/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar dirección');
-
+      await apiClient.delete(`/users/addresses/${id}`);
       setSavedAddresses(savedAddresses.filter(a => a.id !== id));
       alert('Dirección eliminada exitosamente');
     } catch (error: any) {
@@ -764,13 +640,7 @@ export default function ProfilePage() {
     if (!confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/payment-methods/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar tarjeta');
-
+      await apiClient.delete(`/users/payment-methods/${id}`);
       setSavedCards(savedCards.filter(c => c.id !== id));
       alert('Tarjeta eliminada exitosamente');
     } catch (error: any) {
@@ -868,20 +738,13 @@ export default function ProfilePage() {
       reader.readAsDataURL(file);
 
       // Enviar al servidor usando el endpoint dedicado para avatar
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/avatar`, {
+      const response = await apiClient.request('/users/avatar', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
+        headers: {},
+        body: formData as any,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al subir la imagen');
-      }
-
-      const data = await response.json();
+      const data = response.data as any;
       
       // Actualizar el usuario con la nueva URL del avatar
       if (data.success && data.data?.user) {
@@ -889,10 +752,7 @@ export default function ProfilePage() {
         const updatedUser = data.data.user;
         setUser(updatedUser);
         // Construir URL completa para el avatar
-        const fullAvatarUrl = updatedUser?.avatar 
-          ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${updatedUser.avatar}`
-          : null;
-        setAvatarUrl(fullAvatarUrl);
+        setAvatarUrl(getAvatarUrl(updatedUser?.avatar));
       }
 
       setShowAvatarMenu(false);
@@ -901,7 +761,7 @@ export default function ProfilePage() {
       console.error('Error uploading avatar:', error);
       alert(error.message || 'Error al subir la imagen');
       // Restaurar avatar anterior
-      setAvatarUrl(user?.avatar ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}${user.avatar}` : null);
+      setAvatarUrl(getAvatarUrl(user?.avatar));
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -913,25 +773,14 @@ export default function ProfilePage() {
 
     setIsUploadingAvatar(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          firstName: user?.firstName,
-          lastName: user?.lastName,
-          email: user?.email,
-          avatar: null,
-        }),
+      const response = await apiClient.put('/users/me', {
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        avatar: null,
       });
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar la imagen');
-      }
-
-      const data = await response.json();
+      const data = response.data as any;
       setUser(data.data || data);
       setAvatarUrl(null);
       setShowAvatarMenu(false);
@@ -948,22 +797,8 @@ export default function ProfilePage() {
     setLoading(true);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ firstName, lastName, email }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al actualizar perfil');
-      }
-
-      const data = await response.json();
-      setUser(data.data || data);
+      const response = await apiClient.put<any>('/users/me', { firstName, lastName, email });
+      setUser(response.data || response);
       setIsEditing(false);
     } catch (error: any) {
       alert(error.message || 'Error al guardar los cambios');
@@ -1122,9 +957,11 @@ export default function ProfilePage() {
                           {isUploadingAvatar ? (
                             <div className="h-6 w-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                           ) : avatarUrl ? (
-                            <img
+                            <Image
                               src={avatarUrl}
                               alt={`${user.firstName} ${user.lastName}`}
+                              width={96}
+                              height={96}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -1207,7 +1044,7 @@ export default function ProfilePage() {
                         </p>
                         <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-black text-white text-xs font-medium">
                           <Shield className="h-3 w-3" />
-                          {user.role === 'ADMIN' ? 'Administrador' : 'Cliente'}
+                          {isAdmin(user) ? 'Administrador' : 'Cliente'}
                         </span>
                       </div>
                     </div>

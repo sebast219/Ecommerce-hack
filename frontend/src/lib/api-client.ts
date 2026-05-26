@@ -1,5 +1,7 @@
 'use client';
 
+import { tokenManager } from './token-manager';
+
 interface ApiResponse<T = any> {
   success: boolean;
   data: T;
@@ -18,30 +20,68 @@ class ApiClient {
   private refreshPromise: Promise<string | null> | null = null;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
+    }
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL;
   }
 
-  // Token management con localStorage
+  // Token management via TokenManager
   private getAccessToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('accessToken');
+    const token = tokenManager.getAccessToken();
+    if (token) return token;
+    
+    // Fallback: try to read from auth-store if tokenManager is empty
+    // This handles edge cases where tokenManager and auth-store get out of sync
+    if (typeof window !== 'undefined') {
+      try {
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage);
+          const state = parsed.state;
+          if (state?.token) {
+            // Sync back to tokenManager for consistency
+            tokenManager.setTokens(state.token, state.refreshToken);
+            return state.token;
+          }
+        }
+      } catch {
+        // Ignore parsing errors
+      }
+    }
+    
+    return null;
   }
 
   private getRefreshToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('refreshToken');
+    const token = tokenManager.getRefreshToken();
+    if (token) return token;
+    
+    // Fallback: try to read from auth-store if tokenManager is empty
+    if (typeof window !== 'undefined') {
+      try {
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+          const parsed = JSON.parse(authStorage);
+          const state = parsed.state;
+          if (state?.refreshToken) {
+            return state.refreshToken;
+          }
+        }
+      } catch {
+        // Ignore parsing errors
+      }
+    }
+    
+    return null;
   }
 
   setTokens(accessToken: string, refreshToken: string) {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    tokenManager.setTokens(accessToken, refreshToken);
   }
 
   clearTokens() {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    tokenManager.clearTokens();
   }
 
   async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
@@ -127,16 +167,22 @@ class ApiClient {
       if (!response.ok) {
         this.clearTokens();
         if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth-storage');
           window.location.href = '/auth/login';
         }
         return null;
       }
 
       const data = await response.json();
-      this.setTokens(data.data.accessToken, data.data.refreshToken);
-      return data.data.accessToken;
+      const newAccessToken = data.data?.accessToken || data.accessToken;
+      const newRefreshToken = data.data?.refreshToken || data.refreshToken;
+      this.setTokens(newAccessToken, newRefreshToken);
+      return newAccessToken;
     } catch {
       this.clearTokens();
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth-storage');
+      }
       return null;
     }
   }

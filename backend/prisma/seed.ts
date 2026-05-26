@@ -206,6 +206,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/ducky']),
       },
       {
         name: 'WiFi Pineapple Mark VII',

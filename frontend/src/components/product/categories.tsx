@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Wifi, Usb, ShieldAlert, Network, Cpu, Search, ArrowRight, Package } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 
 interface Category {
   id: string;
@@ -37,19 +38,14 @@ export function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Categories API Response:', data);
-          // Handle nested response structure: data.data.categories contains the actual array
-          const categoriesData = data.data?.categories || data.categories || data.data?.data || data.data || data;
-          console.log('Categories Data Extracted:', categoriesData);
-          if (Array.isArray(categoriesData)) {
-            setCategories(categoriesData);
-            console.log('Categories loaded successfully:', categoriesData.length);
-          }
-        } else {
-          console.error('Failed to fetch categories:', response.status);
+        const response = await apiClient.get<any>('/categories');
+        console.log('Categories API Response:', response);
+        // Handle nested response structure: data.data.categories contains the actual array
+        const categoriesData = response.data?.data?.categories || response.data?.categories || response.data?.data || response.data;
+        console.log('Categories Data Extracted:', categoriesData);
+        if (Array.isArray(categoriesData)) {
+          setCategories(categoriesData);
+          console.log('Categories loaded successfully:', categoriesData.length);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);

@@ -2,6 +2,7 @@
 // PROPÓSITO: Configuración y utilidades para pagos con Stripe
 
 import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { apiClient } from './api-client';
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -50,80 +51,25 @@ export interface CreateCheckoutSessionData {
 
 // API client para pagos
 class StripePaymentClient {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-  }
 
   async createPaymentIntent(data: CreatePaymentIntentData): Promise<PaymentIntent> {
-    const response = await fetch(`${this.baseUrl}/payments/create-payment-intent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create payment intent');
-    }
-
-    const result = await response.json();
-    return result.data;
+    const response = await apiClient.post<PaymentIntent>('/payments/create-payment-intent', data);
+    return response.data;
   }
 
   async createCheckoutSession(data: CreateCheckoutSessionData): Promise<CheckoutSession> {
-    const response = await fetch(`${this.baseUrl}/payments/checkout-session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create checkout session');
-    }
-
-    const result = await response.json();
-    return result.data;
+    const response = await apiClient.post<CheckoutSession>('/payments/checkout-session', data);
+    return response.data;
   }
 
   async getPaymentIntent(paymentIntentId: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/payments/payment-intent/${paymentIntentId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to get payment intent');
-    }
-
-    const result = await response.json();
-    return result.data;
+    const response = await apiClient.get<any>(`/payments/payment-intent/${paymentIntentId}`);
+    return response.data;
   }
 
   async confirmPayment(paymentIntentId: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/payments/confirm-payment/${paymentIntentId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to confirm payment');
-    }
-
-    const result = await response.json();
-    return result.data;
+    const response = await apiClient.post<any>(`/payments/confirm-payment/${paymentIntentId}`, {});
+    return response.data;
   }
 }
 

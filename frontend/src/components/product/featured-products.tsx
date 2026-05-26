@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Star, ShoppingCart, ArrowRight } from 'lucide-react';
 
 const featuredProducts = [
@@ -51,9 +52,11 @@ export function FeaturedProducts() {
             >
               {/* Image */}
               <div className="aspect-square bg-black/[0.02] overflow-hidden">
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
+                  width={400}
+                  height={400}
                   className="
                     w-full h-full object-contain p-6
                     transition-transform duration-700

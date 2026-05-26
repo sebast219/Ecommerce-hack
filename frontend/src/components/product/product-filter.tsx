@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { apiClient } from '@/lib/api-client';
 
 import {
   X,
@@ -36,16 +37,10 @@ function useCategories() {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const response = await apiClient.get<any>('/categories');
       
       // Handle double-nested response structure: { data: { success: true, data: { categories: [...] } } }
-      const innerData = result.data || result;
+      const innerData = response.data || response;
       
       // Extract categories from inner data.data or innerData directly
       const categoriesArray = innerData.data?.categories || innerData.categories || [];

@@ -15,8 +15,6 @@ export enum UserRole {
   USER = 'USER',
   ADMIN = 'ADMIN',
   VENDOR = 'VENDOR',
-  MODERATOR = 'MODERATOR',
-  INSTRUCTOR = 'INSTRUCTOR',
 }
 
 export class RegisterDto {
