@@ -6,26 +6,11 @@ export interface AdminOrder {
   orderNumber: string;
   status: 'PENDING' | 'AWAITING_PAYMENT' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'EXPIRED';
   currency: string;
-  subtotal: {
-    amount: number;
-    currency: string;
-  };
-  tax: {
-    amount: number;
-    currency: string;
-  };
-  shipping: {
-    amount: number;
-    currency: string;
-  };
-  discount: {
-    amount: number;
-    currency: string;
-  };
-  total: {
-    amount: number;
-    currency: string;
-  };
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  discount: number;
+  total: number;
   notes?: string;
   shippingName: string;
   shippingEmail: string;
@@ -52,10 +37,7 @@ export interface AdminOrder {
   items: Array<{
     id: string;
     quantity: number;
-    price: {
-      amount: number;
-      currency: string;
-    };
+    price: number;
     productId: string;
     product?: {
       id: string;
@@ -129,7 +111,8 @@ export interface ApiResponse<T> {
 export const adminOrderService = {
   // Get all orders (admin view with all fields)
   getAll: async (params?: OrderQueryParams): Promise<ApiResponse<AdminOrder[]>> => {
-    return httpClient.get<AdminOrder[]>('/admin/orders', params);
+    const response: any = await httpClient.get<AdminOrder[]>('/admin/orders', params);
+    return response.data?.data || response.data;
   },
 
   // Get order by ID (admin view)
@@ -172,25 +155,9 @@ export const adminOrderService = {
   },
 
   // Get order analytics
-  getAnalytics: async (period?: '7d' | '30d' | '90d' | '1y'): Promise<ApiResponse<{
-    totalOrders: number;
-    totalRevenue: number;
-    averageOrderValue: number;
-    ordersByStatus: Record<string, number>;
-    revenueByStatus: Record<string, number>;
-    topProducts: Array<{
-      productId: string;
-      productName: string;
-      totalSales: number;
-      totalRevenue: number;
-    }>;
-    dailyOrders: Array<{
-      date: string;
-      orders: number;
-      revenue: number;
-    }>;
-  }>> => {
-    return httpClient.get('/admin/orders/analytics', { period });
+  getAnalytics: async (period?: '7d' | '30d' | '90d' | '1y'): Promise<any> => {
+    const response: any = await httpClient.get('/admin/orders/analytics', { period });
+    return response.data?.data || response.data;
   },
 
   // Export orders
@@ -202,18 +169,9 @@ export const adminOrderService = {
   },
 
   // Get order statistics
-  getStats: async (): Promise<ApiResponse<{
-    totalOrders: number;
-    pendingOrders: number;
-    processingOrders: number;
-    shippedOrders: number;
-    deliveredOrders: number;
-    cancelledOrders: number;
-    totalRevenue: number;
-    revenueThisMonth: number;
-    revenueGrowth: number;
-  }>> => {
-    return httpClient.get('/admin/orders/stats');
+  getStats: async (): Promise<any> => {
+    const response: any = await httpClient.get('/admin/orders/stats');
+    return response.data?.data || response.data;
   },
 
   // Bulk operations

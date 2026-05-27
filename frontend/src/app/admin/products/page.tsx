@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/auth-store';
-import { adminProductService } from '@/lib/admin-product-service';
+import { adminProductService, AdminProduct } from '@/lib/admin-product-service';
 import Pagination from '@/components/admin/Pagination';
 import AdminHeader from '@/components/admin/AdminHeader';
 import {
@@ -16,39 +16,9 @@ import {
   Eye,
 } from 'lucide-react';
 
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: {
-    amount: number;
-    currency: string;
-  };
-  originalPrice?: {
-    amount: number;
-    currency: string;
-  };
-  sku: string;
-  stock: number;
-  categoryId: string;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
-  experienceLevel: 'ENTRY' | 'INTERMEDIATE' | 'ADVANCED';
-  images: string[];
-  tags: string[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function AdminProductsPage() {
   const { token } = useAuthStore();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -70,13 +40,12 @@ export default function AdminProductsPage() {
 
       const response = await adminProductService.getAll(params);
       
-      if (response.success && Array.isArray(response.data)) {
-        setProducts(response.data as any);
-      } else {
-        setProducts([]);
-      }
+      // Manejar respuesta directa o anidada
+      const productsData = Array.isArray(response) ? response : (response?.data || []);
+      setProducts(productsData);
     } catch (error: any) {
       console.error('Error loading products:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -113,9 +82,9 @@ export default function AdminProductsPage() {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          product.sku.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !filterCategory || product.category.name === filterCategory;
+    const matchesCategory = !filterCategory || (product.category && product.category.name === filterCategory);
     const matchesActive = filterActive === null || product.isActive === filterActive;
     
     return matchesSearch && matchesCategory && matchesActive;
@@ -126,9 +95,9 @@ export default function AdminProductsPage() {
       case 'name':
         return a.name.localeCompare(b.name);
       case 'price':
-        return a.price.amount - b.price.amount;
+        return a.price - b.price;
       case 'stock':
-        return a.stock - b.stock;
+        return (a.inventoryCount || 0) - (b.inventoryCount || 0);
       case 'createdAt':
       default:
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -303,30 +272,22 @@ export default function AdminProductsPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-bold text-gray-900">
-                        ${product.price.amount}
+                        ${product.price}
                       </span>
-                      {product.originalPrice && product.originalPrice.amount > product.price.amount && (
+                      {product.comparePrice && product.comparePrice > product.price && (
                         <span className="text-sm text-gray-500 line-through">
-                          ${product.originalPrice.amount}
+                          ${product.comparePrice}
                         </span>
                       )}
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      product.difficulty === 'BEGINNER'
-                        ? 'bg-green-100 text-green-800'
-                        : product.difficulty === 'INTERMEDIATE'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : product.difficulty === 'ADVANCED'
-                        ? 'bg-orange-100 text-orange-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {product.difficulty}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800`}>
+                      INTERMEDIATE
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-                    <span>Stock: {product.stock}</span>
-                    <span>{product.category.name}</span>
+                    <span>Stock: {product.inventoryCount || 0}</span>
+                    <span>{product.category?.name || 'Sin categoría'}</span>
                   </div>
 
                   <div className="flex items-center justify-between">

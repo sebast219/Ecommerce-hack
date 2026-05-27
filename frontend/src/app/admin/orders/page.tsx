@@ -63,13 +63,12 @@ export default function AdminOrdersPage() {
 
       const response = await adminOrderService.getAll(params);
       
-      if (response.success && Array.isArray(response.data)) {
-        setOrders(response.data);
-      } else {
-        setOrders([]);
-      }
+      // Manejar respuesta directa o anidada
+      const ordersData = Array.isArray(response) ? response : (response?.data || []);
+      setOrders(ordersData);
     } catch (error: any) {
       console.error('Error loading orders:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -370,7 +369,7 @@ export default function AdminOrdersPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="font-bold text-sm text-zinc-900">
-                              {formatCurrency(order.total.amount, order.currency)}
+                              {formatCurrency(order.total, order.currency)}
                             </div>
                           </td>
                           <td className="px-6 py-4">

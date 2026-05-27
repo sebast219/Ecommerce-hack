@@ -51,23 +51,36 @@ export interface ApiResponse<T> {
 // Admin service for dashboard operations
 export const adminService = {
   // Dashboard statistics
-  getStats: async (): Promise<ApiResponse<DashboardStats[]>> => {
-    return httpClient.get<DashboardStats[]>('/admin/dashboard/stats');
+  getStats: async (): Promise<DashboardStats[]> => {
+    const response = await httpClient.get<any>('/admin/dashboard/stats');
+    // Handle nested response: response.data.data
+    const data = response.data?.data || response.data || [];
+    console.log('Dashboard stats response:', data);
+    return data;
   },
 
   // Recent orders
-  getRecentOrders: async (): Promise<ApiResponse<RecentOrder[]>> => {
-    return httpClient.get<RecentOrder[]>('/admin/dashboard/recent-orders');
+  getRecentOrders: async (): Promise<RecentOrder[]> => {
+    const response = await httpClient.get<any>('/admin/dashboard/recent-orders');
+    const data = response.data?.data || response.data || [];
+    console.log('Recent orders response:', data);
+    return data;
   },
 
   // Top selling products
-  getTopProducts: async (): Promise<ApiResponse<TopProduct[]>> => {
-    return httpClient.get<TopProduct[]>('/admin/dashboard/top-products');
+  getTopProducts: async (): Promise<TopProduct[]> => {
+    const response = await httpClient.get<any>('/admin/dashboard/top-products');
+    const data = response.data?.data || response.data || [];
+    console.log('Top products response:', data);
+    return data;
   },
 
   // Sales activity
-  getSalesActivity: async (): Promise<ApiResponse<SalesActivity[]>> => {
-    return httpClient.get<SalesActivity[]>('/admin/dashboard/sales-activity');
+  getSalesActivity: async (): Promise<SalesActivity[]> => {
+    const response = await httpClient.get<any>('/admin/dashboard/sales-activity');
+    const data = response.data?.data || response.data || [];
+    console.log('Sales activity response:', data);
+    return data;
   },
 
   // Get dashboard summary (all data in one call)
@@ -77,7 +90,7 @@ export const adminService = {
     topProducts: TopProduct[];
     salesActivity: SalesActivity[];
   }> => {
-    const [statsResponse, ordersResponse, productsResponse, activityResponse] = await Promise.all([
+    const [stats, orders, products, activity] = await Promise.all([
       adminService.getStats(),
       adminService.getRecentOrders(),
       adminService.getTopProducts(),
@@ -85,10 +98,10 @@ export const adminService = {
     ]);
 
     return {
-      stats: statsResponse.data,
-      recentOrders: ordersResponse.data,
-      topProducts: productsResponse.data,
-      salesActivity: activityResponse.data
+      stats,
+      recentOrders: orders,
+      topProducts: products,
+      salesActivity: activity
     };
   }
 };

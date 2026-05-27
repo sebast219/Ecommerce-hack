@@ -104,7 +104,8 @@ export interface ApiResponse<T> {
 export const adminProductService = {
   // Get all products (admin view with all fields)
   getAll: async (params?: ProductQueryParams): Promise<ApiResponse<AdminProduct[]>> => {
-    return httpClient.get<AdminProduct[]>('/admin/products', params);
+    const response: any = await httpClient.get<AdminProduct[]>('/admin/products', params);
+    return response.data?.data || response.data;
   },
 
   // Get product by ID (admin view)

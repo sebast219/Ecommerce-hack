@@ -212,6 +212,7 @@ export class EcommerceRulesService {
   // Validar disponibilidad de stock
   validateStockAvailability(
     items: Array<{ productId: string; quantity: number }>,
+    stockMap: Record<string, number> = {}, // Mapa de productId -> stock real
   ): Promise<{
     isValid: boolean;
     unavailableItems: Array<{
@@ -220,8 +221,8 @@ export class EcommerceRulesService {
       available: number;
     }>;
   }> {
-    // Esta función debería conectarse a tu repositorio de productos
-    // Por ahora, es una implementación simulada
+    // Esta función valida stock usando un mapa de stock proporcionado externamente
+    // El mapa debe venir del repositorio de productos con los valores reales de la BD
     return new Promise((resolve) => {
       const unavailableItems: Array<{
         productId: string;
@@ -229,10 +230,9 @@ export class EcommerceRulesService {
         available: number;
       }> = [];
 
-      // Simulación de validación de stock
       items.forEach((item) => {
-        // Aquí deberías consultar el stock real del producto
-        const availableStock = 100; // Valor simulado
+        // Usar stock real del mapa proporcionado, o 0 si no existe
+        const availableStock = stockMap[item.productId] || 0;
 
         if (item.quantity > availableStock) {
           unavailableItems.push({

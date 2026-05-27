@@ -62,7 +62,8 @@ export interface ApiResponse<T> {
 export const adminUserService = {
   // Get all users (admin view with all fields)
   getAll: async (params?: UserQueryParams): Promise<ApiResponse<AdminUser[]>> => {
-    return httpClient.get<AdminUser[]>('/admin/users', params);
+    const response: any = await httpClient.get<AdminUser[]>('/admin/users', params);
+    return response.data?.data || response.data;
   },
 
   // Get user by ID (admin view)
@@ -130,15 +131,9 @@ export const adminUserService = {
   },
 
   // Get user statistics
-  getStats: async (): Promise<ApiResponse<{
-    totalUsers: number;
-    activeUsers: number;
-    verifiedUsers: number;
-    adminUsers: number;
-    newUsersThisMonth: number;
-    usersGrowthRate: number;
-  }>> => {
-    return httpClient.get('/admin/users/stats');
+  getStats: async (): Promise<any> => {
+    const response: any = await httpClient.get('/admin/users/stats');
+    return response.data?.data || response.data;
   }
 };
 

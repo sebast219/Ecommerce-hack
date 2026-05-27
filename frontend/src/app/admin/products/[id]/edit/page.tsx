@@ -28,10 +28,10 @@ interface ProductFormData {
   name: string;
   slug: string;
   description: string;
-  price: number;
-  originalPrice: number;
+  price: number | string;
+  originalPrice: number | string;
   sku: string;
-  stock: number;
+  stock: number | string;
   categoryId: string;
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   experienceLevel: 'ENTRY' | 'INTERMEDIATE' | 'ADVANCED';
@@ -72,7 +72,7 @@ export default function EditProductPage() {
   const fetchCategories = useCallback(async () => {
     try {
       const response = await apiClient.get('/categories');
-      const categoriesData = (response.data as any)?.data || response.data;
+      const categoriesData = (response.data as any)?.data?.categories || (response.data as any)?.categories || [];
       
       if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
@@ -206,16 +206,27 @@ export default function EditProductPage() {
     
     try {
       const payload = {
-        ...formData,
-        price: parseFloat(formData.price.toString()),
-        originalPrice: parseFloat(formData.originalPrice.toString()),
-        stock: parseInt(formData.stock.toString()),
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description,
+        price: Number(formData.price),
+        comparePrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
+        sku: formData.sku,
+        categoryId: formData.categoryId,
+        difficulty: formData.difficulty,
+        isActive: formData.isActive,
+        trackInventory: true,
+        isPhysical: true,
       };
 
-      const response = await apiClient.put(`/products/${productId}`, payload);
+      console.log('Payload to send:', JSON.stringify(payload, null, 2));
+      const response = await apiClient.patch(`/admin/products/${productId}`, payload);
+      console.log('Response:', response);
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Error updating product:', error);
+      console.error('Error response:', error.response?.data);
+      alert(`Error al actualizar el producto: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }

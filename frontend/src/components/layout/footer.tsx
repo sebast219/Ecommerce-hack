@@ -7,8 +7,8 @@ import Image from 'next/image';
 export function Footer() {
   const pathname = usePathname();
   
-  // Ocultar footer en la página de perfil
-  if (pathname?.startsWith('/profile')) {
+  // Ocultar footer en la página de perfil y en todas las rutas de admin
+  if (pathname?.startsWith('/profile') || pathname?.startsWith('/admin')) {
     return null;
   }
 

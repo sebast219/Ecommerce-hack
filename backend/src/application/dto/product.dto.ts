@@ -121,18 +121,19 @@ export class CreateProductDto {
     example: ['https://example.com/image1.jpg'],
     description: 'Product images',
   })
+  @IsOptional()
   @IsArray({ message: 'Product images must be an array' })
-  @ArrayNotEmpty({ message: 'Product must have at least one image' })
   @IsUrl({}, { each: true, message: 'Each image must be a valid URL' })
-  images: string[];
+  images?: string[];
 
   @ApiProperty({
     example: ['wifi', 'pentesting', 'audit'],
     description: 'Product tags',
   })
+  @IsOptional()
   @IsArray({ message: 'Product tags must be an array' })
   @IsString({ each: true, message: 'Each tag must be a string' })
-  tags: string[];
+  tags?: string[];
 
   @ApiPropertyOptional({ example: 0.5, description: 'Product weight in kg' })
   @IsOptional()
@@ -172,10 +173,11 @@ export class CreateProductDto {
     enum: ProductDifficulty,
     description: 'Product difficulty level',
   })
+  @IsOptional()
   @IsEnum(ProductDifficulty, {
     message: 'Product difficulty must be a valid difficulty level',
   })
-  difficulty: ProductDifficulty;
+  difficulty?: ProductDifficulty;
 
   @ApiPropertyOptional({ example: 'commercial', description: 'License type' })
   @IsOptional()
@@ -190,24 +192,27 @@ export class CreateProductDto {
     example: ['windows', 'linux', 'mac'],
     description: 'Product compatibility',
   })
+  @IsOptional()
   @IsArray({ message: 'Product compatibility must be an array' })
   @IsEnum(['windows', 'linux', 'mac', 'android', 'ios'], {
     each: true,
     message: 'Each compatibility option must be valid',
   })
-  compatibility: string[];
+  compatibility?: string[];
 
   @ApiProperty({
     example: ['https://example.com/tutorial'],
     description: 'Product tutorials',
   })
+  @IsOptional()
   @IsArray({ message: 'Product tutorials must be an array' })
   @IsUrl({}, { each: true, message: 'Each tutorial must be a valid URL' })
-  tutorials: string[];
+  tutorials?: string[];
 
   @ApiProperty({ example: true, description: 'Product is physical' })
+  @IsOptional()
   @IsBoolean({ message: 'Product physical status must be a boolean' })
-  isPhysical: boolean;
+  isPhysical?: boolean;
 
   @ApiPropertyOptional({
     example: 'https://example.com/download',
@@ -218,9 +223,10 @@ export class CreateProductDto {
   downloadUrl?: string;
 
   @ApiProperty({ example: 'category-id-here', description: 'Category ID' })
+  @IsOptional()
   @IsString({ message: 'Category ID must be a string' })
   @Length(1, 100, { message: 'Category ID is required' })
-  categoryId: string;
+  categoryId?: string;
 }
 
 export class UpdateProductDto {

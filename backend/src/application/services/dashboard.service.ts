@@ -304,34 +304,48 @@ export class DashboardService {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+    console.log('=== SALES ACTIVITY DEBUG ===');
+    console.log('Current date:', now.toISOString());
+    console.log('30 days ago:', thirtyDaysAgo.toISOString());
+
+    // Incluir más estados para el gráfico de ventas
     const orders = await this.prisma.order.findMany({
       where: {
         createdAt: { gte: thirtyDaysAgo },
-        status: { in: ['COMPLETED', 'PAID'] },
+        status: { in: ['COMPLETED', 'PAID', 'SHIPPED', 'DELIVERED'] },
       },
       select: {
         total: true,
         createdAt: true,
+        status: true,
       },
     });
 
-    // Agrupar por día
+    console.log('Orders found in last 30 days:', orders.length);
+    console.log('Orders:', orders.map(o => ({ date: o.createdAt.toISOString(), total: o.total, status: o.status })));
+
+    // Agrupar por día usando fecha local en lugar de UTC
     const dailySales: Record<string, number> = {};
     const dateLabels: string[] = [];
-    
+
     for (let i = 0; i < 30; i++) {
       const date = new Date(thirtyDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
-      const dateKey = date.toISOString().split('T')[0];
+      // Usar fecha local en lugar de UTC
+      const dateKey = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
       dailySales[dateKey] = 0;
       dateLabels.push(dateKey);
     }
 
     orders.forEach((order) => {
-      const dateKey = order.createdAt.toISOString().split('T')[0];
+      // Usar fecha local del pedido
+      const orderDate = new Date(order.createdAt);
+      const dateKey = orderDate.toLocaleDateString('en-CA');
       if (dailySales.hasOwnProperty(dateKey)) {
         dailySales[dateKey] += order.total;
       }
     });
+
+    console.log('Daily sales:', dailySales);
 
     // Convertir al formato esperado para el gráfico
     const chartData = dateLabels.map((dateKey) => ({
@@ -340,6 +354,7 @@ export class DashboardService {
       date: dateKey,
     }));
 
+    console.log('Chart data:', chartData);
     return chartData;
   }
 

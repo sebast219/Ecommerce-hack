@@ -19,6 +19,8 @@ import { OrderController } from './controllers/order.controller';
 import { PaymentController } from './controllers/payment.controller';
 import { PaymentsController } from './controllers/payments.controller';
 import { DashboardController } from './controllers/dashboard.controller';
+import { AdminOrdersController } from './controllers/admin-orders.controller';
+import { AdminUsersController } from './controllers/admin-users.controller';
 import { HealthController } from './controllers/health.controller';
 import { JwtAuthGuard, ThrottlingGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -81,6 +83,8 @@ export {
     PaymentController,
     PaymentsController,
     DashboardController,
+    AdminOrdersController,
+    AdminUsersController,
     HealthController,
   ],
   providers: [

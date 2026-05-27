@@ -23,19 +23,19 @@ export interface CreateProductRequest {
   barcode?: string;
   trackInventory: boolean;
   isActive: boolean;
-  images: string[];
-  tags: string[];
+  images?: string[];
+  tags?: string[];
   weight?: number;
   dimensions?: any;
   seoTitle?: string;
   seoDescription?: string;
-  difficulty: ProductDifficulty;
+  difficulty?: ProductDifficulty;
   licenseType?: string;
-  compatibility: string[];
-  tutorials: string[];
-  isPhysical: boolean;
+  compatibility?: string[];
+  tutorials?: string[];
+  isPhysical?: boolean;
   downloadUrl?: string;
-  categoryId: string;
+  categoryId?: string;
 }
 
 export interface CreateProductResponse {

@@ -68,7 +68,7 @@ export default function NewProductPage() {
   const fetchCategories = useCallback(async () => {
     try {
       const response = await apiClient.get('/categories');
-      const categoriesData = (response.data as any)?.data || response.data;
+      const categoriesData = (response.data as any)?.data?.categories || (response.data as any)?.categories || [];
       
       if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
@@ -170,16 +170,28 @@ export default function NewProductPage() {
     
     try {
       const payload = {
-        ...formData,
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description,
         price: parseFloat(formData.price.toString()),
-        originalPrice: parseFloat(formData.originalPrice.toString()),
-        stock: parseInt(formData.stock.toString()),
+        comparePrice: formData.originalPrice ? parseFloat(formData.originalPrice.toString()) : undefined,
+        sku: formData.sku,
+        categoryId: formData.categoryId,
+        difficulty: formData.difficulty,
+        isActive: formData.isActive,
+        images: formData.images,
+        tags: formData.tags,
+        trackInventory: true,
+        isPhysical: true,
+        compatibility: ['windows', 'linux', 'mac'],
+        tutorials: [],
       };
 
-      const response = await apiClient.post('/products', payload);
+      const response = await apiClient.post('/admin/products', payload);
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Error creating product:', error);
+      alert('Error al crear el producto. Por favor revisa los campos.');
     } finally {
       setLoading(false);
     }

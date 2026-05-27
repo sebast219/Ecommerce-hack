@@ -52,7 +52,11 @@ export class CreateOrderUseCase {
         const cartItems = await tx.cartItem.findMany({
           where: { cartId: cart.id },
           include: {
-            product: true,
+            product: {
+              include: {
+                inventory: true,
+              },
+            },
           },
         });
 
@@ -72,9 +76,13 @@ export class CreateOrderUseCase {
             );
           }
 
-          // TODO: Obtener stock de productInventory cuando la relación funcione
-          const stock = 999; // Stock temporal infinito para pruebas
-          if (stock < item.quantity) {
+          // Obtener stock real de productInventory
+          const inventory = item.product.inventory;
+          const stock = inventory?.quantity || 0;
+          const trackStock = inventory?.track ?? true;
+
+          // Si no hay inventario o no se rastrea, permitir (comportamiento actual)
+          if (trackStock && stock < item.quantity) {
             throw new ConflictException(
               `Insufficient stock for "${item.product.name}". Only ${stock} available`,
             );
@@ -88,14 +96,16 @@ export class CreateOrderUseCase {
           orderItemsData.push({
             productId: item.productId,
             quantity: item.quantity,
-            price: unitPrice, // Usar 'price' en lugar de 'unitPrice' según el schema
+            price: unitPrice,
           });
 
-          // TODO: Actualizar inventory cuando la relación funcione
-          inventoryUpdates.push({
-            productId: item.productId,
-            newQuantity: stock - item.quantity,
-          });
+          // Preparar actualización de inventory (solo si se rastrea stock)
+          if (trackStock && inventory) {
+            inventoryUpdates.push({
+              productId: item.productId,
+              newQuantity: stock - item.quantity,
+            });
+          }
         }
 
         // 3. Calcular impuestos y envío

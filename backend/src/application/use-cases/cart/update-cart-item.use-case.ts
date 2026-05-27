@@ -30,7 +30,11 @@ export class UpdateCartItemUseCase {
     const cartItem = await this.prisma.cartItem.findUnique({
       where: { id: cartItemId },
       include: {
-        product: true,
+        product: {
+          include: {
+            inventory: true,
+          },
+        },
       },
     });
 
@@ -43,9 +47,12 @@ export class UpdateCartItemUseCase {
       throw new ForbiddenException('Access denied');
     }
 
-    // TODO: Obtener stock de productInventory cuando la relación funcione
-    const stock = 999; // Stock temporal infinito para pruebas
-    if (quantity > stock) {
+    // Validar stock real de productInventory
+    const inventory = cartItem.product.inventory;
+    const stock = inventory?.quantity || 0;
+    const trackStock = inventory?.track ?? true;
+
+    if (trackStock && quantity > stock) {
       throw new BadRequestException(`Only ${stock} units available`);
     }
 

@@ -84,35 +84,34 @@ export default function AdminAnalyticsPage() {
         adminUserService.getStats(),
       ]);
 
-      if (dashboardStats.success && Array.isArray(dashboardStats.data)) {
-        const statsData = dashboardStats.data[0] || {};
+      // Usar orderAnalytics para las estadísticas principales
+      if (orderAnalytics) {
+        setOrderStats(orderAnalytics);
         setStats({
-          totalRevenue: statsData.totalRevenue || 0,
-          totalOrders: statsData.totalOrders || 0,
-          totalUsers: statsData.totalUsers || 0,
-          totalProducts: statsData.totalProducts || 0,
-          revenueGrowth: statsData.revenueGrowth || 0,
-          ordersGrowth: statsData.ordersGrowth || 0,
-          usersGrowth: statsData.usersGrowth || 0,
-          productsGrowth: statsData.productsGrowth || 0,
+          totalRevenue: orderAnalytics.totalRevenue || 0,
+          totalOrders: orderAnalytics.totalOrders || 0,
+          totalUsers: userAnalytics?.totalUsers || 0,
+          totalProducts: 0, // Se puede obtener de otro endpoint si es necesario
+          revenueGrowth: orderAnalytics.revenueGrowth || 0,
+          ordersGrowth: 0,
+          usersGrowth: userAnalytics?.usersGrowthRate || 0,
+          productsGrowth: 0,
         });
       }
 
-      if (orderAnalytics.success) {
-        setOrderStats(orderAnalytics.data);
-      }
-
-      if (productAnalytics.success) {
-        setSalesData(productAnalytics.data.dailyOrders || []);
-        setTopProducts((productAnalytics.data.topProducts || []).map(p => ({
+      // productAnalytics es un objeto directo
+      if (productAnalytics) {
+        setSalesData(productAnalytics.dailyOrders || []);
+        setTopProducts((productAnalytics.topProducts || []).map((p: any) => ({
           name: p.productName,
           sales: p.totalSales,
           revenue: p.totalRevenue
         })));
       }
 
-      if (userAnalytics.success) {
-        setUserStats(userAnalytics.data);
+      // userAnalytics es un objeto directo
+      if (userAnalytics) {
+        setUserStats(userAnalytics);
       }
     } catch (error) {
       console.error('Error loading analytics:', error);

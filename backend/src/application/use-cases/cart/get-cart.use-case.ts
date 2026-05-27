@@ -26,7 +26,11 @@ export class GetCartUseCase {
     const items = await this.prisma.cartItem.findMany({
       where: { cartId: cart.id },
       include: {
-        product: true,
+        product: {
+          include: {
+            inventory: true,
+          },
+        },
       },
       orderBy: { id: 'desc' },
     });
@@ -44,9 +48,12 @@ export class GetCartUseCase {
         continue;
       }
 
-      // TODO: Obtener stock de productInventory cuando la relación funcione
-      const stock = 999; // Stock temporal infinito para pruebas
-      if (stock < item.quantity) {
+      // Validar stock real de productInventory
+      const inventory = item.product.inventory;
+      const stock = inventory?.quantity || 0;
+      const trackStock = inventory?.track ?? true;
+
+      if (trackStock && stock < item.quantity) {
         invalidItems.push({
           ...item,
           reason: `Only ${stock} units available`,
