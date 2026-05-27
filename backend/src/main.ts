@@ -60,7 +60,20 @@ async function bootstrap() {
           .split(',')
           .map(o => o.trim())
           .filter(o => o);
-        if (allowed.includes(origin)) {
+        
+        // Check for exact match or wildcard pattern match
+        const isAllowed = allowed.some(allowedOrigin => {
+          if (allowedOrigin === origin) return true;
+          // Support wildcard patterns like https://*.vercel.app
+          if (allowedOrigin.includes('*')) {
+            const pattern = allowedOrigin.replace(/\*/g, '.*');
+            const regex = new RegExp(`^${pattern}$`);
+            return regex.test(origin);
+          }
+          return false;
+        });
+
+        if (isAllowed) {
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));

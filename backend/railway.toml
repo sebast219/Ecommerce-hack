@@ -14,4 +14,4 @@ name = "backend"
 [services.variables]
 NODE_ENV = "production"
 PORT = "3001"
-CORS_ORIGIN = "http://localhost:3000,https://ecommerce-hack-rnpu.vercel.app"
+CORS_ORIGIN = "http://localhost:3000,https://ecommerce-hack-rnpu.vercel.app,https://ecommerce-hack-rnpu-4njuh8tlx-sebast219s-projects.vercel.app,https://*.vercel.app"
