@@ -17,6 +17,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
+  // Aumentar límite de tamaño del body para uploads de archivos
+  app.useBodyParser('json', { limit: '10mb' });
+  app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
+
   // Servir archivos estáticos de uploads
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
@@ -48,7 +52,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      const allowed = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+      const allowed = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://127.0.0.1:62040,http://127.0.0.1:62675,http://127.0.0.1:54337')
         .split(',')
         .map(o => o.trim());
       if (!origin || allowed.includes(origin)) {
@@ -58,14 +62,13 @@ async function bootstrap() {
       }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
   });
 
   // EJEMPLO: Prefijo global de API
   const apiPrefix = configService.get('app.apiPrefix');
-  // Excluir la ruta 'products' del prefijo global para que quede disponible en '/products'
-  app.setGlobalPrefix(apiPrefix, { exclude: ['products'] });
+  app.setGlobalPrefix(apiPrefix);
 
   // EJEMPLO: Configuración Swagger
   const config = new DocumentBuilder()
@@ -126,6 +129,7 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`🎯 Application ready on port ${port}`);
+  console.log(`🌐 Listening on http://0.0.0.0:${port}`);
 }
 
 // EJEMPLO: Manejo de errores no capturados

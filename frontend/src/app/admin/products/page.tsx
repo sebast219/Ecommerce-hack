@@ -80,21 +80,17 @@ export default function AdminProductsPage() {
       }
     } catch (error: any) {
       console.error('Error loading products:', error);
-      alert('Error al cargar productos: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
   }, [searchTerm, filterCategory, sortBy, filterActive]);
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
 
     try {
       await adminProductService.delete(productId);
       setProducts(products.filter(p => p.id !== productId));
-      alert('Producto eliminado exitosamente');
     } catch (error: any) {
-      alert(error.message || 'Error al eliminar el producto');
     }
   };
 
@@ -105,7 +101,6 @@ export default function AdminProductsPage() {
         p.id === productId ? { ...p, isActive: !isActive } : p
       ));
     } catch (error: any) {
-      alert(error.message || 'Error al actualizar el producto');
     }
   };
 

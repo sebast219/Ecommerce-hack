@@ -75,7 +75,6 @@ export default function NewProductPage() {
       }
     } catch (error: any) {
       console.error('Error loading categories:', error);
-      alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
   }, []);
 
@@ -164,7 +163,6 @@ export default function NewProductPage() {
     e.preventDefault();
     
     if (!isAuthenticated || user?.role !== 'ADMIN') {
-      alert('No tienes permisos para crear productos');
       return;
     }
 
@@ -179,11 +177,9 @@ export default function NewProductPage() {
       };
 
       const response = await apiClient.post('/products', payload);
-      alert('Producto creado exitosamente');
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Error creating product:', error);
-      alert('Error al crear producto: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }

@@ -79,7 +79,6 @@ export default function EditProductPage() {
       }
     } catch (error: any) {
       console.error('Error loading categories:', error);
-      alert('Error al cargar categorías: ' + (error.message || 'Error desconocido'));
     }
   }, []);
 
@@ -109,7 +108,6 @@ export default function EditProductPage() {
       }
     } catch (error: any) {
       console.error('Error loading product:', error);
-      alert('Error al cargar producto: ' + (error.message || 'Error desconocido'));
     } finally {
       setFetchLoading(false);
     }
@@ -201,7 +199,6 @@ export default function EditProductPage() {
     e.preventDefault();
     
     if (!isAuthenticated || user?.role !== 'ADMIN') {
-      alert('No tienes permisos para editar productos');
       return;
     }
 
@@ -216,11 +213,9 @@ export default function EditProductPage() {
       };
 
       const response = await apiClient.put(`/products/${productId}`, payload);
-      alert('Producto actualizado exitosamente');
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Error updating product:', error);
-      alert('Error al actualizar producto: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }

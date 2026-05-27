@@ -20,10 +20,8 @@ class ApiClient {
   private refreshPromise: Promise<string | null> | null = null;
 
   constructor() {
-    if (!process.env.NEXT_PUBLIC_API_URL) {
-      throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
-    }
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    // Fallback to localhost if env var is not set (for development)
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
   }
 
   // Token management via TokenManager
@@ -100,9 +98,14 @@ class ApiClient {
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(fetchConfig.headers as Record<string, string>),
     };
+
+    // Only set Content-Type for non-FormData requests
+    // FormData requires browser to set Content-Type with boundary automatically
+    if (!(fetchConfig.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (!skipAuth) {
       const token = this.getAccessToken();

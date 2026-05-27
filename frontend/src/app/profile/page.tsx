@@ -40,6 +40,17 @@ interface Order {
   status: 'completed' | 'processing' | 'shipped';
   total: number;
   items: number;
+  orderItems?: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    product: {
+      id: string;
+      name: string;
+      slug: string;
+      images: string[];
+    };
+  }>;
 }
 
 // Helper function to format dates
@@ -245,6 +256,17 @@ export default function ProfilePage() {
               status: order.status || 'processing',
               total: Number(order.total) || 0,
               items: order.items?.length || order.itemCount || 1,
+              orderItems: order.items?.map((item: any) => ({
+                id: item.id,
+                quantity: item.quantity,
+                price: Number(item.price) || 0,
+                product: {
+                  id: item.product?.id,
+                  name: item.product?.name || 'Producto',
+                  slug: item.product?.slug || '',
+                  images: Array.isArray(item.product?.images) ? item.product.images : [item.product?.images].filter(Boolean),
+                },
+              })) || [],
             })));
           }
         })
@@ -260,28 +282,28 @@ export default function ProfilePage() {
   // Update notifications when user data or orders change
   useEffect(() => {
     if (user && orders) {
-      setNotifications([
-        { 
-          id: 'orders', 
-          label: 'Pedidos y envíos', 
-          desc: `Actualizaciones sobre tus ${orders.length} pedido${orders.length !== 1 ? 's' : ''}`, 
-          enabled: notifications.find(n => n.id === 'orders')?.enabled ?? true 
+      setNotifications(prev => [
+        {
+          id: 'orders',
+          label: 'Pedidos y envíos',
+          desc: `Actualizaciones sobre tus ${orders.length} pedido${orders.length !== 1 ? 's' : ''}`,
+          enabled: prev.find(n => n.id === 'orders')?.enabled ?? true
         },
-        { 
-          id: 'promos', 
-          label: 'Promociones', 
-          desc: 'Ofertas especiales basadas en tus intereses', 
-          enabled: notifications.find(n => n.id === 'promos')?.enabled ?? false 
+        {
+          id: 'promos',
+          label: 'Promociones',
+          desc: 'Ofertas especiales basadas en tus intereses',
+          enabled: prev.find(n => n.id === 'promos')?.enabled ?? false
         },
-        { 
-          id: 'security', 
-          label: 'Seguridad', 
-          desc: `Alertas para ${user.firstName || 'tu cuenta'}`, 
-          enabled: notifications.find(n => n.id === 'security')?.enabled ?? true 
+        {
+          id: 'security',
+          label: 'Seguridad',
+          desc: `Alertas para ${user.firstName || 'tu cuenta'}`,
+          enabled: prev.find(n => n.id === 'security')?.enabled ?? true
         },
       ]);
     }
-  }, [user, orders, notifications, user?.firstName]);
+  }, [user, orders, user?.firstName]);
 
   // Update avatar URL when user data changes
   useEffect(() => {
@@ -435,7 +457,6 @@ export default function ProfilePage() {
           expiry: `${newCard.expiryMonth}/${newCard.expiryYear}`,
           bank: newCard.bank || 'generic',
         } : c));
-        alert('Tarjeta actualizada exitosamente');
       } else {
         // Add new card to the list
         setSavedCards([...savedCards, {
@@ -445,7 +466,6 @@ export default function ProfilePage() {
           expiry: `${newCard.expiryMonth}/${newCard.expiryYear}`,
           bank: newCard.bank || 'generic',
         }]);
-        alert('Tarjeta guardada exitosamente');
       }
       
       // Reset form and close modal
@@ -459,7 +479,6 @@ export default function ProfilePage() {
       setBank(null);
     } catch (error: any) {
       console.error('Error saving card:', error);
-      alert('Error al guardar tarjeta: ' + (error.message || 'Error desconocido'));
     } finally {
       setSavingCard(false);
     }
@@ -513,7 +532,6 @@ export default function ProfilePage() {
       setNewPassword('');
       setConfirmPassword('');
       setPasswordStrength(0);
-      alert('Contraseña actualizada exitosamente');
     } catch (error: any) {
       setPasswordError(error.message || 'Error al cambiar la contraseña');
     } finally {
@@ -564,7 +582,6 @@ export default function ProfilePage() {
           zip: newAddress.zipCode,
           phone: newAddress.phone,
         } : a));
-        alert('Dirección actualizada exitosamente');
       } else {
         // Add new address to the list
         setSavedAddresses([...savedAddresses, {
@@ -576,7 +593,6 @@ export default function ProfilePage() {
           zip: newAddress.zipCode,
           phone: newAddress.phone,
         }]);
-        alert('Dirección guardada exitosamente');
       }
       
       // Reset form and close modal
@@ -611,14 +627,11 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAddress = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta dirección?')) return;
     
     try {
       await apiClient.delete(`/users/addresses/${id}`);
       setSavedAddresses(savedAddresses.filter(a => a.id !== id));
-      alert('Dirección eliminada exitosamente');
     } catch (error: any) {
-      alert(error.message || 'Error al eliminar la dirección');
     }
   };
 
@@ -637,14 +650,11 @@ export default function ProfilePage() {
   };
 
   const handleDeleteCard = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta tarjeta?')) return;
     
     try {
       await apiClient.delete(`/users/payment-methods/${id}`);
       setSavedCards(savedCards.filter(c => c.id !== id));
-      alert('Tarjeta eliminada exitosamente');
     } catch (error: any) {
-      alert(error.message || 'Error al eliminar la tarjeta');
     }
   };
 
@@ -713,13 +723,11 @@ export default function ProfilePage() {
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona una imagen válida');
       return;
     }
 
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('La imagen no debe superar los 5MB');
       return;
     }
 
@@ -756,10 +764,8 @@ export default function ProfilePage() {
       }
 
       setShowAvatarMenu(false);
-      alert('Foto de perfil actualizada exitosamente');
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      alert(error.message || 'Error al subir la imagen');
       // Restaurar avatar anterior
       setAvatarUrl(getAvatarUrl(user?.avatar));
     } finally {
@@ -769,7 +775,6 @@ export default function ProfilePage() {
 
   // Handle remove avatar
   const handleRemoveAvatar = async () => {
-    if (!confirm('¿Estás seguro de que deseas eliminar tu foto de perfil?')) return;
 
     setIsUploadingAvatar(true);
     try {
@@ -784,9 +789,7 @@ export default function ProfilePage() {
       setUser(data.data || data);
       setAvatarUrl(null);
       setShowAvatarMenu(false);
-      alert('Foto de perfil eliminada exitosamente');
     } catch (error: any) {
-      alert(error.message || 'Error al eliminar la imagen');
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -801,7 +804,6 @@ export default function ProfilePage() {
       setUser(response.data || response);
       setIsEditing(false);
     } catch (error: any) {
-      alert(error.message || 'Error al guardar los cambios');
     } finally {
       setLoading(false);
     }
@@ -822,54 +824,74 @@ export default function ProfilePage() {
   return (
     <div className="h-screen w-full bg-white flex overflow-hidden">
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────── */}
-      <div className="hidden lg:flex flex-col h-full w-[320px] bg-black text-white px-8 py-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col h-full w-[360px] bg-gradient-to-b from-black to-black/95 text-white px-8 py-12 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: '32px 32px'
+          }} />
+        </div>
+
         {/* Logo */}
-        <div className="relative z-10 mb-16">
-          <Link href="/" className="inline-flex items-center gap-2 group">
-            <Shield className="h-6 w-6 text-white/80" />
-            <span className="text-lg font-semibold tracking-tight">Hack 6</span>
+        <div className="relative z-10 mb-20">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <Image 
+                src="/favicon.ico" 
+                alt="Hack 6 Logo" 
+                width={44}
+                height={44}
+                className="h-11 w-11 rounded-full relative"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight">Hack 6</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">Security Store</span>
+            </div>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="relative z-10 flex-1 space-y-2">
+        <nav className="relative z-10 flex-1 space-y-1">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 ${
               activeTab === 'overview'
-                ? 'bg-white text-black'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
+                ? 'bg-white text-black shadow-lg shadow-white/10'
+                : 'text-white/50 hover:bg-white/5 hover:text-white'
             }`}
           >
             <User className="h-5 w-5" />
-            <span className="text-sm font-medium">Resumen</span>
+            <span className="text-sm font-semibold">Resumen</span>
           </button>
 
           <button
             onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 ${
               activeTab === 'orders'
-                ? 'bg-white text-black'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
+                ? 'bg-white text-black shadow-lg shadow-white/10'
+                : 'text-white/50 hover:bg-white/5 hover:text-white'
             }`}
           >
             <Package className="h-5 w-5" />
-            <span className="text-sm font-medium">Pedidos</span>
-            <span className="ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full">
+            <span className="text-sm font-semibold">Pedidos</span>
+            <span className="ml-auto text-xs bg-white/20 px-2.5 py-1 rounded-full font-medium">
               {orders.length}
             </span>
           </button>
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 ${
               activeTab === 'settings'
-                ? 'bg-white text-black'
-                : 'text-white/60 hover:bg-white/10 hover:text-white'
+                ? 'bg-white text-black shadow-lg shadow-white/10'
+                : 'text-white/50 hover:bg-white/5 hover:text-white'
             }`}
           >
             <Settings className="h-5 w-5" />
-            <span className="text-sm font-medium">Configuración</span>
+            <span className="text-sm font-semibold">Configuración</span>
           </button>
         </nav>
 
@@ -877,7 +899,7 @@ export default function ProfilePage() {
         <div className="relative z-10 mt-auto pt-8 border-t border-white/10">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm"
+            className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
@@ -886,18 +908,29 @@ export default function ProfilePage() {
       </div>
 
       {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-white to-black/[0.02]">
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between px-6 py-4 border-b border-black/10">
-          <Link href="/" className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            <span className="font-semibold tracking-tight">Hack 6</span>
+        <div className="lg:hidden flex items-center justify-between px-6 py-5 border-b border-black/[0.08] bg-white/80 backdrop-blur-xl">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative">
+              <Image 
+                src="/favicon.ico" 
+                alt="Hack 6 Logo" 
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold tracking-tight">Hack 6</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-black/40">Security Store</span>
+            </div>
           </Link>
-          <span className="text-xs uppercase tracking-[0.3em] text-black/40">Perfil</span>
+          <span className="text-xs uppercase tracking-[0.3em] text-black/40 font-semibold">Perfil</span>
         </div>
 
         {/* Mobile Navigation */}
-        <div className="lg:hidden flex gap-1 p-4 border-b border-black/10 overflow-x-auto">
+        <div className="lg:hidden flex gap-2 p-4 border-b border-black/[0.08] bg-white/50 backdrop-blur-sm overflow-x-auto">
           {[
             { id: 'overview', label: 'Resumen', icon: User },
             { id: 'orders', label: 'Pedidos', icon: Package },
@@ -906,10 +939,10 @@ export default function ProfilePage() {
             <button
               key={id}
               onClick={() => setActiveTab(id as typeof activeTab)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold whitespace-nowrap transition-all ${
                 activeTab === id
-                  ? 'bg-black text-white'
-                  : 'bg-black/5 text-black/60 hover:bg-black/10'
+                  ? 'bg-black text-white shadow-lg shadow-black/10'
+                  : 'bg-black/[0.03] text-black/60 hover:bg-black/[0.05]'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -920,48 +953,48 @@ export default function ProfilePage() {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto h-full">
-          <div className="max-w-4xl mx-auto px-6 lg:px-12 py-8 lg:py-12 bg-white min-h-full">
+          <div className="max-w-5xl mx-auto px-6 lg:px-16 py-10 lg:py-16 min-h-full">
             {/* ─── OVERVIEW TAB ───────────────────────────────────── */}
             {activeTab === 'overview' && (
-              <div className="space-y-10">
+              <div className="space-y-12">
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="text-xs uppercase tracking-[0.35em] text-black/40 font-medium block mb-2">
+                    <span className="text-xs uppercase tracking-[0.3em] text-black/40 font-semibold block mb-3">
                       Mi cuenta
                     </span>
-                    <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight">
+                    <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
                       Hola, {user.firstName}
                     </h1>
                   </div>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/15 text-sm font-medium hover:bg-black hover:text-white transition-all duration-300"
+                    className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-black/[0.08] text-sm font-semibold hover:bg-black hover:text-white transition-all duration-300"
                   >
                     <Edit3 className="h-4 w-4" />
-                    {isEditing ? 'Cancelar' : 'Editar'}
+                    {isEditing ? 'Cancelar' : 'Editar perfil'}
                   </button>
                 </div>
 
                 {/* Profile Card */}
-                <div className="border border-black/10 rounded-3xl overflow-hidden">
+                <div className="border border-black/[0.08] rounded-3xl overflow-hidden bg-white">
                   {/* Avatar & Basic Info */}
-                  <div className="p-8 lg:p-10 border-b border-black/10">
-                    <div className="flex items-center gap-6">
+                  <div className="p-10 lg:p-12 border-b border-black/[0.08]">
+                    <div className="flex items-center gap-8">
                       {/* Avatar with floating menu */}
                       <div className="relative">
                         <div
-                          className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-black text-white flex items-center justify-center text-2xl lg:text-3xl font-semibold overflow-hidden cursor-pointer transition-all hover:ring-4 hover:ring-black/10"
+                          className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-gradient-to-br from-black/5 to-black/[0.02] border border-black/[0.08] text-black flex items-center justify-center text-3xl lg:text-4xl font-bold overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:shadow-black/10"
                           onClick={() => setShowAvatarMenu(!showAvatarMenu)}
                         >
                           {isUploadingAvatar ? (
-                            <div className="h-6 w-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="h-8 w-8 border-4 border-black/10 border-t-black rounded-full animate-spin" />
                           ) : avatarUrl ? (
                             <Image
                               src={avatarUrl}
                               alt={`${user.firstName} ${user.lastName}`}
-                              width={96}
-                              height={96}
+                              width={112}
+                              height={112}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -978,15 +1011,15 @@ export default function ProfilePage() {
                               onClick={() => setShowAvatarMenu(false)}
                             />
                             {/* Menu */}
-                            <div className="absolute top-full left-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-black/10 p-2 min-w-[180px] animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute top-full left-0 mt-3 z-50 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-black/[0.08] p-2 min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
                               <button
                                 onClick={() => {
                                   fileInputRef.current?.click();
                                 }}
                                 disabled={isUploadingAvatar}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/5 transition-colors text-left text-sm font-medium disabled:opacity-50"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-black/[0.03] transition-colors text-left text-sm font-semibold disabled:opacity-50"
                               >
-                                <div className="w-8 h-8 rounded-lg bg-black/5 flex items-center justify-center">
+                                <div className="w-9 h-9 rounded-xl bg-black/[0.03] flex items-center justify-center">
                                   <Camera className="h-4 w-4" />
                                 </div>
                                 <span>Cambiar foto</span>
@@ -996,16 +1029,16 @@ export default function ProfilePage() {
                                 <button
                                   onClick={handleRemoveAvatar}
                                   disabled={isUploadingAvatar}
-                                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-left text-sm font-medium text-red-600 disabled:opacity-50"
+                                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50/50 text-left text-sm font-semibold text-red-600 disabled:opacity-50"
                                 >
-                                  <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                  <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
                                     <Trash2 className="h-4 w-4" />
                                   </div>
                                   <span>Eliminar foto</span>
                                 </button>
                               )}
 
-                              <div className="mt-2 pt-2 border-t border-black/10 px-4 py-2">
+                              <div className="mt-2 pt-2 border-t border-black/[0.08] px-4 py-2">
                                 <p className="text-xs text-black/40">
                                   Formatos: JPG, PNG, WebP
                                   <br />
@@ -1210,7 +1243,12 @@ export default function ProfilePage() {
                       {/* Order Header */}
                       <div className="flex items-center justify-between px-6 py-4 bg-black/[0.02] border-b border-black/10">
                         <div className="flex items-center gap-4">
-                          <span className="font-medium">{order.id}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs uppercase tracking-wider text-black/40">Pedido</span>
+                            <span className="font-mono font-semibold text-sm bg-black/5 px-2 py-1 rounded-lg">
+                              {order.id.slice(-8).toUpperCase()}
+                            </span>
+                          </div>
                           <span className="text-sm text-black/50 flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" />
                             {order.date}
@@ -1223,22 +1261,75 @@ export default function ProfilePage() {
 
                       {/* Order Content */}
                       <div className="p-6">
-                        <div className="flex items-center justify-between">
+                        {/* Products List */}
+                        <div className="space-y-3 mb-6">
+                          {order.orderItems?.map((item) => (
+                            <div
+                              key={item.id}
+                              className="group flex items-center gap-4 p-4 bg-gradient-to-r from-black/[0.02] to-transparent border border-black/5 rounded-2xl hover:border-black/15 hover:from-black/[0.03] transition-all duration-300"
+                            >
+                              {/* Product Image */}
+                              <div className="w-20 h-20 rounded-xl bg-white border border-black/10 overflow-hidden flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
+                                {item.product.images?.[0] ? (
+                                  <Image
+                                    src={item.product.images[0]}
+                                    alt={item.product.name}
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-black/5 to-black/[0.02] flex items-center justify-center">
+                                    <Package className="h-6 w-6 text-black/20" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <Link
+                                  href={`/products/${item.product.slug}`}
+                                  className="font-semibold text-sm text-black hover:text-black/70 transition-colors truncate block mb-1"
+                                >
+                                  {item.product.name}
+                                </Link>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs px-2 py-1 bg-black/5 rounded-full text-black/60 font-medium">
+                                    Cantidad: {item.quantity}
+                                  </span>
+                                  <span className="text-xs text-black/40">•</span>
+                                  <span className="text-xs text-black/60 font-medium">
+                                    ${Number(item.price).toFixed(2)} c/u
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Item Total */}
+                              <div className="text-right flex-shrink-0">
+                                <p className="font-bold text-base text-black">
+                                  ${(Number(item.price) * item.quantity).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Order Footer */}
+                        <div className="flex items-center justify-between pt-5 border-t border-black/10">
                           <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-xl bg-black text-white flex items-center justify-center">
-                              <Package className="h-6 w-6" />
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-black/5 to-black/[0.02] border border-black/10 flex items-center justify-center">
+                              <Package className="h-5 w-5 text-black/40" />
                             </div>
                             <div>
-                              <p className="font-medium">{order.items} productos</p>
-                              <p className="text-sm text-black/50">Entrega estimada: 3-5 días</p>
+                              <p className="text-xs uppercase tracking-wider text-black/40 mb-0.5">Entrega estimada</p>
+                              <p className="text-sm font-semibold text-black">3-5 días hábiles</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-semibold tracking-tight">${Number(order.total).toFixed(2)}</p>
-                            <button className="text-sm text-black/50 hover:text-black flex items-center gap-1 mt-1 transition-colors">
-                              Ver detalles
-                              <ChevronRight className="h-4 w-4" />
-                            </button>
+                            <p className="text-xs uppercase tracking-wider text-black/40 mb-0.5">Total del pedido</p>
+                            <p className="text-2xl font-bold tracking-tight text-black">
+                              ${Number(order.total).toFixed(2)}
+                            </p>
                           </div>
                         </div>
                       </div>

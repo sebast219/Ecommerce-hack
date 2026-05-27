@@ -58,9 +58,7 @@ export const CartSidebarML = ({ isOpen, onClose }: CartSidebarMLProps) => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
-      clearCart();
-    }
+    clearCart();
   };
 
   // Close sidebar when clicking outside
