@@ -10,6 +10,9 @@ export interface AdminUser {
   role: UserRole;
   isActive: boolean;
   emailVerified: boolean;
+  isVerified?: boolean;
+  avatar?: string;
+  phone?: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;

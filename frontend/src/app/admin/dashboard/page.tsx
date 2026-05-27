@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { adminService, DashboardStats, RecentOrder, TopProduct, SalesActivity } from '@/lib/admin-service';
+import { usePathname } from 'next/navigation';
+import AdminHeader from '@/components/admin/AdminHeader';
 import {
   LayoutDashboard,
   Package,
@@ -15,9 +17,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
-  Settings,
-  LogOut,
-  Shield,
   Menu,
   Loader2
 } from 'lucide-react';
@@ -35,84 +34,8 @@ const QUICK_ACTIONS = [
   { label: 'Nuevo Producto', icon: Plus, href: '/admin/products/new' },
   { label: 'Ver Pedidos', icon: ShoppingCart, href: '/admin/orders' },
   { label: 'Estadísticas', icon: TrendingUp, href: '/admin/analytics' },
-  { label: 'Configuración', icon: Settings, href: '/admin/settings' },
+  { label: 'Configuración', icon: LayoutDashboard, href: '/admin/settings' },
 ];
-
-// ==========================================
-// 2. SUBCOMPONENTES (UI Modular)
-// ==========================================
-
-const Sidebar = ({ user, onLogout, activeRoute = '/admin/dashboard' }: { 
-  user: any, 
-  onLogout: () => void,
-  activeRoute?: string 
-}) => {
-  // Configuración del menú - preparada para futuras funcionalidades
-  const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard', active: activeRoute === '/admin/dashboard' },
-    { name: 'Productos', icon: Package, href: '/admin/products', active: activeRoute === '/admin/products' },
-    { name: 'Pedidos', icon: ShoppingCart, href: '/admin/orders', active: activeRoute === '/admin/orders' },
-    { name: 'Usuarios', icon: Users, href: '/admin/users', active: activeRoute === '/admin/users' },
-    { name: 'Análisis', icon: TrendingUp, href: '/admin/analytics', active: activeRoute === '/admin/analytics' },
-    { name: 'Configuración', icon: Settings, href: '/admin/settings', active: activeRoute === '/admin/settings' },
-    // Futuras funcionalidades (comentadas para habilitar cuando estén listas)
-    // { name: 'Inventario', icon: Package, href: '/admin/inventory', active: activeRoute === '/admin/inventory' },
-    // { name: 'Marketing', icon: TrendingUp, href: '/admin/marketing', active: activeRoute === '/admin/marketing' },
-    // { name: 'Reportes', icon: LayoutDashboard, href: '/admin/reports', active: activeRoute === '/admin/reports' },
-  ];
-
-  // Función para manejar clics en el menú (preparada para futuras funcionalidades)
-  const handleMenuClick = (item: any) => {
-    // Lógica futura para tracking, analytics, etc.
-    console.log(`Navigating to: ${item.href}`);
-  };
-
-  return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 border-r border-gray-200 bg-white z-40 hidden lg:flex flex-col">
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-6">
-        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menú Principal</p>
-        {menuItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            onClick={() => handleMenuClick(item)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              item.active 
-                ? 'bg-zinc-900 text-white shadow-md' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-zinc-900'
-            }`}
-          >
-            <item.icon className="h-4 w-4" />
-            {item.name}
-            {/* Indicador para futuras notificaciones */}
-            {/* {item.notification && (
-              <span className="ml-auto h-2 w-2 bg-red-500 rounded-full animate-pulse"></span>
-            )} */}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-        <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-white border border-gray-100 shadow-sm">
-          <div className="h-9 w-9 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-gray-200">
-            {user?.firstName?.[0] || 'A'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-zinc-900 truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-          </div>
-        </div>
-        <button 
-          onClick={onLogout}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-red-600 hover:bg-red-50 text-sm font-medium transition-all w-full"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar sesión
-        </button>
-      </div>
-    </aside>
-  );
-};
 
 const StatCard = ({ stat, isLoading }: { stat: any, isLoading: boolean }) => (
   <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -152,8 +75,7 @@ const StatCard = ({ stat, isLoading }: { stat: any, isLoading: boolean }) => (
 // ==========================================
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuthStore();
+  const pathname = usePathname();
   
   // Estados para datos del dashboard
   const [stats, setStats] = useState<any[]>([]);
@@ -172,11 +94,8 @@ export default function AdminDashboardPage() {
   // Estado de error
   const [error, setError] = useState<string | null>(null);
 
-  
   // Cargar datos del dashboard
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'ADMIN') return;
-
     const loadDashboardData = async () => {
       try {
         setError(null);
@@ -201,28 +120,11 @@ export default function AdminDashboardPage() {
     };
 
     loadDashboardData();
-  }, [isAuthenticated, user]);
-
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-  };
-
-  // Renderizado de carga
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="flex flex-col items-center gap-4 text-zinc-500">
-          <div className="h-8 w-8 border-4 border-gray-200 border-t-zinc-900 rounded-full animate-spin" />
-          <span className="text-sm font-medium animate-pulse">Preparando entorno seguro...</span>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   if (error && !loading.stats && !loading.orders && !loading.products && !loading.activity) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+      <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-4 text-zinc-500">
           <div className="text-red-500">Error: {error}</div>
           <button 
@@ -237,40 +139,32 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50/50">
-      {/* Sidebar Modularizado con soporte para rutas activas */}
-      <Sidebar user={user} onLogout={handleLogout} activeRoute="/admin/dashboard" />
-
+    <>
       {/* Contenido Principal */}
-      <main className="lg:ml-64 lg:mt-16 min-h-screen">
+      <main>
         <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
           
           {/* Cabecera Responsiva */}
-          <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Menu className="h-6 w-6 lg:hidden text-zinc-900" /> {/* Menú hamburguesa para móvil (visual) */}
-                <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
-                  Panel de Administración
+          <AdminHeader
+            title="Resumen General"
+            subtitle="Vista general de métricas y actividad reciente"
+            badge="Panel de Administración"
+            actions={
+              <div className="flex items-center gap-4 bg-white px-5 py-2.5 rounded-2xl border border-gray-200 shadow-sm">
+                <span className="text-sm font-medium text-gray-600 capitalize">
+                  {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
+                <div className="w-px h-4 bg-gray-200" />
+                <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                  </span>
+                  Sistema En Línea
+                </div>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-zinc-900 mt-2">Resumen General</h1>
-            </div>
-            
-            <div className="flex items-center gap-4 bg-white px-5 py-2.5 rounded-2xl border border-gray-200 shadow-sm">
-              <span className="text-sm font-medium text-gray-600 capitalize">
-                {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </span>
-              <div className="w-px h-4 bg-gray-200" />
-              <div className="flex items-center gap-2 text-xs font-bold text-zinc-900">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                </span>
-                Sistema En Línea
-              </div>
-            </div>
-          </header>
+            }
+          />
 
           {/* Grid de Estadísticas */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -469,9 +363,13 @@ export default function AdminDashboardPage() {
                 )}
               </div>
               <div className="flex justify-between mt-4 text-xs font-medium text-gray-400 border-t border-gray-100 pt-4">
-                <span>1 Dic</span>
-                <span>15 Dic</span>
-                <span>31 Dic</span>
+                {salesActivity.length > 0 && (
+                  <>
+                    <span>{new Date(salesActivity[0]?.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                    <span>{new Date(salesActivity[Math.floor(salesActivity.length / 2)]?.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                    <span>{new Date(salesActivity[salesActivity.length - 1]?.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                  </>
+                )}
               </div>
             </section>
 
@@ -504,6 +402,6 @@ export default function AdminDashboardPage() {
 
         </div>
       </main>
-    </div>
+    </>
   );
 }

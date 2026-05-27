@@ -3,21 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { adminProductService } from '@/lib/admin-product-service';
+import Pagination from '@/components/admin/Pagination';
+import AdminHeader from '@/components/admin/AdminHeader';
 import {
   Plus,
   Edit3,
   Trash2,
   Search,
-  Filter,
   Package,
-  DollarSign,
   Eye,
-  ArrowUpDown,
-  MoreVertical,
-  ArrowLeft,
 } from 'lucide-react';
 
 interface Product {
@@ -51,14 +47,15 @@ interface Product {
 }
 
 export default function AdminProductsPage() {
-  const router = useRouter();
-  const { user, isAuthenticated, token, logout } = useAuthStore();
+  const { token } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
   const [filterActive, setFilterActive] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
   
   const fetchProducts = useCallback(async () => {
@@ -105,10 +102,14 @@ export default function AdminProductsPage() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (token) {
       fetchProducts();
     }
-  }, [isAuthenticated, token, fetchProducts]);
+  }, [token, currentPage, fetchProducts]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,99 +135,21 @@ export default function AdminProductsPage() {
     }
   });
 
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-  };
-
-  // Sidebar Component
-  const Sidebar = ({ user, onLogout, activeRoute = '/admin/products' }: { 
-    user: any, 
-    onLogout: () => void,
-    activeRoute?: string 
-  }) => {
-    const menuItems = [
-      { name: 'Dashboard', icon: Package, href: '/admin/dashboard', active: activeRoute === '/admin/dashboard' },
-      { name: 'Productos', icon: Package, href: '/admin/products', active: activeRoute === '/admin/products' },
-      { name: 'Pedidos', icon: Package, href: '/admin/orders', active: activeRoute === '/admin/orders' },
-      { name: 'Usuarios', icon: Package, href: '/admin/users', active: activeRoute === '/admin/users' },
-      { name: 'Análisis', icon: Package, href: '/admin/analytics', active: activeRoute === '/admin/analytics' },
-      { name: 'Configuración', icon: Package, href: '/admin/settings', active: activeRoute === '/admin/settings' },
-    ];
-
-    return (
-      <aside className="fixed left-0 top-0 bottom-0 w-64 border-r border-gray-200 bg-white z-40 hidden lg:flex flex-col">
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-6">
-          <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Menú Principal</p>
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                item.active 
-                  ? 'bg-zinc-900 text-white shadow-md' 
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-zinc-900'
-              }`}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-white border border-gray-100 shadow-sm">
-            <div className="h-9 w-9 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-gray-200">
-              {user?.firstName?.[0] || 'A'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-zinc-900 truncate">{user?.firstName} {user?.lastName}</p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-            </div>
-          </div>
-          <button 
-            onClick={onLogout}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-red-600 hover:bg-red-50 text-sm font-medium transition-all w-full"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Cerrar sesión
-          </button>
-        </div>
-      </aside>
-    );
-  };
-
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Acceso Restringido</h1>
-          <p className="text-gray-600 mb-6">Necesitas privilegios de administrador para acceder a esta página.</p>
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-          >
-            Iniciar Sesión
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-gray-900">Gestión de Productos</h1>
-              <span className="text-sm text-gray-500">
-                {products.length} productos
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <AdminHeader
+            title="Gestión de Productos"
+            count={products.length}
+            badge="Panel de Administración"
+            actions={
               <Link
                 href="/admin/products/new"
                 className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
@@ -234,23 +157,13 @@ export default function AdminProductsPage() {
                 <Plus className="h-4 w-4" />
                 Nuevo Producto
               </Link>
-              
-              <Link
-                href="/admin"
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                Volver al Dashboard
-              </Link>
-            </div>
-          </div>
+            }
+          />
         </div>
       </div>
 
-      {/* Sidebar Component */}
-      <Sidebar user={user} onLogout={handleLogout} activeRoute="/admin/products" />
-
-      {/* Main Content with Sidebar Offset */}
-      <div className="lg:ml-64">
+      {/* Main Content */}
+      <div>
         {/* Filters and Search */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
@@ -324,8 +237,9 @@ export default function AdminProductsPage() {
             <p className="text-gray-600">No hay productos que coincidan con los criterios de búsqueda.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedProducts.map((product) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedProducts.map((product) => (
               <div
                 key={product.id}
                 className={`bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow ${
@@ -440,9 +354,17 @@ export default function AdminProductsPage() {
               </div>
             ))}
           </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(sortedProducts.length / pageSize)}
+            onPageChange={handlePageChange}
+            pageSize={pageSize}
+            totalItems={sortedProducts.length}
+          />
+          </>
         )}
       </div>
       </div>
-    </div>
+    </>
   );
 }

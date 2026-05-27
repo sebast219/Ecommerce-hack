@@ -22,7 +22,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import { File } from 'multer';
+import type { Express } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -354,7 +354,7 @@ export class UsersController {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
-          cb(null, `${req.user.id}-${uniqueSuffix}${ext}`);
+          cb(null, `${(req.user as any).id}-${uniqueSuffix}${ext}`);
         },
       }),
       fileFilter: (req, file, cb) => {
@@ -385,10 +385,10 @@ export class UsersController {
         ],
       }),
     )
-    file: File,
+    file: Express.Multer.File,
   ) {
     console.log('=== UPLOAD AVATAR DEBUG ===');
-    console.log('User ID:', req.user.id);
+    console.log('User ID:', (req.user as any).id);
     console.log('File received:', file ? 'YES' : 'NO');
 
     if (!file) {
@@ -412,7 +412,7 @@ export class UsersController {
 
     try {
       const updatedUser = await this.prisma.user.update({
-        where: { id: req.user.id },
+        where: { id: (req.user as any).id },
         data: { avatar: avatarUrl },
         select: {
           id: true,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Grid, List, SlidersHorizontal } from 'lucide-react';
 
 import { ProductCard } from '@/components/product/product-card';
@@ -8,6 +9,7 @@ import { ProductFilter } from '@/components/product/product-filter';
 import { useProducts } from '@/hooks/use-products';
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -35,6 +37,17 @@ export default function ProductsPage() {
     const timer = setTimeout(() => setIsLoaded(true), 50);
     return () => clearTimeout(timer);
   }, []);
+
+  // Read search parameter from URL
+  useEffect(() => {
+    const searchParam = searchParams.get('search');
+    if (searchParam) {
+      setFilters(prev => ({ ...prev, search: searchParam }));
+    } else {
+      // Si no hay parámetro de búsqueda, limpiar el filtro
+      setFilters(prev => ({ ...prev, search: '' }));
+    }
+  }, [searchParams]);
 
   // Refetch cuando cambian los filtros manualmente (no en carga inicial)
   const prevFiltersRef = useRef(filters);

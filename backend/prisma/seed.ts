@@ -46,6 +46,7 @@ async function main() {
       firstName: 'Cyber',
       lastName: 'Admin',
       role: 'ADMIN',
+      certifications: 'CISSP, CEH, OSCP',
     },
   });
 
@@ -61,6 +62,7 @@ async function main() {
       firstName: 'John',
       lastName: 'Doe',
       role: 'USER',
+      certifications: 'CompTIA Security+',
     },
   });
 
@@ -190,7 +192,6 @@ async function main() {
   // Create cybersecurity products
   await prisma.product.createMany({
     data: [
-      // === PRODUCTOS EXISTENTES ACTUALIZADOS ===
       {
         name: 'USB Rubber Ducky',
         slug: 'usb-rubber-ducky',
@@ -224,6 +225,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi', 'Ethernet']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/pineapple']),
       },
       {
         name: 'Bash Bunny Mark II',
@@ -240,6 +243,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/bashbunny']),
       },
       {
         name: 'Flipper Zero',
@@ -256,6 +261,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['RF', 'RFID', 'NFC', 'Sub-GHz', 'Infrared']),
+        tutorials: JSON.stringify(['https://docs.flipperzero.one']),
       },
       {
         name: 'LAN Turtle',
@@ -272,6 +279,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['Ethernet', 'USB']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/lanturtle']),
       },
       {
         name: 'Packet Squirrel',
@@ -288,6 +297,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['Ethernet', 'WiFi']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/packetsquirrel']),
       },
       {
         name: 'Signal Owl',
@@ -304,6 +315,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi', 'Bluetooth', 'RF']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/signalowl']),
       },
       {
         name: 'Key Croc',
@@ -320,6 +333,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/keycroc']),
       },
       // === NUEVOS PRODUCTOS USB HACKING ===
       {
@@ -334,6 +349,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB', 'WiFi']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/omgcable']),
       },
       {
         name: 'Rubber Ducky Payload Studio Kit',
@@ -347,6 +364,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/ducky']),
       },
       // === NUEVOS PRODUCTOS ATAQUES INALÁMBRICOS ===
       {
@@ -361,6 +380,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/pineapple']),
       },
       {
         name: 'HackRF One',
@@ -374,6 +395,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['RF', 'SDR']),
+        tutorials: JSON.stringify(['https://greatscottgadgets.com/hackrf/one/']),
       },
       {
         name: 'Alfa Network AWUS036ACH',
@@ -387,6 +410,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi', 'Kali Linux']),
+        tutorials: JSON.stringify(['https://www.alfa.com.tw/support/']),
       },
       // === NUEVOS PRODUCTOS HARDWARE IMPLANTS ===
       {
@@ -401,6 +426,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['Ethernet']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/sharkjack']),
       },
       {
         name: 'Screen Crab',
@@ -414,6 +441,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['HDMI']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/screencrab']),
       },
       {
         name: 'Plunder Bug',
@@ -427,6 +456,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['Ethernet']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/plunderbug']),
       },
       // === NUEVOS PRODUCTOS RED TEAM TOOLS ===
       {
@@ -441,6 +472,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['RFID', 'NFC']),
+        tutorials: JSON.stringify(['https://proxmark.com/docs']),
       },
       {
         name: 'USB Ninja Cable Pro',
@@ -454,6 +487,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB', 'WiFi']),
+        tutorials: JSON.stringify(['https://usbninja.com/docs']),
       },
       {
         name: 'Hak5 Field Kit',
@@ -467,6 +502,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi', 'Ethernet', 'USB']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/fieldkit']),
       },
       // === NUEVOS PRODUCTOS NETWORK MONITORING ===
       {
@@ -481,6 +518,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['WiFi 2.4GHz']),
+        tutorials: JSON.stringify(['https://hak5.org/products/wifi-coconut/docs']),
       },
       {
         name: 'Raspberry Pi 4 Pentest Kit',
@@ -494,6 +533,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['Linux', 'WiFi', 'Ethernet']),
+        tutorials: JSON.stringify(['https://www.kali.org/docs/raspberry-pi/']),
       },
       // === NUEVOS PRODUCTOS DIGITAL FORENSICS ===
       {
@@ -508,6 +549,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['iOS', 'Android']),
+        tutorials: JSON.stringify(['https://www.cellebrite.com/en/training/']),
       },
       {
         name: 'Write Blocker USB 3.0',
@@ -521,6 +564,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB 3.0']),
+        tutorials: JSON.stringify(['https://www.cru-inc.com/support/']),
       },
       // === NUEVOS PRODUCTOS SEGURIDAD FISICA ===
       {
@@ -535,6 +580,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['Physical Locks']),
+        tutorials: JSON.stringify(['https://www.sparrowslockpicks.com/guides/']),
       },
       {
         name: 'RFID Duplicator PM3',
@@ -548,6 +595,8 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
+        compatibility: JSON.stringify(['RFID 125KHz']),
+        tutorials: JSON.stringify(['https://proxmark.com/docs']),
       },
       // === NUEVOS PRODUCTOS OSINT ===
       {
@@ -563,6 +612,8 @@ async function main() {
         difficulty: 'INTERMEDIATE',
         isPhysical: false,
         licenseType: 'commercial',
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://docs.maltego.com/']),
       },
       {
         name: 'Shodan Membership',
@@ -577,6 +628,8 @@ async function main() {
         difficulty: 'BEGINNER',
         isPhysical: false,
         licenseType: 'commercial',
+        compatibility: JSON.stringify(['Web', 'API']),
+        tutorials: JSON.stringify(['https://developer.shodan.io/api']),
       },
       // === NUEVOS PRODUCTOS CRIPTOGRAFIA ===
       {
@@ -591,6 +644,8 @@ async function main() {
         isActive: true,
         difficulty: 'INTERMEDIATE',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB', 'NFC', 'FIDO2', 'U2F']),
+        tutorials: JSON.stringify(['https://support.yubico.com/']),
       },
       {
         name: 'HSM NitroKey Pro',
@@ -604,6 +659,8 @@ async function main() {
         isActive: true,
         difficulty: 'ADVANCED',
         isPhysical: true,
+        compatibility: JSON.stringify(['USB', 'OpenPGP', 'S/MIME']),
+        tutorials: JSON.stringify(['https://www.nitrokey.com/documentation']),
       },
       // === NUEVOS PRODUCTOS MALWARE ANALYSIS ===
       {
@@ -619,6 +676,8 @@ async function main() {
         difficulty: 'ADVANCED',
         isPhysical: false,
         licenseType: 'commercial',
+        compatibility: JSON.stringify(['Linux', 'VMware', 'VirtualBox']),
+        tutorials: JSON.stringify(['https://remnux.org/docs/']),
       },
       {
         name: 'Ghidra Pro Suite',
@@ -634,6 +693,8 @@ async function main() {
         isPhysical: false,
         licenseType: 'open-source',
         downloadUrl: 'https://github.com/NationalSecurityAgency/ghidra',
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://ghidra-sre.org/']),
       },
       // === NUEVOS PRODUCTOS SOCIAL ENGINEERING ===
       {
@@ -649,6 +710,8 @@ async function main() {
         difficulty: 'INTERMEDIATE',
         isPhysical: false,
         licenseType: 'commercial',
+        compatibility: JSON.stringify(['Web', 'API']),
+        tutorials: JSON.stringify(['https://getgophish.com/docs/']),
       },
       {
         name: 'BadUSB Social Kit',
@@ -662,9 +725,10 @@ async function main() {
         isActive: true,
         difficulty: 'BEGINNER',
         isPhysical: true,
-      },
+        compatibility: JSON.stringify(['Windows', 'macOS', 'Linux']),
+        tutorials: JSON.stringify(['https://docs.hak5.org/ducky']),
+      }
     ]),
-    skipDuplicates: true,
   });
 
   // Create inventory for products
