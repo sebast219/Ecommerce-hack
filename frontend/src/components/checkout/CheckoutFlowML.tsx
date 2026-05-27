@@ -231,7 +231,7 @@ export const CheckoutFlowML = () => {
 
       // Sync local cart to API cart first
       await syncCartToApi();
-      
+
       const order = await createOrder({
         shippingAddressId: selectedAddressId,
         notes: shippingAddress.notes
@@ -243,16 +243,55 @@ export const CheckoutFlowML = () => {
 
       setOrderData(order);
 
-      // Create payment intent for card payments
+      // Process payment with mock payment endpoint
       if (paymentMethod === 'card') {
         // Handle both OrderResult (orderId) and Order (id) response types
         const orderId = (order as any).orderId || (order as any).id;
-        const orderTotal = (order as any).total || total; // Use order total or calculated total
-        const clientSecret = await createPaymentIntent(orderId, orderTotal);
-        if (clientSecret) {
-          // Process Stripe payment here
-          // For now, simulate successful payment
+        const orderTotal = (order as any).total || total;
+
+        console.log('Processing mock payment:', { orderId, orderTotal, cardData, useNewPaymentMethod });
+
+        // For saved cards, use default values for missing fields
+        // If card number has asterisks (saved card), use a demo card number
+        let cardNumber = cardData.number.replace(/\s/g, '');
+        if (cardNumber.includes('*')) {
+          // Extract last 4 digits and use demo card number
+          const last4 = cardNumber.slice(-4);
+          cardNumber = `424242424242${last4}`; // Demo card with same last 4 digits
+        }
+
+        const paymentCardData = {
+          cardNumber: cardNumber,
+          cardHolder: cardData.name || 'Cardholder',
+          expiry: cardData.expiry,
+          cvc: cardData.cvv || '123', // Default CVV for saved cards
+        };
+
+        // Validate card data - only require number for saved cards
+        if (!paymentCardData.cardNumber || !paymentCardData.expiry) {
+          setError('Por favor completa los datos de la tarjeta');
+          return;
+        }
+
+        // Call mock payment endpoint
+        const paymentResponse = await apiClient.post('/payments/mock-payment', {
+          cardNumber: paymentCardData.cardNumber,
+          cardHolder: paymentCardData.cardHolder,
+          expiry: paymentCardData.expiry,
+          cvc: paymentCardData.cvc,
+          amount: orderTotal,
+          orderId: orderId,
+          userId: user?.id,
+        });
+
+        console.log('Payment response:', paymentResponse.data);
+
+        const response = paymentResponse.data as { success: boolean; data: any; message: string };
+
+        if (response.success) {
           await handlePaymentSuccess(order);
+        } else {
+          setError(response.message || 'Error al procesar el pago');
         }
       } else {
         // Handle transfer payment
@@ -260,6 +299,7 @@ export const CheckoutFlowML = () => {
       }
 
     } catch (err: any) {
+      console.error('Payment error:', err);
       setError(err.message || 'Error al procesar el pago');
     } finally {
       setLoading(false);

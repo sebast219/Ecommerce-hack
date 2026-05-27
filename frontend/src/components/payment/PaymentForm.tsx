@@ -81,7 +81,7 @@ export default function PaymentForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -89,23 +89,28 @@ export default function PaymentForm({
     setLoading(true);
 
     try {
-      // Crear Checkout Session directamente
-      const sessionData = await apiClient.post('/payments/checkout-session', {
-        items: [{
-          name: 'Order Payment',
-          amount: amount,
-          quantity: 1,
-          description: orderId ? `Order #${orderId}` : 'Purchase from Ecommerce Hak 6'
-        }],
-        successUrl: `${window.location.origin}/payment/success`,
-        cancelUrl: `${window.location.origin}/payment/cancel`,
+      console.log('Processing mock payment:', { orderId, customerId, amount });
+      // Procesar pago simulado
+      const paymentData = await apiClient.post('/payments/mock-payment', {
+        cardNumber: cardForm.number.replace(/\s/g, ''),
+        cardHolder: cardForm.name,
+        expiry: cardForm.expiry,
+        cvc: cardForm.cvc,
+        amount: amount,
         orderId,
-        customerId,
+        userId: customerId, // Using customerId as userId for demo
       });
-      
-      // Redirigir a Stripe Checkout
-      window.location.href = (sessionData.data as any).url;
+
+      console.log('Payment response:', paymentData.data);
+      const response = paymentData.data as { success: boolean; data: any; message: string };
+
+      if (response.success) {
+        onSuccess(response.data);
+      } else {
+        onError(new Error(response.message || 'Payment failed'));
+      }
     } catch (error) {
+      console.error('Payment error:', error);
       onError(error as Error);
     } finally {
       setLoading(false);

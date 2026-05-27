@@ -52,13 +52,19 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      const allowed = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://127.0.0.1:62040,http://127.0.0.1:62675,http://127.0.0.1:54337')
-        .split(',')
-        .map(o => o.trim());
-      if (!origin || allowed.includes(origin)) {
+      // Allow all localhost/127.0.0.1 origins regardless of port for development
+      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        const allowed = (process.env.CORS_ORIGIN || '')
+          .split(',')
+          .map(o => o.trim())
+          .filter(o => o);
+        if (allowed.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
       }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -36,6 +36,7 @@ import { HandleStripeWebhookUseCase } from './use-cases/payment/handle-stripe-we
 
 // Order Services
 import { OrderEmailService } from './services/order-email.service';
+import { OrderStateMachineService } from './services/order-state-machine.service';
 
 // Order Use Cases adicionales
 import { GetOrderTrackingUseCase } from './use-cases/order/get-order-tracking.use-case';
@@ -74,6 +75,7 @@ import { DashboardService } from './services/dashboard.service';
 
     // Order Services
     OrderEmailService,
+    OrderStateMachineService,
     GetOrderTrackingUseCase,
 
     // Dashboard Service
@@ -108,6 +110,10 @@ import { DashboardService } from './services/dashboard.service';
     // Payment Use Cases
     CreatePaymentIntentUseCase,
     HandleStripeWebhookUseCase,
+
+    // Order Services
+    OrderEmailService,
+    OrderStateMachineService,
 
     // Dashboard Service
     DashboardService,

@@ -13,9 +13,15 @@ import {
   Logger,
   Req,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { StripeService } from '../../infrastructure/services/stripe.service';
+import { MockPaymentService } from '../../infrastructure/services/mock-payment.service';
+import { OrderStateMachineService } from '../../application/services/order-state-machine.service';
+import { OrderEmailService } from '../../application/services/order-email.service';
+import { OrderStatus } from '../../domain/enums/order-status.enum';
 import {
   CreatePaymentIntentDto,
   CreateCustomerDto,
@@ -26,7 +32,12 @@ import {
 export class PaymentsController {
   private readonly logger = new Logger(PaymentsController.name);
 
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(
+    private readonly stripeService: StripeService,
+    private readonly mockPaymentService: MockPaymentService,
+    private readonly orderStateMachine: OrderStateMachineService,
+    private readonly orderEmailService: OrderEmailService,
+  ) {}
 
   @Post('create-payment-intent')
   @ApiOperation({ summary: 'Crear intención de pago' })
@@ -75,6 +86,54 @@ export class PaymentsController {
       };
     } catch (error) {
       this.logger.error('Error creating customer:', error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('mock-payment')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Procesar pago simulado (demo)' })
+  @ApiResponse({ status: 200, description: 'Pago simulado procesado' })
+  @UseGuards(AuthGuard('jwt'))
+  async processMockPayment(@Req() req: any, @Body() paymentData: {
+    cardNumber: string;
+    cardHolder: string;
+    expiry: string;
+    cvc: string;
+    amount: number;
+    orderId: string;
+    userId: string;
+  }) {
+    try {
+      const result = await this.mockPaymentService.processPayment(paymentData);
+
+      if (result.success) {
+        // Update order status to PAID
+        await this.orderStateMachine.transition({
+          orderId: paymentData.orderId,
+          toStatus: OrderStatus.PAID,
+          triggeredBy: req.user.id,
+          description: 'Mock payment processed successfully',
+          metadata: {
+            transactionId: result.transactionId,
+            amount: result.amount,
+            cardLast4: paymentData.cardNumber.slice(-4),
+          },
+        });
+
+        // Send confirmation email
+        await this.orderEmailService.sendOrderConfirmation(paymentData.orderId);
+
+        this.logger.log(`Mock payment successful for order ${paymentData.orderId}`);
+      }
+
+      return {
+        success: result.success,
+        data: result,
+        message: result.message,
+      };
+    } catch (error) {
+      this.logger.error('Error processing mock payment:', error);
       throw new BadRequestException(error.message);
     }
   }

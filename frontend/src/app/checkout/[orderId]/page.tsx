@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements, PaymentElement, useStripe, useElements,
-} from '@stripe/react-stripe-js';
 import { apiClient } from '@/lib/api-client';
-import { Loader2, Lock } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+import PaymentForm from '@/components/payment/PaymentForm';
 
 interface OrderDetail {
   id: string;
@@ -21,55 +16,7 @@ interface OrderDetail {
   shipping: number;
   status: string;
   items: any[];
-}
-
-function CheckoutForm({ orderId, total }: { orderId: string; total: number }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) return;
-
-    setIsProcessing(true);
-
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/orders/${orderId}/success`,
-      },
-    });
-
-    if (error) {
-      toast.error(error.message || 'Error en el pago');
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
-
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-      >
-        {isProcessing ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Procesando...</>
-        ) : (
-          <><Lock className="mr-2 h-4 w-4" />Pagar ${total.toFixed(2)}</>
-        )}
-      </button>
-
-      <p className="text-center text-xs text-gray-500">
-        ð Lock Secure payment powered by Stripe
-      </p>
-    </form>
-  );
+  userId: string;
 }
 
 export default function CheckoutPage() {
@@ -78,7 +25,6 @@ export default function CheckoutPage() {
   const orderId = params.orderId as string;
 
   const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,14 +39,6 @@ export default function CheckoutPage() {
           router.push('/orders');
           return;
         }
-
-        // Crear payment intent
-        const intentResponse = await apiClient.post<{
-          clientSecret: string;
-          paymentIntentId: string;
-        }>(`/payments/orders/${orderId}/intent`);
-
-        setClientSecret(intentResponse.data.clientSecret);
       } catch (error: any) {
         toast.error(error.message || 'Error al cargar el checkout');
         router.push('/products');
@@ -112,6 +50,15 @@ export default function CheckoutPage() {
     init();
   }, [orderId, router]);
 
+  const handlePaymentSuccess = (paymentResult: any) => {
+    toast.success('¡Pago procesado exitosamente!');
+    router.push(`/orders/${orderId}`);
+  };
+
+  const handlePaymentError = (error: Error) => {
+    toast.error(error.message || 'Error en el pago');
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -120,7 +67,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!order || !clientSecret) return null;
+  if (!order) return null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -133,15 +80,13 @@ export default function CheckoutPage() {
           <div className="rounded-lg border border-gray-200 bg-white p-6">
             <h2 className="mb-6 text-lg font-bold">Detalles de Pago</h2>
 
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: { theme: 'stripe' },
-              }}
-            >
-              <CheckoutForm orderId={orderId} total={order.total} />
-            </Elements>
+            <PaymentForm
+              amount={order.total}
+              orderId={orderId}
+              customerId={order.userId}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            />
           </div>
         </section>
 

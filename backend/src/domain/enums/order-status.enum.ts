@@ -22,6 +22,7 @@ export enum OrderStatus {
 export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [
     OrderStatus.AWAITING_PAYMENT,
+    OrderStatus.PAID, // Allow direct PENDING -> PAID for mock payments
     OrderStatus.CANCELLED,
     OrderStatus.EXPIRED,
   ],

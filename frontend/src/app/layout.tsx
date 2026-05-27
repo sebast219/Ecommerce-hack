@@ -15,12 +15,8 @@ export const metadata: Metadata = {
   description: 'Plataforma especializada en herramientas de ciberseguridad',
   keywords: ['ecommerce', 'ciberseguridad', 'herramientas', 'pentesting', 'seguridad informática'],
   icons: {
-    icon: [
-      { url: '/favicon.png', sizes: '48x48', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/favicon.png', sizes: '48x48', type: 'image/png' },
-    ],
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 };
 
