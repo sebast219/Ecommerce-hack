@@ -132,13 +132,15 @@ NEXT_PUBLIC_APP_SPECIALIZATION="Ciberseguridad"
 - **Autenticación**: Login, register y rutas protegidas
 - **Componentes UI**: Biblioteca de componentes reutilizables
 - **Type Safety**: TypeScript estricto en todo el proyecto
-
-### 🔄 En Desarrollo
 - **Catálogo Especializado**: Herramientas de pentesting, forense, redes
 - **Carrito de Compras**: Gestión completa del carrito
+- **Integración Backend**: API client con Axios funcionando
+- **Filtros Técnicos**: Por categoría, nivel de habilidad, compatibilidad
+
+### 🔄 En Desarrollo
 - **Proceso de Checkout**: Multi-step checkout con Stripe
 - **Panel Administrativo**: Dashboard básico
-- **Filtros Técnicos**: Por categoría, nivel de habilidad, compatibilidad
+- **Testing**: Unit tests y e2e tests
 
 ## 🛠️ Scripts Disponibles
 

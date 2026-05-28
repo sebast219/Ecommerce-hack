@@ -104,8 +104,8 @@ Authorization: Bearer <access_token>
 ### Usuarios por defecto
 | Rol | Email | Contraseña |
 |-----|-------|------------|
-| Admin | admin@ecommerce.com | admin123 |
-| Usuario | user@ecommerce.com | user123 |
+| Admin | admin@cybersec-store.com | admin123 |
+| Usuario | hacker@pro.com | user123 |
 
 ## � Endpoints Principales
 
