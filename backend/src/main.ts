@@ -51,35 +51,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow all localhost/127.0.0.1 origins regardless of port for development
-      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-        callback(null, true);
-      } else {
-        const allowed = (process.env.CORS_ORIGIN || '')
-          .split(',')
-          .map(o => o.trim())
-          .filter(o => o);
-        
-        // Check for exact match or wildcard pattern match
-        const isAllowed = allowed.some(allowedOrigin => {
-          if (allowedOrigin === origin) return true;
-          // Support wildcard patterns like https://*.vercel.app
-          if (allowedOrigin.includes('*')) {
-            const pattern = allowedOrigin.replace(/\*/g, '.*');
-            const regex = new RegExp(`^${pattern}$`);
-            return regex.test(origin);
-          }
-          return false;
-        });
-
-        if (isAllowed) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      }
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
